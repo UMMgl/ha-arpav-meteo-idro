@@ -13,7 +13,7 @@ jobs:
     name: "Release quality (Gold)"
     permissions:
       contents: read
-    uses: ./.github/workflows/tests.yml
+    uses: $/.github/workflows/tests.yml
     with:
       quality_tier: "gold"
 
