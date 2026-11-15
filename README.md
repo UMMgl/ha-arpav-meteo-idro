@@ -202,7 +202,7 @@ once every 10 minutes, since a METAR is issued every 30.
 *Fork addition.* Besides weather locations, the integration can add the ARPAV
 **hydrometric stations** of a river. Add the integration again and choose
 **Hydrometric stations**, then the river and its stations. Automatic order
-covers 86 stations across the 23 ARPAV water bodies with multiple gauges in
+covers 88 stations across the 23 ARPAV water bodies with multiple gauges in
 the 15 November 2026 registry. See the [profile coverage and sources](docs/hydro_topology.md).
 Other selected stations follow in their selected order. Rivers without a profile
 use the selected order throughout.

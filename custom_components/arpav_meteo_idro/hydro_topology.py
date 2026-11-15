@@ -148,14 +148,15 @@ _VENETO_PATHS = {
         ("628", "661", 48144, 19583),
         ("652", "651", 25480, 38285),
     ),
-    # The delta is a branching network. The three terminal gauges keep
-    # selection order until each gauge's link to a branch is confirmed.
+    # Pila and Porto Barricata are on separate branches below the split.
     "po": (
         ("399", "562", 60245, 42269),
         ("562", "560", 42269, 115189),
         ("560", "pila_tolle_junction", 115189, 115196),
         ("pila_tolle_junction", "po_di_pila", 114007, 114007),
         ("pila_tolle_junction", "po_delle_tolle", 7637, 7637),
+        ("po_di_pila", "561", 114007, 2242),
+        ("po_delle_tolle", "552", 7637, 10042),
     ),
     "posina": (
         ("194", "407", 31597, 115229),
