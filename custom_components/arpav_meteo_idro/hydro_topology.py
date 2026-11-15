@@ -201,6 +201,17 @@ def _cartographic_profile(river: str, paths: tuple[tuple[str, str, int, int], ..
 
 _PROFILES = {river: _cartographic_profile(river, paths) for river, paths in _VENETO_PATHS.items()}
 _PROFILES["bacchiglione"] = _station_profile(BACCHIGLIONE_REACHES, _STATION_NODES)
+# ARPAV lists 319 under Po. Append its independent route after the Po di
+# Venezia branches for display. Volta Grimana is a navigation connection, so
+# there is no directed reach to this station from Cavanella Po.
+_PO_LEVANTE_REACH = Reach(
+    upstream="canal_bianco_volta_grimana",
+    downstream="319",
+    source_url="https://www.agenziapo.it/idrovia/idrovia-fissero-tartaro-canalbianco-po-di-levante",
+    source_reference="AIPo, Canal Bianco to Porto Levante via the Po-Brondolo junction",
+    confidence="medium",
+)
+_PROFILES["po"].update(_station_profile((_PO_LEVANTE_REACH,), {"319": "319"}))
 
 
 def _station_key(station_id: str) -> str:
