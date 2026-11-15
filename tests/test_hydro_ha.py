@@ -428,7 +428,7 @@ async def test_options_flow_shows_stored_ceiling_as_text(enable_custom_integrati
     assert CONF_HYDRO_AXIS_CEILING not in form["data_schema"]({"stations": []})
 
 
-async def test_axis_ceiling_matches_padded_station_ids(enable_custom_integrations, hass, arpav, freezer):
+async def test_options_flow_matches_padded_station_ids(enable_custom_integrations, hass, arpav):
     """Like the order field, 0334 and 334 are the same station (saved under the entry's ID)."""
     entry = _entry()
     entry.add_to_hass(hass)
@@ -436,6 +436,9 @@ async def test_axis_ceiling_matches_padded_station_ids(enable_custom_integration
         result = await _options_flow(hass, entry, axis_ceiling="0334=10")
     assert result["data"][CONF_HYDRO_AXIS_CEILING] == {"334": 10.0}
 
+
+async def test_axis_ceiling_matches_padded_stored_ids(enable_custom_integrations, hass, arpav, freezer):
+    """A ceiling stored under a padded ID still applies to the station."""
     freezer.move_to(NOW)
     stored = _entry(**{CONF_HYDRO_AXIS_CEILING: {"0334": 12.0}})
     stored.add_to_hass(hass)
