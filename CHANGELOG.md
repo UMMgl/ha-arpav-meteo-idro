@@ -14,6 +14,9 @@
 ### :memo: Documentation
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
+### :wrench: Chores
+- **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
+
 ### :warning: Deprecations
 - **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).
 
