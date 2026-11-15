@@ -225,11 +225,11 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - &id001
+    - &id002
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultima ora
-    - &id003
+    - &id004
       condition: screen
       media_query: '(min-width: 768px)'
     cards:
@@ -248,6 +248,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: &id001
+          func: last
+          duration: 5min
+          fill: last
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -256,6 +260,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
@@ -268,6 +273,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
@@ -280,6 +286,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
@@ -338,6 +345,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -346,6 +354,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -358,6 +367,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
@@ -370,6 +380,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
@@ -428,6 +439,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -436,6 +448,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
@@ -448,6 +461,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
@@ -460,6 +474,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
@@ -518,6 +533,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -526,6 +542,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -538,6 +555,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -550,6 +568,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -608,6 +627,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       yaxis:
       - decimals: 2
         show: false
@@ -636,6 +656,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       yaxis:
       - decimals: 2
         show: false
@@ -664,6 +685,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -672,6 +694,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -684,6 +707,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -696,6 +720,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
+        group_by: *id001
         transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
@@ -754,6 +779,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
       type: area
@@ -762,6 +788,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
@@ -774,6 +801,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
@@ -786,6 +814,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
@@ -832,8 +861,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
-    - &id002
+    - *id002
+    - &id003
       condition: screen
       media_query: '(max-width: 767px)'
   - type: custom:apexcharts-card
@@ -851,6 +880,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -859,6 +889,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -871,6 +902,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
@@ -883,6 +915,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
@@ -929,8 +962,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 1h
     header:
@@ -946,6 +979,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
       type: area
@@ -954,6 +988,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
@@ -966,6 +1001,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
@@ -978,6 +1014,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
@@ -1024,8 +1061,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 1h
     header:
@@ -1041,6 +1078,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -1049,6 +1087,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -1061,6 +1100,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -1073,6 +1113,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -1119,8 +1160,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 1h
     header:
@@ -1136,6 +1177,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     yaxis:
     - decimals: 2
       show: false
@@ -1152,8 +1194,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 1h
     header:
@@ -1169,6 +1211,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     yaxis:
     - decimals: 2
       show: false
@@ -1185,8 +1228,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 1h
     header:
@@ -1202,6 +1245,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
       type: area
@@ -1210,6 +1254,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -1222,6 +1267,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -1234,6 +1280,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
+      group_by: *id001
       transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
@@ -1280,17 +1327,17 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id001
     - *id002
+    - *id003
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id005
+    - &id006
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultimo giorno
-    - *id003
+    - *id004
     cards:
     - type: custom:apexcharts-card
       graph_span: 24h
@@ -1307,7 +1354,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: &id004
+        group_by: &id005
           func: last
           duration: 10min
           fill: 'null'
@@ -1319,7 +1366,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
@@ -1332,7 +1379,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
@@ -1345,7 +1392,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
@@ -1404,7 +1451,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -1413,7 +1460,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -1426,7 +1473,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
@@ -1439,7 +1486,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
@@ -1498,7 +1545,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -1507,7 +1554,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
@@ -1520,7 +1567,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
@@ -1533,7 +1580,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
@@ -1592,7 +1639,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -1601,7 +1648,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -1614,7 +1661,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -1627,7 +1674,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -1686,7 +1733,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       yaxis:
       - decimals: 2
         show: false
@@ -1715,7 +1762,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       yaxis:
       - decimals: 2
         show: false
@@ -1744,7 +1791,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -1753,7 +1800,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -1766,7 +1813,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -1779,7 +1826,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id004
+        group_by: *id005
         transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
@@ -1838,7 +1885,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
       type: area
@@ -1847,7 +1894,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
@@ -1860,7 +1907,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
@@ -1873,7 +1920,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
@@ -1920,8 +1967,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -1937,7 +1984,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -1946,7 +1993,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -1959,7 +2006,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
@@ -1972,7 +2019,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
@@ -2019,8 +2066,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -2036,7 +2083,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
       type: area
@@ -2045,7 +2092,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
@@ -2058,7 +2105,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
@@ -2071,7 +2118,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
@@ -2118,8 +2165,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -2135,7 +2182,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -2144,7 +2191,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -2157,7 +2204,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -2170,7 +2217,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -2217,8 +2264,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -2234,7 +2281,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     yaxis:
     - decimals: 2
       show: false
@@ -2251,8 +2298,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -2268,7 +2315,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     yaxis:
     - decimals: 2
       show: false
@@ -2285,8 +2332,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -2302,7 +2349,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
       type: area
@@ -2311,7 +2358,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -2324,7 +2371,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -2337,7 +2384,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id004
+      group_by: *id005
       transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
@@ -2384,17 +2431,17 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id005
-    - *id002
+    - *id006
+    - *id003
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id007
+    - &id008
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultima settimana
-    - *id003
+    - *id004
     cards:
     - type: custom:apexcharts-card
       graph_span: 7d
@@ -2411,7 +2458,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: &id006
+        group_by: &id007
           func: avg
           duration: 30min
           fill: 'null'
@@ -2423,7 +2470,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
@@ -2436,7 +2483,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
@@ -2449,7 +2496,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
@@ -2508,7 +2555,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -2517,7 +2564,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -2530,7 +2577,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
@@ -2543,7 +2590,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
@@ -2602,7 +2649,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -2611,7 +2658,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
@@ -2624,7 +2671,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
@@ -2637,7 +2684,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
@@ -2696,7 +2743,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -2705,7 +2752,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -2718,7 +2765,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -2731,7 +2778,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -2790,7 +2837,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       yaxis:
       - decimals: 2
         show: false
@@ -2819,7 +2866,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       yaxis:
       - decimals: 2
         show: false
@@ -2848,7 +2895,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -2857,7 +2904,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -2870,7 +2917,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -2883,7 +2930,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id007
         transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
@@ -2942,7 +2989,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
       type: area
@@ -2951,7 +2998,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
@@ -2964,7 +3011,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
@@ -2977,7 +3024,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
@@ -3024,8 +3071,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3041,7 +3088,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -3050,7 +3097,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -3063,7 +3110,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
@@ -3076,7 +3123,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
@@ -3123,8 +3170,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3140,7 +3187,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
       type: area
@@ -3149,7 +3196,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
@@ -3162,7 +3209,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
@@ -3175,7 +3222,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
@@ -3222,8 +3269,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3239,7 +3286,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -3248,7 +3295,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
@@ -3261,7 +3308,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -3274,7 +3321,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -3321,8 +3368,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3338,7 +3385,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     yaxis:
     - decimals: 2
       show: false
@@ -3355,8 +3402,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3372,7 +3419,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     yaxis:
     - decimals: 2
       show: false
@@ -3389,8 +3436,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 7d
     header:
@@ -3406,7 +3453,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
       type: area
@@ -3415,7 +3462,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
@@ -3428,7 +3475,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
@@ -3441,7 +3488,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id006
+      group_by: *id007
       transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
@@ -3488,17 +3535,17 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id002
+    - *id008
+    - *id003
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id008
+    - &id009
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultimo mese
-    - *id003
+    - *id004
     cards:
     - type: custom:apexcharts-card
       graph_span: 30d
@@ -3915,8 +3962,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -3978,8 +4025,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -4041,8 +4088,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -4104,8 +4151,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -4141,8 +4188,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -4178,8 +4225,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
   - type: custom:apexcharts-card
     graph_span: 30d
     header:
@@ -4241,8 +4288,8 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id008
-    - *id002
+    - *id009
+    - *id003
 - type: grid
   column_span: 4
   cards:

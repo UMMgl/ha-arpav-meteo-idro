@@ -43,7 +43,9 @@ COLORS = {"below": "#1e88e5", "g1": "#fbc02d", "g2": "#ef6c00", "g3": "#c62828"}
 PERIOD_HELPER = "input_select.bacchiglione_periodo_grafici"
 # label, graph span, grouping of the states, hourly Recorder means
 PERIODS = [
-    ("Ultima ora", "1h", None, False),
+    # a grouping is needed in the last hour too: a level that did not change
+    # may return no point at all, and ApexCharts fails drawing the thresholds
+    ("Ultima ora", "1h", {"func": "last", "duration": "5min", "fill": "last"}, False),
     ("Ultimo giorno", "24h", {"func": "last", "duration": "10min", "fill": "null"}, False),
     ("Ultima settimana", "7d", {"func": "avg", "duration": "30min", "fill": "null"}, False),
     ("Ultimo mese", "30d", None, True),
