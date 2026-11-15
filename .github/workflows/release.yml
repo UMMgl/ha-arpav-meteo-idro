@@ -102,6 +102,9 @@ jobs:
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3  # v3
         with:
           body: ${{ steps.changelog.outputs.changes }}
+          # beta and release candidate tags (e.g. 0.15.5b1, 0.15.5rc1) are GitHub
+          # pre-releases: HACS offers them only to users who enable beta versions
+          prerelease: ${{ contains(github.ref_name, 'b') || contains(github.ref_name, 'rc') }}
           files: |
             ${{ runner.temp }}/ha-arpav-meteo-idro.zip
             ${{ runner.temp }}/ha-arpav-meteo-idro.cdx.json

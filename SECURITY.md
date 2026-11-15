@@ -67,6 +67,9 @@ Fixed by upgrading: `requirements_ha.txt` homeassistant 2026.10.2 to 2026.11.1
 
 ## Verifying a release
 
+Tags such as `0.15.5b1` or `0.15.5rc1` are published as GitHub pre-releases:
+HACS offers them only to users who enable beta versions for this repository.
+
 Every release from 0.15.4 on carries, next to `ha-arpav-meteo-idro.zip`:
 
 * `ha-arpav-meteo-idro.cdx.json`: software bill of materials (OWASP CycloneDX)

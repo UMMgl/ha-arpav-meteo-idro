@@ -19,3 +19,9 @@ Data: ARPAV (Agenzia Regionale per la Prevenzione e Protezione Ambientale del
 Veneto) open data, released under CC BY 4.0. Automatic data, not previously
 validated. This integration is not affiliated with ARPAV and is not an
 official warning service.
+
+The Veneto station-to-station connectivity in hydro_topology.py is derived
+from ARPAV, Grafo Idrografia (elemento idrico), licensed CC BY 3.0.
+https://gaia.arpa.veneto.it/layers/idrografia:geonode:v_idrografia_rete
+https://creativecommons.org/licenses/by/3.0/
+The source paths were condensed to monitored reaches and named junctions.
