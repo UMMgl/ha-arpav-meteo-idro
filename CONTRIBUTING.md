@@ -37,6 +37,9 @@ A pull request is merged only when:
 
 `main` is protected: changes reach it only through pull requests.
 
+AI agents must use their dedicated GitHub App identity. They must not approve or
+merge pull requests.
+
 ## Coding style
 
 The code is checked with [Ruff](https://docs.astral.sh/ruff/) (configuration in

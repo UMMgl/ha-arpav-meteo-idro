@@ -3,6 +3,13 @@
 - **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
 - **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
 - **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
+- **diagnostics**: config entry diagnostics for weather and hydrometric entries; coordinates and municipality are redacted (#6)
+- **hydro**: the devices of the stations deselected in the options are removed, and can be deleted by hand (#6)
+- **hydro**: "Observed at" and "Level change" are disabled by default on new installations; existing entities keep their state (#6)
+- **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
+
+### :memo: Documentation
+- **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :warning: Deprecations
 - **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).

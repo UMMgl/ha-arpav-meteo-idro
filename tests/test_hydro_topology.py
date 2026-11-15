@@ -58,10 +58,10 @@ def test_registry_profiles_cover_all_multi_station_water_bodies():
         if not topology_evidence(river, station_id)
     }
     assert len(multiple) == 23
-    assert unverified == {("Po", "319"), ("Po", "552"), ("Po", "561")}
+    assert not unverified
 
 
-def test_veneto_profiles_follow_reaches_and_keep_po_delta_selection_order():
+def test_veneto_profiles_follow_reaches_and_keep_po_delta_branches():
     """Check main-stem paths, compound place names and ambiguous gauges."""
     cases = {
         "Adige": "607 332 270 301 281 284 293",
@@ -76,7 +76,15 @@ def test_veneto_profiles_follow_reaches_and_keep_po_delta_selection_order():
         expected = sequence.split()
         assert ordered_selection(expected[::-1], "", river) == expected
     selected = ["552", "562", "561", "560", "399", "319"]
-    assert ordered_selection(selected, "", "Po") == ["399", "562", "560", "552", "561", "319"]
+    assert ordered_selection(selected, "", "Po") == ["399", "562", "560", "561", "552", "319"]
+    assert ordered_selection(["0561", "560"], "", "Po") == ["560", "0561"]
+    assert ordered_selection(["0552", "560"], "", "Po") == ["560", "0552"]
+    p = topology_evidence("Po", "0561")
+    b = topology_evidence("Po", "0552")
+    assert (p.upstream, p.downstream) == ("po_di_pila", "561")
+    assert (b.upstream, b.downstream) == ("po_delle_tolle", "552")
+    assert p.source_reference.endswith("114007 to 2242")
+    assert b.source_reference.endswith("7637 to 10042")
     assert ordered_selection(selected, "0561, 0399", "Po") == [
         "561", "399", "552", "562", "560", "319",
     ]
@@ -96,3 +104,13 @@ def test_canal_bianco_uses_medium_confidence():
     for station in ("693", "665", "666", "664"):
         assert topology_evidence("Canal Bianco", station).confidence == "medium"
     assert topology_evidence("Brenta", "374").confidence == "high"
+
+
+def test_porto_levante_has_its_own_regulated_route():
+    """Expose Porto Levante without attaching it to the Po di Venezia branches."""
+    evidence = topology_evidence("Po", "0319")
+    assert (evidence.upstream, evidence.downstream) == ("canal_bianco_volta_grimana", "319")
+    assert evidence.confidence == "medium"
+    assert "agenziapo.it" in evidence.source_url
+    assert ordered_selection(["999", "0319", "0560"], "", "Po") == ["0560", "0319", "999"]
+    assert ordered_selection(["0560", "0319"], "319", "Po") == ["0319", "0560"]

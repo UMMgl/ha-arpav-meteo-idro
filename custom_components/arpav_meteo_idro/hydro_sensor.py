@@ -52,6 +52,8 @@ SENSORS: tuple[HydroSensorDescription, ...] = (
         translation_key="hydro_observed_at",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
+        # the time is also an attribute of every sensor: rarely needed as an entity
+        entity_registry_enabled_default=False,
         value_fn=lambda s: s.reading.observed_at if s.reading else None,
     ),
     HydroSensorDescription(
@@ -71,6 +73,8 @@ SENSORS: tuple[HydroSensorDescription, ...] = (
     HydroSensorDescription(
         key="level_change",
         translation_key="hydro_level_change",
+        # the trend sensor already says where the level is going
+        entity_registry_enabled_default=False,
         device_class=SensorDeviceClass.DISTANCE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfLength.METERS,

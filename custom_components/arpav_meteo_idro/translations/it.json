@@ -258,6 +258,12 @@
         }
     },
     "exceptions": {
+        "fetch_failed": {
+            "message": "Impossibile scaricare i dati ARPAV (stato HTTP {status})."
+        },
+        "no_station_readable": {
+            "message": "Nessuna stazione idrometrica ARPAV è leggibile."
+        },
         "archive_failed": {
             "message": "Impossibile archiviare i dati: {error}"
         },
