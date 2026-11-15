@@ -39,6 +39,13 @@ Planned work, one pull request each. Quality items refer to
 - [ ] Inject the Home Assistant web session in the weather part.
 - [ ] Strict typing (mypy --strict).
 
+## Compliance
+
+- [ ] EU Cyber Resilience Act (Regulation (EU) 2024/2847): scope decision, Annex I
+  essential requirements, vulnerability handling (SBOM, coordinated disclosure,
+  signed updates), reporting obligations from 11 September 2026 – see
+  [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18).
+
 ## Upstream
 
 Deferred in [#13](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/13). ARPAV Meteo e Idro is the active Home Assistant integration. ARPAV River Level provides a technical reference for hydrometric data quality and polling resilience.

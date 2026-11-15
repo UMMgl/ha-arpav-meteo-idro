@@ -235,7 +235,6 @@ sections:
     cards:
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Ponte Marchese
@@ -326,7 +325,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Vicenza
@@ -417,7 +415,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Longare
@@ -508,7 +505,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Montegalda
@@ -599,7 +595,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Padova Voltabarozzo
@@ -628,7 +623,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Ponte San Nicolo'
@@ -657,7 +651,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 1h
-      update_interval: 5min
       header:
         show: true
         title: Bovolenta
@@ -748,7 +741,6 @@ sections:
                 color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Ponte Marchese
@@ -846,7 +838,6 @@ sections:
       media_query: '(max-width: 767px)'
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Vicenza
@@ -942,7 +933,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Longare
@@ -1038,7 +1028,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Montegalda
@@ -1134,7 +1123,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Padova Voltabarozzo
@@ -1168,7 +1156,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Ponte San Nicolo'
@@ -1202,7 +1189,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 1h
-    update_interval: 5min
     header:
       show: true
       title: Bovolenta
@@ -1308,7 +1294,6 @@ sections:
     cards:
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Ponte Marchese
@@ -1406,7 +1391,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Vicenza
@@ -1501,7 +1485,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Longare
@@ -1596,7 +1579,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Montegalda
@@ -1691,7 +1673,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Padova Voltabarozzo
@@ -1721,7 +1702,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Ponte San Nicolo'
@@ -1751,7 +1731,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 24h
-      update_interval: 5min
       header:
         show: true
         title: Bovolenta
@@ -1846,7 +1825,6 @@ sections:
                 color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Ponte Marchese
@@ -1946,7 +1924,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Vicenza
@@ -2046,7 +2023,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Longare
@@ -2146,7 +2122,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Montegalda
@@ -2246,7 +2221,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Padova Voltabarozzo
@@ -2281,7 +2255,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Ponte San Nicolo'
@@ -2316,7 +2289,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 24h
-    update_interval: 5min
     header:
       show: true
       title: Bovolenta
@@ -2426,7 +2398,6 @@ sections:
     cards:
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Ponte Marchese
@@ -2524,7 +2495,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Vicenza
@@ -2619,7 +2589,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Longare
@@ -2714,7 +2683,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Montegalda
@@ -2809,7 +2777,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Padova Voltabarozzo
@@ -2839,7 +2806,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Ponte San Nicolo'
@@ -2869,7 +2835,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 7d
-      update_interval: 5min
       header:
         show: true
         title: Bovolenta
@@ -2964,7 +2929,6 @@ sections:
                 color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Ponte Marchese
@@ -3064,7 +3028,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Vicenza
@@ -3164,7 +3127,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Longare
@@ -3264,7 +3226,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Montegalda
@@ -3364,7 +3325,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Padova Voltabarozzo
@@ -3399,7 +3359,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Ponte San Nicolo'
@@ -3434,7 +3393,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 7d
-    update_interval: 5min
     header:
       show: true
       title: Bovolenta
@@ -3544,7 +3502,6 @@ sections:
     cards:
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Ponte Marchese
@@ -3603,7 +3560,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Vicenza
@@ -3662,7 +3618,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Longare
@@ -3721,7 +3676,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Montegalda
@@ -3780,7 +3734,6 @@ sections:
                 color: '#fff'
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Padova Voltabarozzo
@@ -3813,7 +3766,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Ponte San Nicolo'
@@ -3846,7 +3798,6 @@ sections:
           height: 260
     - type: custom:apexcharts-card
       graph_span: 30d
-      update_interval: 5min
       header:
         show: true
         title: Bovolenta
@@ -3905,7 +3856,6 @@ sections:
                 color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Ponte Marchese
@@ -3969,7 +3919,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Vicenza
@@ -4033,7 +3982,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Longare
@@ -4097,7 +4045,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Montegalda
@@ -4161,7 +4108,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Padova Voltabarozzo
@@ -4199,7 +4145,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Ponte San Nicolo'
@@ -4237,7 +4182,6 @@ sections:
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
-    update_interval: 5min
     header:
       show: true
       title: Bovolenta
@@ -4306,7 +4250,6 @@ sections:
     heading: Ultime 72 ore, medie orarie dal Recorder
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Ponte Marchese
@@ -4365,7 +4308,6 @@ sections:
               color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Vicenza
@@ -4424,7 +4366,6 @@ sections:
               color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Longare
@@ -4483,7 +4424,6 @@ sections:
               color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Montegalda
@@ -4542,7 +4482,6 @@ sections:
               color: '#fff'
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Padova Voltabarozzo
@@ -4575,7 +4514,6 @@ sections:
         height: 190
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Ponte San Nicolo'
@@ -4608,7 +4546,6 @@ sections:
         height: 190
   - type: custom:apexcharts-card
     graph_span: 72h
-    update_interval: 5min
     header:
       show: true
       title: Bovolenta
