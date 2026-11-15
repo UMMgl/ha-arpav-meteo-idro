@@ -41,6 +41,8 @@ Planned work, one pull request each. Quality items refer to
 
 ## Upstream
 
+Deferred in [#13](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/13). ARPAV Meteo e Idro is the active Home Assistant integration. ARPAV River Level provides a technical reference for hydrometric data quality and polling resilience.
+
 - [ ] Propose the hydrometric part to davidecavestro/arpa-veneto-weather as a pull
   request (without the fork rename; contribution under BSD-3-Clause like the
   original project), if the author is interested.

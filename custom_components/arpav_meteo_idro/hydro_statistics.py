@@ -1,26 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Gianluca Nardin (@UMMgl)
-"""Completion of the long-term statistics of the hydrometric level sensors.
-
-Every station file holds the last ~2-3 days of readings. Once a day (and at
-start-up, and on demand through a service) the hourly mean/min/max are rebuilt
-from those readings and imported into the statistics of the level sensor of
-the station. Hours missed while Home Assistant was down or the download failed
-are filled in; hours already present are overwritten with values computed from
-every ARPAV reading of the hour. Writing the same hour twice overwrites it, so
-the import is idempotent.
-
-Only hours that ended at least an hour ago are written, so an hour the
-recorder is still compiling is never touched.
-"""
+"""Fill missing long-term level statistics from complete hourly ARPAV observations."""
 
 from __future__ import annotations
 
 import logging
 from datetime import timedelta
 
+from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.models import StatisticMeanType, StatisticMetaData
-from homeassistant.components.recorder.statistics import async_import_statistics
+from homeassistant.components.recorder.statistics import async_import_statistics, statistics_during_period
 from homeassistant.const import UnitOfLength
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
@@ -58,23 +47,51 @@ async def async_import_hydro_history(hass: HomeAssistant, coordinator: HydroCoor
     if not coordinator.data:
         await coordinator.async_request_refresh()
 
+    async with coordinator.archive_lock:
+        return await _async_fill_missing_hours(hass, coordinator)
+
+
+async def _async_fill_missing_hours(
+    hass: HomeAssistant, coordinator: HydroCoordinator,
+) -> dict[str, dict]:
+    """Read existing hours and queue only complete hours the recorder is missing."""
+    recorder = get_instance(hass)
     registry = er.async_get(hass)
-    cut = dt_util.utcnow().replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
-    report: dict[str, dict] = {}
+    one_hour = timedelta(hours=1)
+    cut = dt_util.utcnow().replace(minute=0, second=0, microsecond=0) - one_hour
+    candidates = {}
     for station_id, state in (coordinator.data or {}).items():
         entity_id = registry.async_get_entity_id("sensor", DOMAIN, level_unique_id(station_id))
-        if entity_id is None:
-            continue
-        statistics = hydro.hourly_statistics(state.series, before=cut)
+        if entity_id is not None:
+            candidates[entity_id] = (station_id, hydro.hourly_statistics(
+                state.series, before=cut, complete_hours_only=True,
+            ))
+
+    starts = [row["start"] for _, rows in candidates.values() for row in rows]
+    existing = {}
+    if starts:
+        existing = await recorder.async_add_executor_job(
+            statistics_during_period, hass, min(starts), max(starts) + one_hour,
+            set(candidates), "hour", None, {"mean"},
+        )
+
+    report = {}
+    for entity_id, (station_id, rows) in candidates.items():
+        present = {row["start"] for row in existing.get(entity_id, ())}
+        missing = [row for row in rows if row["start"].timestamp() not in present]
         report[entity_id] = {
             "station_id": station_id,
-            "hours": len(statistics),
-            "from": statistics[0]["start"].isoformat() if statistics else None,
-            "to": statistics[-1]["start"].isoformat() if statistics else None,
+            "hours": len(missing),
+            "from": missing[0]["start"].isoformat() if missing else None,
+            "to": missing[-1]["start"].isoformat() if missing else None,
         }
-        if statistics:
-            async_import_statistics(hass, _metadata(entity_id), statistics)
+        if missing:
+            async_import_statistics(hass, _metadata(entity_id), missing)
+
     total = sum(item["hours"] for item in report.values())
+    if total:
+        # A following manual or scheduled import must see the rows just queued.
+        await recorder.async_block_till_done()
     _LOGGER.info("Hydrometric history: %s hourly statistics imported into %s level sensors",
                  total, sum(1 for item in report.values() if item["hours"]))
     return report

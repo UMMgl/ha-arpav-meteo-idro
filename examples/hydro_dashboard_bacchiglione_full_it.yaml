@@ -180,18 +180,19 @@ sections:
 
       {%- set arrow = {''rising'':''mdi:arrow-top-right-thick'',''steady'':''mdi:arrow-right-thick'',''falling'':''mdi:arrow-bottom-right-thick''} -%}
 
-      | Stazione | Livello | Stato | Trend |
+      | Stazione | Livello | Stato | Età (min) | Trend |
 
-      |---|---:|:---:|:---:|
+      |---|---:|:---:|---:|:---:|
 
       {% for s in states.sensor | selectattr(''attributes.source'', ''defined'') | selectattr(''attributes.source'', ''eq'', ''arpav_hydrometric_station'') | selectattr(''attributes.display_order'', ''defined'')
-      | sort(attribute=''attributes.display_order'') -%}
+      | selectattr(''attributes.station_id'', ''in'', ["276", "333", "303", "308", "334", "595", "287"]) | sort(attribute=''attributes.display_order'') -%}
 
       {%- set d = s.attributes.level_change_m -%}
 
       | <small>{{ (s.attributes.station_name or s.name).split('' a '')[-1] }}</small> | <small>{{ ''%.2f'' | format(s.attributes.level_m) if s.attributes.level_m is number else ''—'' }}</small> | <font
-      size="4" color="{{ dot.get(s.state, ''#9e9e9e'') }}">{{ ''◯'' if s.state in [''stale'', ''missing''] else ''⬤'' }}</font> | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{%
-      if s.attributes.trend != ''steady'' and d is number %} <small>{{ ''%+.0f'' | format(d * 100) }}</small>{% endif %}{% else %}—{% endif %} |
+      size="4" color="{{ dot.get(s.state, ''#9e9e9e'') }}">{{ ''◯'' if s.state in [''stale'', ''missing''] else ''⬤'' }}</font> | {{ s.attributes.age_minutes | round(0) | int if s.attributes.age_minutes
+      is number else ''—'' }} | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{% if s.attributes.trend != ''steady'' and d is number %} <small>{{ ''%+.0f'' | format(d
+      * 100) }}</small>{% endif %}{% else %}—{% endif %} |
 
       {% endfor %}'
 - type: grid
@@ -201,15 +202,16 @@ sections:
     heading: Legenda
     heading_style: subtitle
   - type: markdown
-    content: '<small>**Grafici**: area blu sotto G1, gialla oltre G1, arancione oltre G2, rossa oltre G3; scala normalizzata con G1 al 60% e G3 al 90% dell''altezza (si allarga se il livello esce).<br>**Stato**:
-      <font color="#2e7d32">⬤</font> sotto G1 · <font color="#fbc02d">⬤</font> G1–G2 · <font color="#ef6c00">⬤</font> G2–G3 · <font color="#c62828">⬤</font> da G3 · <font color="#9e9e9e">⬤</font> soglie
-      non pubblicate · <font color="#9e9e9e">◯</font> dato mancante o vecchio.<br>**Trend**: ultime 4 misure; freccia inclinata e variazione in cm da ±5 cm.<br>Livelli rispetto allo zero idrometrico locale:
-      non confrontabili tra stazioni. Ordine monte → valle candidato.<br>_Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta._</small>'
+    content: '<small>**Grafici**: area blu sotto G1, gialla oltre G1, arancione oltre G2, rossa oltre G3; scala normalizzata con G1 al 60% e G3 al 90% dell''altezza (si allarga se il livello esce); i buchi
+      sono misure mancanti.<br>**Stato**: <font color="#2e7d32">⬤</font> sotto G1 · <font color="#fbc02d">⬤</font> G1–G2 · <font color="#ef6c00">⬤</font> G2–G3 · <font color="#c62828">⬤</font> da G3 · <font
+      color="#9e9e9e">⬤</font> soglie non pubblicate · <font color="#9e9e9e">◯</font> dato mancante o vecchio.<br>**Trend**: ultime 4 misure; freccia inclinata e variazione in cm da ±5 cm.<br>Livelli rispetto
+      allo zero idrometrico locale: non confrontabili tra stazioni. Stazioni monitorate mostrate da monte a valle (ordine candidato).<br>_Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un
+      servizio di allerta._</small>'
 - type: grid
   column_span: 4
   cards:
   - type: heading
-    heading: Andamento dalla sorgente alla foce (con soglie)
+    heading: Stazioni monitorate da monte a valle (con soglie)
   - type: tile
     entity: input_select.bacchiglione_periodo_grafici
     name: Periodo
@@ -246,7 +248,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -254,8 +256,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 1.0 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -266,8 +268,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 2.2 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -278,8 +280,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 3.2 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -337,7 +339,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -345,8 +347,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 3.0 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -357,8 +359,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 4.6 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -369,8 +371,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 5.4 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -428,7 +430,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -436,8 +438,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 3.8 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -448,8 +450,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 5.0 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -460,8 +462,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 6.3 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -519,7 +521,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -527,8 +529,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 3.0 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -539,8 +541,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 5.5 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -551,8 +553,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 6.5 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -610,7 +612,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       yaxis:
       - decimals: 2
         show: false
@@ -639,7 +641,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       yaxis:
       - decimals: 2
         show: false
@@ -668,7 +670,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -676,8 +678,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 5.5 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -688,8 +690,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 6.5 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -700,8 +702,8 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
-        transform: 'return x >= 7.0 ? x : null;'
+        fill_raw: 'null'
+        transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -759,7 +761,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
       type: area
@@ -767,8 +769,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 1.0 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -779,8 +781,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 2.2 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -791,8 +793,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 3.2 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -857,7 +859,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -865,8 +867,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 3.0 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -877,8 +879,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 4.6 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -889,8 +891,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 5.4 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -953,7 +955,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
       type: area
@@ -961,8 +963,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 3.8 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -973,8 +975,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 5.0 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -985,8 +987,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 6.3 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1049,7 +1051,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
       type: area
@@ -1057,8 +1059,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 3.0 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1069,8 +1071,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 5.5 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1081,8 +1083,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 6.5 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1145,7 +1147,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     yaxis:
     - decimals: 2
       show: false
@@ -1179,7 +1181,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     yaxis:
     - decimals: 2
       show: false
@@ -1213,7 +1215,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
       type: area
@@ -1221,8 +1223,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 5.5 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1233,8 +1235,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 6.5 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1245,8 +1247,8 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
-      transform: 'return x >= 7.0 ? x : null;'
+      fill_raw: 'null'
+      transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1319,11 +1321,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: &id004
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -1331,9 +1333,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 1.0 ? x : null;'
+        transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1344,9 +1346,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 2.2 ? x : null;'
+        transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1357,9 +1359,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 3.2 ? x : null;'
+        transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1417,7 +1419,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
@@ -1426,9 +1428,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 3.0 ? x : null;'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1439,9 +1441,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 4.6 ? x : null;'
+        transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1452,9 +1454,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 5.4 ? x : null;'
+        transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1512,7 +1514,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
@@ -1521,9 +1523,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 3.8 ? x : null;'
+        transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1534,9 +1536,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 5.0 ? x : null;'
+        transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1547,9 +1549,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 6.3 ? x : null;'
+        transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1607,7 +1609,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
@@ -1616,9 +1618,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 3.0 ? x : null;'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1629,9 +1631,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 5.5 ? x : null;'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1642,9 +1644,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 6.5 ? x : null;'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1702,7 +1704,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       yaxis:
       - decimals: 2
@@ -1732,7 +1734,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       yaxis:
       - decimals: 2
@@ -1762,7 +1764,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
@@ -1771,9 +1773,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 5.5 ? x : null;'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1784,9 +1786,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 6.5 ? x : null;'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1797,9 +1799,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id004
-        transform: 'return x >= 7.0 ? x : null;'
+        transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -1857,7 +1859,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
@@ -1866,9 +1868,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 1.0 ? x : null;'
+      transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1879,9 +1881,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 2.2 ? x : null;'
+      transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1892,9 +1894,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 3.2 ? x : null;'
+      transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1957,7 +1959,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
@@ -1966,9 +1968,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 3.0 ? x : null;'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1979,9 +1981,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 4.6 ? x : null;'
+      transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1992,9 +1994,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 5.4 ? x : null;'
+      transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2057,7 +2059,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
@@ -2066,9 +2068,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 3.8 ? x : null;'
+      transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2079,9 +2081,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 5.0 ? x : null;'
+      transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2092,9 +2094,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 6.3 ? x : null;'
+      transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2157,7 +2159,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
@@ -2166,9 +2168,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 3.0 ? x : null;'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2179,9 +2181,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 5.5 ? x : null;'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2192,9 +2194,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 6.5 ? x : null;'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2257,7 +2259,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     yaxis:
     - decimals: 2
@@ -2292,7 +2294,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     yaxis:
     - decimals: 2
@@ -2327,7 +2329,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
@@ -2336,9 +2338,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 5.5 ? x : null;'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2349,9 +2351,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 6.5 ? x : null;'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2362,9 +2364,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id004
-      transform: 'return x >= 7.0 ? x : null;'
+      transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2437,11 +2439,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: &id006
           func: avg
           duration: 30min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -2449,9 +2451,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 1.0 ? x : null;'
+        transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2462,9 +2464,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 2.2 ? x : null;'
+        transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2475,9 +2477,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 3.2 ? x : null;'
+        transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2535,7 +2537,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
@@ -2544,9 +2546,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 3.0 ? x : null;'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2557,9 +2559,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 4.6 ? x : null;'
+        transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2570,9 +2572,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 5.4 ? x : null;'
+        transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2630,7 +2632,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
@@ -2639,9 +2641,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 3.8 ? x : null;'
+        transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2652,9 +2654,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 5.0 ? x : null;'
+        transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2665,9 +2667,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 6.3 ? x : null;'
+        transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2725,7 +2727,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
@@ -2734,9 +2736,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 3.0 ? x : null;'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2747,9 +2749,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 5.5 ? x : null;'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2760,9 +2762,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 6.5 ? x : null;'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2820,7 +2822,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       yaxis:
       - decimals: 2
@@ -2850,7 +2852,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       yaxis:
       - decimals: 2
@@ -2880,7 +2882,7 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
@@ -2889,9 +2891,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 5.5 ? x : null;'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2902,9 +2904,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 6.5 ? x : null;'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2915,9 +2917,9 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by: *id006
-        transform: 'return x >= 7.0 ? x : null;'
+        transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -2975,7 +2977,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
       name: '>= 1.0'
@@ -2984,9 +2986,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 1.0 ? x : null;'
+      transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -2997,9 +2999,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 2.2 ? x : null;'
+      transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3010,9 +3012,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 3.2 ? x : null;'
+      transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3075,7 +3077,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
       name: '>= 3.0'
@@ -3084,9 +3086,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 3.0 ? x : null;'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3097,9 +3099,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 4.6 ? x : null;'
+      transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3110,9 +3112,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 5.4 ? x : null;'
+      transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3175,7 +3177,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
       name: '>= 3.8'
@@ -3184,9 +3186,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 3.8 ? x : null;'
+      transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3197,9 +3199,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 5.0 ? x : null;'
+      transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3210,9 +3212,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 6.3 ? x : null;'
+      transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3275,7 +3277,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
       name: '>= 3.0'
@@ -3284,9 +3286,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 3.0 ? x : null;'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3297,9 +3299,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 5.5 ? x : null;'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3310,9 +3312,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 6.5 ? x : null;'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3375,7 +3377,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     yaxis:
     - decimals: 2
@@ -3410,7 +3412,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     yaxis:
     - decimals: 2
@@ -3445,7 +3447,7 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
       name: '>= 5.5'
@@ -3454,9 +3456,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 5.5 ? x : null;'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3467,9 +3469,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 6.5 ? x : null;'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3480,9 +3482,9 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by: *id006
-      transform: 'return x >= 7.0 ? x : null;'
+      transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -3534,7 +3536,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - &id009
+    - &id008
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultimo mese
@@ -3546,58 +3548,20 @@ sections:
       header:
         show: true
         title: Ponte Marchese
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: &id008
+        fill_raw: 'null'
+        statistics:
           type: mean
           period: hour
-      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-        name: '>= 1.0'
-        type: area
-        color: '#fbc02d'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 1.0 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-        name: '>= 2.2'
-        type: area
-        color: '#ef6c00'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 2.2 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-        name: '>= 3.2'
-        type: area
-        color: '#c62828'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 3.2 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3643,56 +3607,20 @@ sections:
       header:
         show: true
         title: Vicenza
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
-      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-        name: '>= 3.0'
-        type: area
-        color: '#fbc02d'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 3.0 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-        name: '>= 4.6'
-        type: area
-        color: '#ef6c00'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 4.6 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-        name: '>= 5.4'
-        type: area
-        color: '#c62828'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 5.4 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3738,56 +3666,20 @@ sections:
       header:
         show: true
         title: Longare
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
-      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-        name: '>= 3.8'
-        type: area
-        color: '#fbc02d'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 3.8 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-        name: '>= 5.0'
-        type: area
-        color: '#ef6c00'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 5.0 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-        name: '>= 6.3'
-        type: area
-        color: '#c62828'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 6.3 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3833,56 +3725,20 @@ sections:
       header:
         show: true
         title: Montegalda
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
-      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-        name: '>= 3.0'
-        type: area
-        color: '#fbc02d'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 3.0 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-        name: '>= 5.5'
-        type: area
-        color: '#ef6c00'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 5.5 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-        name: '>= 6.5'
-        type: area
-        color: '#c62828'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 6.5 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3928,17 +3784,20 @@ sections:
       header:
         show: true
         title: Padova Voltabarozzo
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3958,17 +3817,20 @@ sections:
       header:
         show: true
         title: Ponte San Nicolo'
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -3988,56 +3850,20 @@ sections:
       header:
         show: true
         title: Bovolenta
-        show_states: true
+        show_states: false
       series:
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-        name: Livello
+        name: Media oraria
         type: area
         color: '#1e88e5'
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
-        statistics: *id008
-      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-        name: '>= 5.5'
-        type: area
-        color: '#fbc02d'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 5.5 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-        name: '>= 6.5'
-        type: area
-        color: '#ef6c00'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 6.5 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
-      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-        name: '>= 7.0'
-        type: area
-        color: '#c62828'
-        opacity: 0.55
-        stroke_width: 0
-        curve: stepline
-        fill_raw: last
-        statistics: *id008
-        transform: 'return x >= 7.0 ? x : null;'
-        show:
-          in_header: false
-          in_legend: false
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
       yaxis:
       - decimals: 2
         show: false
@@ -4083,56 +3909,20 @@ sections:
     header:
       show: true
       title: Ponte Marchese
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 1.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 1.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 2.2'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 2.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 3.2'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 3.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4175,7 +3965,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4183,56 +3973,20 @@ sections:
     header:
       show: true
       title: Vicenza
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 4.6'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 4.6 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 5.4'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 5.4 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4275,7 +4029,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4283,56 +4037,20 @@ sections:
     header:
       show: true
       title: Longare
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 3.8'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 3.8 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 5.0'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 5.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 6.3'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 6.3 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4375,7 +4093,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4383,56 +4101,20 @@ sections:
     header:
       show: true
       title: Montegalda
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4475,7 +4157,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4483,17 +4165,20 @@ sections:
     header:
       show: true
       title: Padova Voltabarozzo
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4510,7 +4195,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4518,17 +4203,20 @@ sections:
     header:
       show: true
       title: Ponte San Nicolo'
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4545,7 +4233,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
   - type: custom:apexcharts-card
     graph_span: 30d
@@ -4553,56 +4241,20 @@ sections:
     header:
       show: true
       title: Bovolenta
-      show_states: true
+      show_states: false
     series:
     - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: Livello
+      name: Media oraria
       type: area
       color: '#1e88e5'
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
-      statistics: *id008
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 7.0'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: last
-      statistics: *id008
-      transform: 'return x >= 7.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
     yaxis:
     - decimals: 2
       show: false
@@ -4645,5 +4297,371 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id009
+    - *id008
     - *id002
+- type: grid
+  column_span: 4
+  cards:
+  - type: heading
+    heading: Ultime 72 ore, medie orarie dal Recorder
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Ponte Marchese
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-3.4
+      max: ~3.93
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 1.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 2.2
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 3.2
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Vicenza
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-1.8
+      max: ~6.2
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 4.6
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 5.4
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Longare
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-1.2
+      max: ~7.13
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.8
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 5.0
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 6.3
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Montegalda
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-4.0
+      max: ~7.67
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 5.5
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 6.5
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Padova Voltabarozzo
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: '|-0.5|'
+      max: ~10.0
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Ponte San Nicolo'
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: '|-0.5|'
+      max: '|+0.5|'
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Bovolenta
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~2.5
+      max: ~7.5
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 5.5
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 6.5
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 7.0
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'

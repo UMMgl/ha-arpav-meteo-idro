@@ -27,25 +27,41 @@ jobs:
 
       - name: "Adjust version number"
         shell: "bash"
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
         run: |
-          yq -i -o json '.version="${{ github.ref_name }}"' \
+          yq -i -o json '.version = strenv(RELEASE_VERSION)' \
             "${{ github.workspace }}/custom_components/arpav_meteo_idro/manifest.json"
 
-      - name: "ZIP the integration directory"
+      - name: "Build and verify the HACS ZIP"
         shell: "bash"
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
         run: |
-          cd "${{ github.workspace }}/custom_components/arpav_meteo_idro"
-          zip ha-arpav-meteo-idro.zip -r ./
+          archive="$RUNNER_TEMP/ha-arpav-meteo-idro.zip"
+          (cd custom_components/arpav_meteo_idro && zip -r "$archive" ./)
+          zip -j "$archive" LICENSE LICENSE-BSD-3-Clause NOTICE
+          python3 - "$archive" <<'PY'
+          import json
+          import os
+          import sys
+          from zipfile import ZipFile
+
+          with ZipFile(sys.argv[1]) as archive:
+              expected = {"LICENSE", "LICENSE-BSD-3-Clause", "NOTICE", "manifest.json", "__init__.py"}
+              missing = expected - set(archive.namelist())
+              if missing:
+                  raise SystemExit(f"Missing HACS ZIP files: {sorted(missing)}")
+              version = json.loads(archive.read("manifest.json"))["version"]
+              if version != os.environ["RELEASE_VERSION"]:
+                  raise SystemExit(f"Incorrect HACS manifest version: {version}")
+          PY
 
       - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v3
         with:
           body: ${{ steps.changelog.outputs.changes }}
-          files: ${{ github.workspace }}/custom_components/arpav_meteo_idro/ha-arpav-meteo-idro.zip
+          files: ${{ runner.temp }}/ha-arpav-meteo-idro.zip
 
-      - name: Commit CHANGELOG.md
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          branch: main
-          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
-          file_pattern: CHANGELOG.md
+      # main is protected (changes only through pull requests): the changelog of each
+      # version is published in the release notes, not committed back to main

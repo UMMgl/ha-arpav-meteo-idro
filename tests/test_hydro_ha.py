@@ -2,7 +2,9 @@
 # Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Home Assistant tests for the hydrometric stations (config flow, sensors, history)."""
 
+import asyncio
 import pathlib
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
@@ -12,11 +14,12 @@ pytest.importorskip("fcntl")  # Home Assistant tests need a POSIX system
 pytest.importorskip("pytest_homeassistant_custom_component")
 
 from homeassistant import config_entries  # noqa: E402
+from homeassistant.components.recorder.statistics import async_import_statistics, statistics_during_period  # noqa: E402
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
-from custom_components.arpav_meteo_idro import hydro  # noqa: E402
+from custom_components.arpav_meteo_idro import hydro, hydro_coordinator, hydro_statistics  # noqa: E402
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
@@ -66,7 +69,7 @@ def _entry(**options):
     )
 
 
-async def test_config_flow_creates_ordered_entry(hass, arpav):
+async def test_config_flow_creates_ordered_entry(enable_custom_integrations, hass, arpav):
     """Menu → river → stations with an explicit upstream-first order."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result["type"] is FlowResultType.MENU
@@ -89,7 +92,7 @@ async def test_config_flow_creates_ordered_entry(hass, arpav):
     assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["276", "333", "287"]
 
 
-async def test_sensors_from_real_files(hass, arpav, freezer):
+async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, freezer):
     """Each station gets level, time, status, trend and change sensors."""
     freezer.move_to(NOW)
     entry = _entry()
@@ -120,7 +123,7 @@ async def test_sensors_from_real_files(hass, arpav, freezer):
     assert hass.states.get(trend).state in hydro.TRENDS
 
 
-async def test_old_reading_is_stale(hass, arpav, freezer):
+async def test_old_reading_is_stale(enable_custom_integrations, hass, arpav, freezer):
     """A reading older than the limit is reported as stale, without a trend."""
     freezer.move_to(NOW + timedelta(hours=5))
     entry = _entry()
@@ -131,29 +134,137 @@ async def test_old_reading_is_stale(hass, arpav, freezer):
     assert hass.states.get(status_id).state == "stale"
 
 
-async def test_history_is_imported_into_the_level_statistics(hass, arpav, freezer):
-    """The archive writes hourly statistics into the level sensor, recorder source."""
+async def test_backfill_fills_only_missing_complete_hours(
+    recorder_mock, enable_custom_integrations, hass, arpav, freezer,
+):
+    """Keep existing stats and skip partial hours even when retried."""
     freezer.move_to(NOW)
     entry = _entry()
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    hass.config.components.add("recorder")
+    coordinator = entry.runtime_data.coordinator
+    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_level")
+    series = coordinator.data["287"].series
+    partial = hydro.hourly_statistics(series)[0]["start"]
+    complete = hydro.hourly_statistics(series, complete_hours_only=True)
+    existing, missing = (row["start"] for row in complete[:2])
+    assert partial < existing
 
-    from custom_components.arpav_meteo_idro import hydro_statistics
+    async_import_statistics(hass, hydro_statistics._metadata(entity_id), [
+        {"start": existing, "mean": 5.0, "min": 4.0, "max": 6.0},
+    ])
+    await recorder_mock.async_block_till_done()
 
-    with patch.object(hydro_statistics, "async_import_statistics") as imported:
+    report = await hydro_statistics.async_import_hydro_history(hass, coordinator)
+    stats = await recorder_mock.async_add_executor_job(
+        statistics_during_period, hass, partial, missing + timedelta(hours=1),
+        {entity_id}, "hour", None, {"mean"},
+    )
+    assert {row["start"]: row["mean"] for row in stats[entity_id]} == {
+        existing.timestamp(): 5.0,
+        missing.timestamp(): complete[1]["mean"],
+    }
+    assert report[entity_id]["hours"] > 0
+    repeat = await hydro_statistics.async_import_hydro_history(hass, coordinator)
+    assert all(item["hours"] == 0 for item in repeat.values())
+
+
+async def test_hydro_keeps_last_valid_on_unusable_response(
+    enable_custom_integrations, hass, arpav, freezer,
+):
+    """Retain the observation and age it while polling healthy stations."""
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.coordinator
+    initial = coordinator.data["287"]
+    healthy = {key: state.data for key, state in coordinator.data.items() if key != "287"}
+    older_series = replace(initial.series, samples=initial.series.samples[:-1])
+    responses = iter([
+        replace(initial.data, series=[]),
+        replace(initial.data, series=[replace(
+            initial.series, samples=[replace(initial.series.samples[-1], value=None, raw=">>")],
+        )]),
+        replace(initial.data, series=[older_series]),
+        initial.data,
+    ])
+
+    async def fetch(meta):
+        if meta["id"] == "287":
+            return next(responses)
+        return healthy[meta["id"]]
+
+    with (
+        patch.object(coordinator, "_async_fetch_station", side_effect=fetch) as mocked,
+        patch("custom_components.arpav_meteo_idro.hydro_coordinator.random.uniform", return_value=1.1),
+    ):
+        for minutes, expected in [(5, "no_level_series"), (10, "no_valid_samples")]:
+            freezer.move_to(NOW + timedelta(minutes=minutes))
+            await coordinator.async_refresh()
+            state = coordinator.data["287"]
+            assert state.acquisition_status == expected
+            assert state.reading.level == initial.reading.level
+            assert state.reading.observed_at == initial.reading.observed_at
+            assert state.fetched_at == initial.fetched_at
+
+        retry_at = coordinator.data["287"].next_retry_at
+        assert retry_at == NOW + timedelta(minutes=21)
+        freezer.move_to(NOW + timedelta(minutes=15))
+        calls = mocked.await_count
+        await coordinator.async_refresh()
+        assert coordinator.data["287"].acquisition_status == "backoff"
+        assert mocked.await_count == calls + len(healthy)
+        assert coordinator.data["333"].fetched_at == NOW + timedelta(minutes=15)
+
+        freezer.move_to(NOW + timedelta(hours=2))
+        await coordinator.async_refresh()
+        state = coordinator.data["287"]
+        assert state.acquisition_status == "older_observation"
+        assert state.reading.observed_at == initial.reading.observed_at
+        assert state.reading.band == "stale"
+
+        freezer.move_to(state.next_retry_at)
+        await coordinator.async_refresh()
+        recovered = coordinator.data["287"]
+        assert recovered.acquisition_status == "ok"
+        assert recovered.next_retry_at is None
+        assert recovered.consecutive_failures == 0
+        assert recovered.reading.band == "stale"
+
+
+async def test_hydro_limits_concurrency_and_keeps_partial_success(
+    enable_custom_integrations, hass, arpav, freezer,
+):
+    """Keep the request limit even when one station times out."""
+    freezer.move_to(NOW)
+    data = hydro.parse_station((FIXTURES / "0287.xml").read_bytes())
+    stations = [dict(STATIONS[0], id=str(index)) for index in range(1, 9)]
+    entry = _entry(**{CONF_HYDRO_STATIONS: stations})
+    entry.add_to_hass(hass)
+    active = maximum = 0
+
+    async def fetch(_coordinator, meta):
+        nonlocal active, maximum
+        active += 1
+        maximum = max(maximum, active)
+        try:
+            await asyncio.sleep(0)
+            if meta["id"] == "1":
+                raise TimeoutError
+            return replace(data, station_id=meta["id"])
+        finally:
+            active -= 1
+
+    with patch.object(hydro_coordinator.HydroCoordinator, "_async_fetch_station", fetch):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
         coordinator = entry.runtime_data.coordinator
-        report = await hydro_statistics.async_import_hydro_history(hass, coordinator)
-
-    assert imported.call_count == len(STATIONS)
-    assert len(report) == len(STATIONS) and all(item["hours"] > 0 for item in report.values())
-    metadata, statistics = imported.call_args_list[-1].args[1:]
-    assert metadata["source"] == "recorder"
-    assert metadata["statistic_id"].startswith("sensor.")
-    assert metadata["unit_of_measurement"] == "m"
-    cut = NOW.replace(minute=0) - timedelta(hours=1)
-    assert all(s["start"] + timedelta(hours=1) <= cut for s in statistics)
+        assert maximum == hydro_coordinator.MAX_CONCURRENT_STATIONS
+        assert coordinator.data["1"].acquisition_status == "fetch_error"
+        assert coordinator.data["2"].reading.level == 1.46
 
 
 async def test_weather_entries_are_untouched(hass):
@@ -165,19 +276,16 @@ async def test_weather_entries_are_untouched(hass):
     assert _is_hydro(_entry())
 
 
-async def test_archive_action_returns_a_report(hass, arpav, freezer):
+async def test_archive_action_returns_a_report(
+    recorder_mock, enable_custom_integrations, hass, arpav, freezer,
+):
     """The action answers how many hours it wrote, per level sensor."""
     freezer.move_to(NOW)
     entry = _entry()
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    hass.config.components.add("recorder")
-
-    from custom_components.arpav_meteo_idro import hydro_statistics
-
-    with patch.object(hydro_statistics, "async_import_statistics"):
-        response = await hass.services.async_call(
-            DOMAIN, "archive_hydro_history", {"entry_id": entry.entry_id}, blocking=True, return_response=True)
+    response = await hass.services.async_call(
+        DOMAIN, "archive_hydro_history", {"entry_id": entry.entry_id}, blocking=True, return_response=True)
     assert response["imported_hours"] > 0
     assert len(response["sensors"]) == len(STATIONS)
