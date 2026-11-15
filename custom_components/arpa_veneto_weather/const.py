@@ -188,5 +188,26 @@ SENSOR_TYPES = {
     },
 }
 
+# --- Hydrometric stations (fork addition, Apache-2.0) ----------------------
+# A config entry is either a weather location (default) or a set of
+# hydrometric stations of a river
+CONF_ENTRY_TYPE = "entry_type"
+ENTRY_TYPE_WEATHER = "weather"
+ENTRY_TYPE_HYDRO = "hydro"
+
+CONF_HYDRO_RIVER = "river"
+# selected stations, in display order (upstream first), with their metadata
+CONF_HYDRO_STATIONS = "stations"
+CONF_HYDRO_ORDER = "display_order"
+CONF_HYDRO_TREND_THRESHOLD = "trend_threshold_cm"
+CONF_HYDRO_TREND_THRESHOLD_DEFAULT = 5
+# 0 means: derived from the frequency of each series
+CONF_HYDRO_STALE_MINUTES = "stale_minutes"
+CONF_HYDRO_STALE_MINUTES_DEFAULT = 0
+CONF_HYDRO_ARCHIVE = "archive_history"
+CONF_HYDRO_UPDATE_MINUTES = 5
+
+HYDRO_ATTRIBUTION = "Data: ARPAV, automatic data not previously validated, CC BY 4.0. Not an official warning service."
+
 CARDINAL_DIRECTIONS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE',
                        'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']

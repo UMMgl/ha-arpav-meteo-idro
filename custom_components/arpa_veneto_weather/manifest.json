@@ -4,16 +4,18 @@
     "version": "0.0.0",
     "iot_class": "cloud_polling",
     "requirements": [
-        "aiohttp"
+        "aiohttp",
+        "defusedxml>=0.7.1"
     ],
     "dependencies": [],
     "after_dependencies": [
         "recorder"
     ],
     "codeowners": [
-        "@davidecavestro"
+        "@davidecavestro",
+        "@UMMgl"
     ],
     "config_flow": true,
-    "documentation": "https://github.com/davidecavestro/arpa-veneto-weather",
-    "issue_tracker": "https://github.com/davidecavestro/arpa-veneto-weather/issues"
+    "documentation": "https://github.com/UMMgl/arpa-veneto-weather",
+    "issue_tracker": "https://github.com/UMMgl/arpa-veneto-weather/issues"
 }

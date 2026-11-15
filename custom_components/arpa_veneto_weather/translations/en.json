@@ -3,12 +3,11 @@
     "config": {
         "step": {
             "user": {
-                "title": "Configure Arpa Veneto Weather",
-                "description": "Choose the municipality to search for the weather zone to use for forecasts.",
-                "data": {
-                    "comune_id": "Municipality",
-                    "zone_id": "Zone",
-                    "station_id": "Weather Station"
+                "title": "ARPA Veneto",
+                "description": "What do you want to add?",
+                "menu_options": {
+                    "weather": "Weather location (forecast and current conditions)",
+                    "hydro": "Hydrometric stations (river water levels)"
                 }
             },
             "zone": {
@@ -24,11 +23,41 @@
                 "data": {
                     "station_id": "Weather Station"
                 }
+            },
+            "weather": {
+                "title": "Configure Arpa Veneto Weather",
+                "description": "Choose the municipality to search for the weather zone to use for forecasts.",
+                "data": {
+                    "comune_id": "Municipality",
+                    "zone_id": "Zone",
+                    "station_id": "Weather Station"
+                }
+            },
+            "hydro": {
+                "title": "Hydrometric stations",
+                "description": "Choose the river or water body. Source: ARPAV open data (CC BY 4.0), automatic data not previously validated.",
+                "data": {
+                    "river": "River"
+                }
+            },
+            "hydro_stations": {
+                "title": "Stations of {river}",
+                "description": "Select the stations and, optionally, their order from upstream to downstream as a comma separated list of IDs (empty: as selected). The order is a display order, not a verified hydraulic topology.\n\nStations: {stations}",
+                "data": {
+                    "stations": "Stations",
+                    "display_order": "Order (IDs, upstream first)"
+                }
             }
         },
         "error": {
             "cannot_connect": "Unable to connect to the API. Check your settings.",
-            "invalid_comune": "The selected municipality is invalid."
+            "invalid_comune": "The selected municipality is invalid.",
+            "no_stations": "Select at least one station.",
+            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287."
+        },
+        "abort": {
+            "cannot_connect": "Unable to read the ARPAV station registry. Try again later.",
+            "already_configured": "This river is already configured."
         }
     },
     "options": {
@@ -79,7 +108,30 @@
                     "night_clear_threshold": "Nighttime clear sky threshold",
                     "night_partly_threshold": "Nighttime partly cloudy threshold"
                 }
+            },
+            "hydro_options": {
+                "title": "Stations of {river}",
+                "description": "Stations: {stations}",
+                "data": {
+                    "stations": "Stations",
+                    "display_order": "Order (IDs, upstream first)",
+                    "trend_threshold_cm": "Trend threshold",
+                    "stale_minutes": "Stale after (0 = automatic)",
+                    "archive_history": "Complete the level statistics every day"
+                },
+                "data_description": {
+                    "trend_threshold_cm": "Change over the last 4 readings from which the level is rising or falling.",
+                    "stale_minutes": "Automatic: 90 minutes, more for series published every 30 minutes.",
+                    "archive_history": "Rebuilds the hourly statistics from the last 2-3 days ARPAV publishes, filling the missed hours."
+                }
             }
+        },
+        "error": {
+            "no_stations": "Select at least one station.",
+            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287."
+        },
+        "abort": {
+            "cannot_connect": "Unable to read the ARPAV station registry. Try again later."
         }
     },
     "selector": {
@@ -161,12 +213,52 @@
             },
             "leaf_wetness": {
                 "name": "Leaf wetness in {station_name}"
+            },
+            "hydro_level": {
+                "name": "Water level"
+            },
+            "hydro_observed_at": {
+                "name": "Observed at"
+            },
+            "hydro_level_change": {
+                "name": "Level change"
+            },
+            "hydro_status": {
+                "name": "Status",
+                "state": {
+                    "below_g1": "Below G1",
+                    "g1_g2": "Between G1 and G2",
+                    "g2_g3": "Between G2 and G3",
+                    "above_g3": "G3 or above",
+                    "no_thresholds": "Thresholds not published",
+                    "stale": "Stale",
+                    "missing": "Missing"
+                }
+            },
+            "hydro_trend": {
+                "name": "Trend",
+                "state": {
+                    "rising": "Rising",
+                    "steady": "Steady",
+                    "falling": "Falling"
+                }
             }
         },
         "weather": {
             "arpav": {
                 "name": "Conditions in {station_name} - forecast for {comune_name}"
             }
+        }
+    },
+    "exceptions": {
+        "archive_failed": {
+            "message": "Unable to archive the data: {error}"
+        },
+        "entry_not_loaded": {
+            "message": "The configuration entry {entry_id} is not loaded."
+        },
+        "wrong_entry_type": {
+            "message": "The configuration entry {entry_id} does not support this action."
         }
     }
 }

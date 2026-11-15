@@ -45,8 +45,12 @@ from .const import (
     CONF_METAR_STATION,
     CONF_METAR_FILL_MISSING,
     CONF_ARCHIVE_BRIGHTNESS,
+    CONF_ENTRY_TYPE,
+    ENTRY_TYPE_HYDRO,
+    ENTRY_TYPE_WEATHER,
 )
 from . import metar
+from .hydro_config_flow import HydroConfigFlowMixin, HydroOptionsFlowHandler
 from .coordinator import haversine
 
 _LOGGER = logging.getLogger(__name__)
@@ -120,7 +124,7 @@ async def fetch_stations_air(cod_parametro):
         return id_to_name, stations
 
 
-class ArpaVenetoWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for ARPA Veneto Weather."""
 
     VERSION = 1
@@ -129,10 +133,16 @@ class ArpaVenetoWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Implement OptionsFlow."""
+        if config_entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_HYDRO:
+            return HydroOptionsFlowHandler()
         return ArpaVenetoWeatherOptionsFlowHandler()
 
     async def async_step_user(self, user_input=None):
-        """Handle the first step: comune selection."""
+        """Choose what to configure: a weather location or hydrometric stations."""
+        return self.async_show_menu(step_id="user", menu_options=[ENTRY_TYPE_WEATHER, ENTRY_TYPE_HYDRO])
+
+    async def async_step_weather(self, user_input=None):
+        """Handle the first step of a weather location: comune selection."""
         if user_input is not None:
             # Save the selected comune ID and move to zone selection
             self.selected_comune_id = user_input["comune_id"]
@@ -147,7 +157,7 @@ class ArpaVenetoWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {vol.Required("comune_id"): vol.In(self.comune_id_to_name)}
         )
 
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(step_id="weather", data_schema=schema)
 
     async def async_step_zone(self, user_input=None):
         """Handle the zone selection step."""
@@ -193,6 +203,10 @@ class ArpaVenetoWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.selected_station_id = user_input["station_id"]
             self.selected_station_name = self.station_id_to_name[self.selected_station_id]
             self.station_id_to_name[self.selected_station_id]
+
+            # the same weather station must not be configured twice for the same zone
+            await self.async_set_unique_id(f"{self.selected_zone_id}_{self.selected_station_id}")
+            self._abort_if_unique_id_configured()
 
             # Create the final entry
             return self.async_create_entry(

@@ -210,6 +210,61 @@ Reports are retrieved from the
 National Weather Service, which requires no credentials, and are fetched at most
 once every 10 minutes, since a METAR is issued every 30.
 
+## Hydrometric stations (river water levels)
+
+*Fork addition.* Besides weather locations, the integration can add the ARPAV
+**hydrometric stations** of a river. Add the integration again and choose
+**Hydrometric stations**, then the river and its stations. Optionally type their
+order from upstream to downstream as a comma separated list of station IDs
+(for example `276, 333, 303, 308, 334, 595, 287` for the Bacchiglione).
+The order is a display order (`topology_status: candidate`), not a verified
+hydraulic topology.
+
+Source: the ARPAV open-data XML files (`stazioni_idro.xml` and one
+`<IDSTAZ>.xml` per station under `https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/`),
+read every 5 minutes. ARPAV publishes in batches, usually 20-60 minutes after
+the observation.
+
+Each station is a device with these sensors:
+
+| Sensor | Meaning |
+|---|---|
+| Water level | Last valid reading, in m, relative to the **local hydrometric zero** of the station: levels of different stations are not comparable and can be negative |
+| Observed at | Time of that reading (ARPAV solar time, a fixed UTC+1, converted to UTC) |
+| Status | `below_g1`, `g1_g2`, `g2_g3`, `above_g3` against the GUARDIA1/2/3 thresholds published for the series; `no_thresholds` when ARPAV publishes none; `stale` when the reading is older than the staleness limit; `missing` when there is no valid reading |
+| Trend | `rising`, `steady`, `falling`: least squares change over the last 4 valid readings, rising or falling from the threshold (default 5 cm) |
+| Level change | That change, in m |
+
+The Status sensor also exposes `guardia1_m`/`guardia2_m`/`guardia3_m` (null when
+not published, never 0), `quality`, `age_minutes`, `last_sample_valid`,
+`display_order`, `latitude` and `longitude`. Every sensor exposes `station_id`,
+`sensor_id`, `source_url` and `source_observed_at`.
+
+Rules applied to the data: series are selected by `TYPE` and `ID`, never by
+position; readings are sorted by time; sentinels such as `>>` are skipped and
+never turned into 0; when the last sample is invalid the previous valid value is
+kept and `quality` is `last_sample_invalid`; thresholds are never borrowed from a
+nearby station.
+
+### Completing the level history
+
+Home Assistant cannot back-date states, but it can import statistics. Once a
+day (03:20), at start-up and through the `arpa_veneto_weather.archive_hydro_history`
+action, the hourly mean/min/max of the last 2-3 days that ARPAV still publishes
+are written into the **statistics of the Water level sensor** of each station.
+Hours missed while Home Assistant was offline or a download failed are filled
+in; only hours ended at least an hour earlier are written. It can be disabled in
+the options.
+
+### Options
+
+Stations and their order, trend threshold (cm), staleness limit (0 = automatic:
+90 minutes, longer for series published every 30 minutes), daily history
+completion.
+
+> The levels and thresholds are automatic ARPAV data, not previously validated.
+> This is not an official warning service: refer to ARPAV and Civil Protection.
+
 ## Data provenance
 
 A single weather station in Home Assistant is fed by several distinct ARPAV
@@ -299,6 +354,63 @@ Raw data from the meteogram remote endpoint, exposed both as single attributes (
 </dd>
 </dl>
 
+## Actions
+
+| Action | What it does | Fields |
+|---|---|---|
+| `arpa_veneto_weather.refresh_data` | Fetch the data now instead of waiting for the next update | `entry_id` (optional): one configuration entry; all when omitted |
+| `arpa_veneto_weather.archive_brightness` | Import the night sky brightness of the last ~72 hours as statistics (weather locations) | `entry_id` (optional) |
+| `arpa_veneto_weather.archive_hydro_history` | Rebuild the hourly statistics of the water level sensors from the last 2-3 days (hydrometric stations) | `entry_id` (optional) |
+
+An `entry_id` that is not loaded, or that is of the wrong kind for the action, is
+rejected with an error.
+
+## Data updates
+
+* Weather locations: every 5 minutes; METAR at most every 10 minutes; night sky
+  brightness once a day.
+* Hydrometric stations: every 5 minutes. ARPAV publishes in batches, usually
+  20-60 minutes after the observation; a station without a reading newer than
+  the staleness limit is reported as `stale`. A station that cannot be
+  downloaded keeps its last data (and turns `stale` when it gets old); the
+  entities become unavailable only when no station can be read at start-up.
+
+## Known limitations
+
+* ARPAV data are automatic and not previously validated; they may later change
+  or be invalidated by ARPAV.
+* Water levels are relative to the local hydrometric zero of each station: they
+  are not altitudes and cannot be compared between stations.
+* The upstream-to-downstream order is a display order typed by the user, not a
+  verified hydraulic topology (confluences, diversions and backwater are not modelled).
+* Home Assistant cannot back-date states: the history of the days before the
+  installation only reaches the long-term statistics, and only for the 2-3 days
+  ARPAV still publishes.
+* GUARDIA1/2/3 are the thresholds published by ARPAV for the series; they are
+  not the official warning codes of the Civil Protection.
+
+## Troubleshooting
+
+* *Cannot connect while adding the integration*: the ARPAV servers are
+  unreachable or returned an HTML page; try again later.
+* *A station is always `stale`*: check the station file
+  (`source_url` attribute) for its latest `DATI` time; some stations stop
+  publishing for maintenance.
+* *A station is `missing`*: ARPAV published only sentinels (for example `>>`)
+  for the whole period.
+* Enable debug logging (see below) and look for `arpa_veneto_weather` in the logs.
+
+## Removing the integration
+
+1. Go to **Settings → Devices & services → ARPA Veneto Weather**.
+2. Open the menu (⋮) of each configuration entry (weather location or river)
+   and choose **Delete**.
+3. To uninstall the files, remove the repository in HACS (or delete
+   `custom_components/arpa_veneto_weather`) and restart Home Assistant.
+
+Statistics already imported stay in the database until they are deleted in
+**Developer tools → Statistics**.
+
 ## Enable Debug Logging
 
 If logs are needed for debugging or reporting an issue, use the following configuration.yaml:
@@ -352,7 +464,7 @@ For more details about ARPAV's copyright and licensing terms, visit their
 [commits-shield]: https://img.shields.io/github/commit-activity/y/davidecavestro/arpa-veneto-weather.svg?style=flat-square
 [commits]: https://github.com/davidecavestro/arpa-veneto-weather/commits/main
 [hacs]: https://www.hacs.xyz/docs/faq/custom_repositories/
-[hacsbadge]: https://img.shields.io/badge/HACS-Default-orange.svg?style=flat-square
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=flat-square
 [forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/davidecavestro/arpa-veneto-weather.svg?style=flat-square

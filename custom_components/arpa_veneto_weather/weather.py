@@ -17,8 +17,7 @@ from .const import (
     CONF_METAR_STATION,
     CONF_OBSERVATIONS,
     DOMAIN,
-    API_BASE,
-    KEY_COORDINATOR
+    API_BASE
 )
 
 
@@ -40,9 +39,13 @@ async def async_get_current_conditions(session, station_id):
         return data[0] if data else {}
 
 
+# the coordinator fetches the data: entities never update in parallel
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up ARPA Veneto sensors from a config entry."""
-    coordinator = hass.data[DOMAIN][config_entry.entry_id][KEY_COORDINATOR]
+    coordinator = config_entry.runtime_data.coordinator
     async_add_entities([ArpaVenetoWeatherEntity(coordinator, config_entry)])
 
 class DateTimeEncoder(json.JSONEncoder):

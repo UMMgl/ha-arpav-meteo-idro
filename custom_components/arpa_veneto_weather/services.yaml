@@ -21,3 +21,15 @@ archive_brightness:
       selector:
         config_entry:
           integration: arpa_veneto_weather
+
+archive_hydro_history:
+  name: "Complete the hydrometric history"
+  description: "Rebuild the hourly statistics of the water level sensors from the readings ARPAV still publishes (about the last 2-3 days), filling the hours that were missed"
+  fields:
+    entry_id:
+      name: "River"
+      description: "The configured hydrometric stations to archive. Archives all of them when omitted."
+      required: false
+      selector:
+        config_entry:
+          integration: arpa_veneto_weather

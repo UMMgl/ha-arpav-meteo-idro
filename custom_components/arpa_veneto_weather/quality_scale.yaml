@@ -1,0 +1,91 @@
+# SPDX-License-Identifier: Apache-2.0
+# Self-assessment against the Home Assistant integration quality scale
+# (https://developers.home-assistant.io/docs/core/integration-quality-scale/).
+# The official tiers are assigned to core integrations only: for a custom
+# integration this file tracks the rules, with status done / todo / exempt.
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling: done
+  brands: done
+  common-modules:
+    status: todo
+    comment: coordinators are in coordinator.py and hydro_coordinator.py; no shared entity.py yet
+  config-flow: done
+  config-flow-test-coverage:
+    status: todo
+    comment: hydrometric steps covered; weather steps to be covered
+  dependency-transparency: done
+  docs-actions: done
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: exempt
+    comment: entities do not subscribe to events
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  docs-conditions:
+    status: exempt
+    comment: no conditions
+  docs-triggers:
+    status: exempt
+    comment: no triggers
+
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: public open data, no credentials
+  test-coverage:
+    status: todo
+    comment: hydrometric modules covered; weather modules not yet
+
+  # Gold
+  devices: done
+  diagnostics: todo
+  discovery:
+    status: exempt
+    comment: cloud service, nothing to discover
+  discovery-update-info:
+    status: exempt
+    comment: cloud service, nothing to discover
+  docs-data-update: done
+  docs-examples: todo
+  docs-known-limitations: done
+  docs-supported-devices:
+    status: exempt
+    comment: no devices, ARPAV stations are selected from the registry
+  docs-supported-functions: done
+  docs-troubleshooting: todo
+  docs-use-cases: todo
+  dynamic-devices:
+    status: exempt
+    comment: stations are chosen by the user in the options
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: todo
+  entity-translations: done
+  exception-translations: todo
+  icon-translations: done
+  reconfiguration-flow: todo
+  repair-issues: todo
+  stale-devices: todo
+
+  # Platinum
+  async-dependency: done
+  inject-websession:
+    status: todo
+    comment: hydrometric part uses the Home Assistant session; weather part still opens its own
+  strict-typing: todo

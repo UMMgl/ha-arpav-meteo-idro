@@ -4,15 +4,25 @@ from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 from .const import (
+    CONF_ENTRY_TYPE,
     DOMAIN,
-    SENSOR_TYPES,
-    KEY_COORDINATOR
+    ENTRY_TYPE_HYDRO,
+    SENSOR_TYPES
 )
+from .hydro_sensor import async_setup_hydro_entities
 from datetime import datetime
+
+# the coordinator fetches the data: entities never update in parallel
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up ARPA Veneto sensors from a config entry."""
-    coordinator = hass.data[DOMAIN][config_entry.entry_id][KEY_COORDINATOR]
+    coordinator = config_entry.runtime_data.coordinator
+
+    if config_entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_HYDRO:
+        await async_setup_hydro_entities(hass, config_entry, coordinator, async_add_entities)
+        return
 
     # create a sensor for each sensor type in SENSOR_TYPES
     sensors = []

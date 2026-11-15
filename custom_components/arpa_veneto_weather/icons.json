@@ -15,7 +15,38 @@
             },
             "uv_index": {
                 "default": "mdi:sun-wireless"
+            },
+            "hydro_level": {
+                "default": "mdi:waves-arrow-up"
+            },
+            "hydro_observed_at": {
+                "default": "mdi:clock-outline"
+            },
+            "hydro_status": {
+                "default": "mdi:waves",
+                "state": {
+                    "g1_g2": "mdi:alert-outline",
+                    "g2_g3": "mdi:alert",
+                    "above_g3": "mdi:alert-octagon",
+                    "stale": "mdi:timer-sand",
+                    "missing": "mdi:help-circle-outline"
+                }
+            },
+            "hydro_trend": {
+                "default": "mdi:arrow-right",
+                "state": {
+                    "rising": "mdi:arrow-top-right",
+                    "falling": "mdi:arrow-bottom-right"
+                }
+            },
+            "hydro_level_change": {
+                "default": "mdi:delta"
             }
+        }
+    },
+    "services": {
+        "archive_hydro_history": {
+            "service": "mdi:database-arrow-down"
         }
     }
 }

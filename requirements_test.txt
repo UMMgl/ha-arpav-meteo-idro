@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+pytest-homeassistant-custom-component
+defusedxml>=0.7.1
+astral
+pytz

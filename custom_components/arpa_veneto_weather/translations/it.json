@@ -3,10 +3,11 @@
     "config": {
         "step": {
             "user": {
-                "title": "Configura Meteo Arpa Veneto",
-                "description": "Scegli il comune per cercare la zona meteo da usare per le previsioni.",
-                "data": {
-                    "comune_id": "Comune"
+                "title": "ARPA Veneto",
+                "description": "Cosa vuoi aggiungere?",
+                "menu_options": {
+                    "weather": "Località meteo (previsioni e condizioni attuali)",
+                    "hydro": "Stazioni idrometriche (livelli dei fiumi)"
                 }
             },
             "zone": {
@@ -22,11 +23,39 @@
                 "data": {
                     "station_id": "Stazione Meteo"
                 }
+            },
+            "weather": {
+                "title": "Configura Meteo Arpa Veneto",
+                "description": "Scegli il comune per cercare la zona meteo da usare per le previsioni.",
+                "data": {
+                    "comune_id": "Comune"
+                }
+            },
+            "hydro": {
+                "title": "Stazioni idrometriche",
+                "description": "Scegli il fiume o corpo idrico. Fonte: open data ARPAV (CC BY 4.0), dati automatici non validati preventivamente.",
+                "data": {
+                    "river": "Fiume"
+                }
+            },
+            "hydro_stations": {
+                "title": "Stazioni del {river}",
+                "description": "Seleziona le stazioni e, se vuoi, il loro ordine da monte a valle come elenco di ID separati da virgole (vuoto: come selezionate). È un ordine di visualizzazione, non una topologia idraulica verificata.\n\nStazioni: {stations}",
+                "data": {
+                    "stations": "Stazioni",
+                    "display_order": "Ordine (ID, da monte)"
+                }
             }
         },
         "error": {
             "cannot_connect": "Impossibile connettersi all'API. Controlla le impostazioni.",
-            "invalid_comune": "Il comune selezionato non è valido."
+            "invalid_comune": "Il comune selezionato non è valido.",
+            "no_stations": "Seleziona almeno una stazione.",
+            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287."
+        },
+        "abort": {
+            "cannot_connect": "Impossibile leggere l'anagrafica stazioni ARPAV. Riprova più tardi.",
+            "already_configured": "Questo fiume è già configurato."
         }
     },
     "options": {
@@ -77,7 +106,30 @@
                     "night_clear_threshold": "Soglia cielo sereno notturno",
                     "night_partly_threshold": "Soglia parzialmente nuvoloso notturno"
                 }
+            },
+            "hydro_options": {
+                "title": "Stazioni del {river}",
+                "description": "Stazioni: {stations}",
+                "data": {
+                    "stations": "Stazioni",
+                    "display_order": "Ordine (ID, da monte)",
+                    "trend_threshold_cm": "Soglia del trend",
+                    "stale_minutes": "Obsoleto dopo (0 = automatico)",
+                    "archive_history": "Completa ogni giorno le statistiche del livello"
+                },
+                "data_description": {
+                    "trend_threshold_cm": "Variazione sulle ultime 4 misure da cui il livello è in salita o in discesa.",
+                    "stale_minutes": "Automatico: 90 minuti, di più per le serie pubblicate ogni 30 minuti.",
+                    "archive_history": "Ricostruisce le statistiche orarie dagli ultimi 2-3 giorni pubblicati da ARPAV, colmando le ore perse."
+                }
             }
+        },
+        "error": {
+            "no_stations": "Seleziona almeno una stazione.",
+            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287."
+        },
+        "abort": {
+            "cannot_connect": "Impossibile leggere l'anagrafica stazioni ARPAV. Riprova più tardi."
         }
     },
     "selector": {
@@ -159,12 +211,52 @@
             },
             "leaf_wetness": {
                 "name": "Bagnatura fogliare a {station_name}"
+            },
+            "hydro_level": {
+                "name": "Livello idrometrico"
+            },
+            "hydro_observed_at": {
+                "name": "Ora della misura"
+            },
+            "hydro_level_change": {
+                "name": "Variazione del livello"
+            },
+            "hydro_status": {
+                "name": "Stato",
+                "state": {
+                    "below_g1": "Sotto G1",
+                    "g1_g2": "Tra G1 e G2",
+                    "g2_g3": "Tra G2 e G3",
+                    "above_g3": "Da G3 in su",
+                    "no_thresholds": "Soglie non pubblicate",
+                    "stale": "Obsoleto",
+                    "missing": "Mancante"
+                }
+            },
+            "hydro_trend": {
+                "name": "Trend",
+                "state": {
+                    "rising": "In salita",
+                    "steady": "Stabile",
+                    "falling": "In discesa"
+                }
             }
         },
         "weather": {
             "arpav": {
                 "name": "Situazione a {station_name} - previsioni per {comune_name}"
             }
+        }
+    },
+    "exceptions": {
+        "archive_failed": {
+            "message": "Impossibile archiviare i dati: {error}"
+        },
+        "entry_not_loaded": {
+            "message": "La configurazione {entry_id} non è caricata."
+        },
+        "wrong_entry_type": {
+            "message": "La configurazione {entry_id} non supporta questa azione."
         }
     }
 }
