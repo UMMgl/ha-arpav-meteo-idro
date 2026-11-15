@@ -1,0 +1,6 @@
+{"data": [
+  {"scadenza": "2026-08-18", "intervallo": "night/morning", "simbolo": "a3.png", "prob precipitazioni": "10%", "attendibilita": "alta", "testo": "Poco nuvoloso", "precipitazioni": "assenti", "temperatura": "18/26"},
+  {"scadenza": "2026-08-18", "intervallo": "afternoon/evening", "simbolo": "b2.png", "prob precipitazioni": "60%", "attendibilita": "media", "testo": "Rovesci", "precipitazioni": "sparse", "temperatura": "22/30"},
+  {"scadenza": "2026-08-19", "intervallo": "", "simbolo": "a1", "prob precipitazioni": "", "attendibilita": "bassa", "testo": "Sereno", "precipitazioni": "assenti", "temperatura": "31"},
+  {"scadenza": "2026-08-20", "intervallo": "", "simbolo": "zz", "prob precipitazioni": "", "attendibilita": "bassa", "testo": "?", "precipitazioni": "", "temperatura": ""}
+]}
