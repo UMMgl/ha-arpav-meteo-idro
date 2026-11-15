@@ -1,3 +1,11 @@
+## [Unreleased]
+### :white_check_mark: Tests
+- **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
+
+### :bug: Bug Fixes
+- **hydro**: `parse_instant` accepts only 12 ASCII digits; truncated or unpadded instants such as `20261115080` were silently read as a wrong time (#29)
+
+
 ## [0.15.2] - 2026-11-15
 ### :sparkles: New Features
 - [`07ddec1`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/07ddec11d69be83888f50818c3eeb7b5d2a892a4) - **hydro**: archive action returns a report (hours per level sensor) and logs it *(commit by [@UMMgl](https://github.com/UMMgl))*
