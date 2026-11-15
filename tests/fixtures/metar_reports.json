@@ -1,0 +1,6 @@
+[
+  {"icaoId": "LIPZ", "reportTime": "2026-08-18T10:20:00.000Z", "temp": 28, "dewp": 18, "wdir": 250, "wspd": 10, "visib": "6+", "altim": 1015, "wxString": null,
+   "clouds": [{"cover": "FEW", "base": 3500}, {"cover": "SCT", "base": 9000}], "rawOb": "METAR LIPZ 181020Z 25010KT 9999 FEW035 SCT090 28/18 Q1015"},
+  {"icaoId": "LIPU", "reportTime": "2026-08-18T10:20:00.000Z", "temp": 27, "dewp": 17, "wdir": "VRB", "wspd": 3, "visib": 3, "altim": 1014, "wxString": "+RA",
+   "clouds": [{"cover": "BKN", "base": 1500}], "rawOb": "METAR LIPU 181020Z VRB03KT 4800 +RA BKN015 27/17 Q1014"}
+]

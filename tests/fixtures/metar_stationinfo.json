@@ -1,0 +1,8 @@
+[
+  {"icaoId": "LIPZ", "lat": 45.505, "lon": 12.352, "site": "Venice/Tessera", "siteType": ["METAR", "TAF"]},
+  {"icaoId": "LIPU", "lat": 45.396, "lon": 11.848, "site": "Padova", "siteType": ["METAR"]},
+  {"icaoId": "LIPD", "lat": 46.031, "lon": 12.998, "site": "Campoformido", "siteType": ["TAF"]},
+  {"icaoId": "LIPN", "lat": null, "lon": 10.27, "site": "Villafranca", "siteType": ["METAR"]},
+  {"icaoId": "", "lat": 45.0, "lon": 11.0, "site": "No id", "siteType": ["METAR"]},
+  {"icaoId": "LIPT", "lat": 45.57, "lon": 11.53, "siteType": ["METAR"]}
+]

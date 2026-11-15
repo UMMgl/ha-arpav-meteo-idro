@@ -1,0 +1,6 @@
+{"data": [
+  {"codseqst": "900", "nome_stazione": "Far Away", "latitudine": 46.5, "longitudine": 12.5},
+  {"codseqst": "901", "nome_stazione": "Empty Near", "latitudine": 45.35, "longitudine": 11.95},
+  {"codseqst": "902", "nome_stazione": "Good Station", "latitudine": 45.40, "longitudine": 11.90},
+  {"nome_stazione": "No code", "latitudine": 45.34, "longitudine": 11.94}
+]}
