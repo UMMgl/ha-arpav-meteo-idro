@@ -8,7 +8,7 @@ refresh_data:
       required: false
       selector:
         config_entry:
-          integration: arpa_veneto_weather
+          integration: arpav_meteo_idro
 
 archive_brightness:
   name: "Archive night sky brightness"
@@ -20,7 +20,7 @@ archive_brightness:
       required: false
       selector:
         config_entry:
-          integration: arpa_veneto_weather
+          integration: arpav_meteo_idro
 
 archive_hydro_history:
   name: "Complete the hydrometric history"
@@ -32,4 +32,4 @@ archive_hydro_history:
       required: false
       selector:
         config_entry:
-          integration: arpa_veneto_weather
+          integration: arpav_meteo_idro

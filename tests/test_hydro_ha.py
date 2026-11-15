@@ -15,8 +15,8 @@ from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
-from custom_components.arpa_veneto_weather import hydro  # noqa: E402
-from custom_components.arpa_veneto_weather.const import (  # noqa: E402
+from custom_components.arpav_meteo_idro import hydro  # noqa: E402
+from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
     CONF_HYDRO_RIVER,
@@ -80,7 +80,7 @@ async def test_config_flow_creates_ordered_entry(hass, arpav):
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"stations": ["287", "333"], "display_order": "x, 1"})
     assert result["errors"] == {"display_order": "invalid_order"}
 
-    with patch("custom_components.arpa_veneto_weather.async_setup_entry", return_value=True):
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"stations": ["287", "333", "276"], "display_order": "276, 333"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -137,7 +137,7 @@ async def test_history_is_imported_into_the_level_statistics(hass, arpav, freeze
     await hass.async_block_till_done()
     hass.config.components.add("recorder")
 
-    from custom_components.arpa_veneto_weather import hydro_statistics
+    from custom_components.arpav_meteo_idro import hydro_statistics
 
     with patch.object(hydro_statistics, "async_import_statistics") as imported:
         coordinator = entry.runtime_data.coordinator
@@ -154,7 +154,7 @@ async def test_history_is_imported_into_the_level_statistics(hass, arpav, freeze
 
 async def test_weather_entries_are_untouched(hass):
     """An entry without entry_type is still a weather location."""
-    from custom_components.arpa_veneto_weather import _is_hydro
+    from custom_components.arpav_meteo_idro import _is_hydro
 
     weather = MockConfigEntry(domain=DOMAIN, data={"station_id": "1"})
     assert not _is_hydro(weather)

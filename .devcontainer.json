@@ -1,5 +1,5 @@
 {
-    "name": "arpa_veneto_weather",
+    "name": "arpav_meteo_idro",
     "image": "mcr.microsoft.com/vscode/devcontainers/python:3.14-trixie",
     "postCreateCommand": "scripts/setup",
     "postStartCommand": "scripts/bootstrap",

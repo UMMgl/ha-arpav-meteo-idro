@@ -1,6 +1,6 @@
 """Constants for Arpa Veneto Weather component."""
 
-DOMAIN = "arpa_veneto_weather"
+DOMAIN = "arpav_meteo_idro"
 
 KEY_COORDINATOR = "coordinator"
 KEY_UNSUBSCRIBER = "options_unsubscriber"

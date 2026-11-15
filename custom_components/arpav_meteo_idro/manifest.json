@@ -1,6 +1,6 @@
 {
-    "domain": "arpa_veneto_weather",
-    "name": "ARPA Veneto Weather",
+    "domain": "arpav_meteo_idro",
+    "name": "ARPAV Meteo e Idro",
     "version": "0.0.0",
     "iot_class": "cloud_polling",
     "requirements": [
@@ -16,6 +16,6 @@
         "@UMMgl"
     ],
     "config_flow": true,
-    "documentation": "https://github.com/UMMgl/arpa-veneto-weather",
-    "issue_tracker": "https://github.com/UMMgl/arpa-veneto-weather/issues"
+    "documentation": "https://github.com/UMMgl/ha-arpav-meteo-idro",
+    "issue_tracker": "https://github.com/UMMgl/ha-arpav-meteo-idro/issues"
 }

@@ -1,4 +1,4 @@
-# Arpa Veneto Weather integration for Home Assistant
+# ARPAV Meteo e Idro – ARPAV weather and hydrometric stations for Home Assistant
 Home Assistant unofficial integration for Arpa Veneto Weather current conditions and forecast bulletins
 
 [![GitHub Release][releases-shield]][releases]
@@ -38,7 +38,7 @@ Register `davidecavestro/arpa-veneto-weather` as an
 1. Create a new folder in your configuration folder (where the `configuration.yaml` lives) called `custom_components`
 2. Download the [latest version](https://github.com/davidecavestro/arpa-veneto-weather/releases)
 into the `custom_components` folder so that the full path from your config
-folder is `custom_components/arpa_veneto_weather/`
+folder is `custom_components/arpav_meteo_idro/`
 3. Restart Home Assistant.
 4. Once Home Assistant is started, from the UI go to
 _Configuration > Integrations > Add Integrations_.
@@ -249,7 +249,7 @@ nearby station.
 ### Completing the level history
 
 Home Assistant cannot back-date states, but it can import statistics. Once a
-day (03:20), at start-up and through the `arpa_veneto_weather.archive_hydro_history`
+day (03:20), at start-up and through the `arpav_meteo_idro.archive_hydro_history`
 action, the hourly mean/min/max of the last 2-3 days that ARPAV still publishes
 are written into the **statistics of the Water level sensor** of each station.
 Hours missed while Home Assistant was offline or a download failed are filled
@@ -309,12 +309,12 @@ those readings with their real timestamps, for the three brightness stations
 nearest to the chosen weather station:
 
 - statistics are hourly, with mean, minimum and maximum, in `mag/arcsec²`;
-- they are named `arpa_veneto_weather:sky_brightness_<station>` and can be
+- they are named `arpav_meteo_idro:sky_brightness_<station>` and can be
   charted with a `statistics-graph` card;
 - the API exposes about the last 72 hours and they are all re-imported at every
   run, so a day spent offline recovers by itself, with no duplicates;
 - the import runs at 11:15 local time, after the daily batch, and once at
-  startup. The `arpa_veneto_weather.archive_brightness` service runs it on
+  startup. The `arpav_meteo_idro.archive_brightness` service runs it on
   demand.
 
 > [!NOTE]
@@ -358,9 +358,9 @@ Raw data from the meteogram remote endpoint, exposed both as single attributes (
 
 | Action | What it does | Fields |
 |---|---|---|
-| `arpa_veneto_weather.refresh_data` | Fetch the data now instead of waiting for the next update | `entry_id` (optional): one configuration entry; all when omitted |
-| `arpa_veneto_weather.archive_brightness` | Import the night sky brightness of the last ~72 hours as statistics (weather locations) | `entry_id` (optional) |
-| `arpa_veneto_weather.archive_hydro_history` | Rebuild the hourly statistics of the water level sensors from the last 2-3 days (hydrometric stations) | `entry_id` (optional) |
+| `arpav_meteo_idro.refresh_data` | Fetch the data now instead of waiting for the next update | `entry_id` (optional): one configuration entry; all when omitted |
+| `arpav_meteo_idro.archive_brightness` | Import the night sky brightness of the last ~72 hours as statistics (weather locations) | `entry_id` (optional) |
+| `arpav_meteo_idro.archive_hydro_history` | Rebuild the hourly statistics of the water level sensors from the last 2-3 days (hydrometric stations) | `entry_id` (optional) |
 
 An `entry_id` that is not loaded, or that is of the wrong kind for the action, is
 rejected with an error.
@@ -398,15 +398,15 @@ rejected with an error.
   publishing for maintenance.
 * *A station is `missing`*: ARPAV published only sentinels (for example `>>`)
   for the whole period.
-* Enable debug logging (see below) and look for `arpa_veneto_weather` in the logs.
+* Enable debug logging (see below) and look for `arpav_meteo_idro` in the logs.
 
 ## Removing the integration
 
-1. Go to **Settings → Devices & services → ARPA Veneto Weather**.
+1. Go to **Settings → Devices & services → ARPAV Meteo e Idro**.
 2. Open the menu (⋮) of each configuration entry (weather location or river)
    and choose **Delete**.
 3. To uninstall the files, remove the repository in HACS (or delete
-   `custom_components/arpa_veneto_weather`) and restart Home Assistant.
+   `custom_components/arpav_meteo_idro`) and restart Home Assistant.
 
 Statistics already imported stay in the database until they are deleted in
 **Developer tools → Statistics**.

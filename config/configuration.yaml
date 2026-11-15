@@ -12,6 +12,6 @@ debugpy:
 logger:
   default: info
   logs:
-    custom_components.arpa_veneto_weather: debug
+    custom_components.arpav_meteo_idro: debug
 
-arpa_veneto_weather:
+arpav_meteo_idro:

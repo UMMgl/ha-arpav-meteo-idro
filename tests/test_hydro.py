@@ -13,7 +13,7 @@ FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 
 # load the module by path: the package __init__ needs Home Assistant
 _spec = importlib.util.spec_from_file_location(
-    "arpav_hydro", ROOT / "custom_components" / "arpa_veneto_weather" / "hydro.py")
+    "arpav_hydro", ROOT / "custom_components" / "arpav_meteo_idro" / "hydro.py")
 hydro = importlib.util.module_from_spec(_spec)
 sys.modules["arpav_hydro"] = hydro
 _spec.loader.exec_module(hydro)
