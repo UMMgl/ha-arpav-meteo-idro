@@ -1,13 +1,25 @@
 # SPDX-License-Identifier: Apache-2.0
+# Dependency updates: one pull request a day per ecosystem (grouped).
+# Security updates are opened separately as soon as an advisory is published.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "06:00"
+      timezone: "Europe/Rome"
     labels: ["dependencies"]
+    groups:
+      github-actions:
+        patterns: ["*"]
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "06:00"
+      timezone: "Europe/Rome"
     labels: ["dependencies"]
+    groups:
+      python:
+        patterns: ["*"]
