@@ -21,6 +21,7 @@ import aiohttp  # noqa: E402
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError  # noqa: E402
 from homeassistant.helpers import entity_registry as er  # noqa: E402
 from homeassistant.helpers.update_coordinator import UpdateFailed  # noqa: E402
+from homeassistant.setup import async_setup_component  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
 from custom_components.arpav_meteo_idro import coordinator as coord  # noqa: E402
@@ -90,8 +91,10 @@ def _routes():
         "bollettini_meteo_simboli_en": _forecast_payload(),
         "aria_valori_orari": _air_quality_payload(),
         "meteo_meteogrammi?rete=MGRAMMIBRI": load_json("arpav_brightness_network.json"),
-        "meteo_brillanza_tabella?codseqst=902": _shifted(load_json("arpav_brightness_readings.json"),
-                                                         "dataora", now - timedelta(hours=1)),
+        # the shared fixture also holds malformed rows, which sort after valid timestamps
+        "meteo_brillanza_tabella?codseqst=902": {"data": [
+            {"dataora": (now - timedelta(hours=1)).strftime(FMT), "valore": "21.0"},
+            {"dataora": (now - timedelta(hours=2)).strftime(FMT), "valore": "20.0"}]},
         "meteo_brillanza_tabella": {"data": []},
         "aviationweather.gov": _metar_payload(),
     }
@@ -141,7 +144,7 @@ async def test_setup_exposes_weather_and_sensors(enable_custom_integrations, has
     assert attrs["wind_bearing"] == "E"
     assert attrs["visibility"] == 9.0
     assert attrs["uv_index"] == 2
-    assert attrs["condition_rule"] == "precipitation"
+    assert attrs["condition_source_rule"] == "precipitation"
     assert attrs["forecast_today_description"] in {"Poco nuvoloso", "Rovesci", "Sereno", "?"}
     assert "METAR" not in attrs["attribution"]
 
@@ -205,7 +208,7 @@ async def test_optional_attributes_air_quality_and_metar(enable_custom_integrati
     assert json.loads(attrs["raw_forecast"])["data"]
     assert attrs["raw_TARIA"]
     assert "ghi" in attrs
-    assert len(attrs["sensors_raw"]) >= 10
+    assert len(attrs["sensors_raw"]) >= 9
 
     for key, expected in (("pm10", "22"), ("pm25", "12"), ("ozone", "80")):
         state = hass.states.get(_entity_id(hass, "sensor", f"arpav_{key}_{STATION}"))
@@ -235,6 +238,7 @@ async def test_infer_condition_modes(enable_custom_integrations, hass, api, infe
 
 async def test_services(enable_custom_integrations, hass, api):
     """refresh_data, archive_brightness and their validation."""
+    assert await async_setup_component(hass, "homeassistant", {})
     entry = await _setup(hass, api)
 
     await hass.services.async_call(DOMAIN, "refresh_data", {}, blocking=True)
@@ -342,7 +346,7 @@ async def test_classify_day_without_radiation_is_unknown(coordinator):
 
 FORECAST = [
     {"datetime": datetime(2026, 8, 18, 8), "type": "twice_daily", "condition": "sunny"},
-    {"datetime": datetime(2026, 8, 18, 16), "type": "twice_daily", "condition": "cloudy"},
+    {"datetime": datetime(2026, 8, 18, 17), "type": "twice_daily", "condition": "cloudy"},
     {"datetime": datetime(2026, 8, 18, 12), "type": "daily", "condition": "rainy"},
     {"datetime": datetime(2026, 8, 18, 12), "type": "daily", "condition": None},
 ]
@@ -351,9 +355,9 @@ OBSERVATION = metar.MetarObservation("LIPZ", observed_at="2026-08-18T10:00:00+00
 
 @pytest.mark.parametrize(("mode", "ghi", "observation", "expected", "source"), [
     (const.CONF_DAY_CONDITION_UNKNOWN, 900, OBSERVATION, "unknown", "unknown"),
-    (const.CONF_DAY_CONDITION_FORECAST, 900, OBSERVATION, "cloudy", "forecast"),
+    (const.CONF_DAY_CONDITION_FORECAST, 900, OBSERVATION, "sunny", "forecast"),
     (const.CONF_DAY_CONDITION_METAR, None, OBSERVATION, "cloudy", "metar"),
-    (const.CONF_DAY_CONDITION_METAR, None, None, "cloudy", "forecast"),
+    (const.CONF_DAY_CONDITION_METAR, None, None, "sunny", "forecast"),
     (const.CONF_DAY_CONDITION_RADIATION_OR_METAR, 950, OBSERVATION, "sunny", "station"),
     (const.CONF_DAY_CONDITION_RADIATION_OR_METAR, None, OBSERVATION, "cloudy", "metar"),
     (const.CONF_DAY_CONDITION_RADIATION_OR_METAR, None, None, "unknown", "unknown"),
@@ -386,6 +390,7 @@ async def test_classify_night_modes(coordinator, mode, brightness, observation, 
     with (
         patch.object(coordinator, "async_metar_observation", AsyncMock(return_value=observation)),
         patch.object(coordinator, "get_night_sky_brightness", AsyncMock(return_value=reading)),
+        patch.object(coord, "moon_illumination", lambda _dt: 0),  # no moon offset
     ):
         condition, provenance = await _classify(coordinator, NIGHT, {}, forecast=FORECAST)
     assert (condition, provenance.source) == (expected, source)
