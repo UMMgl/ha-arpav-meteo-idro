@@ -8,9 +8,10 @@ Planned work, one pull request each. Quality items refer to
 - [x] **Automatic upstream-to-downstream ordering for Bacchiglione**, using a
   documented graph covering the first seven stations, with source, verification
   date and confidence per reach. Manual overrides remain available.
-- [ ] **Extend automatic ordering to other rivers** as cartographic evidence
-  becomes available. Use the documented river network for adjacency, with a
-  manual override and a fallback to selection order for uncovered stations.
+- [x] **Extend automatic ordering** to the 22 other multi-station water bodies
+  in the 15 November 2026 registry. See [coverage and sources](docs/hydro_topology.md).
+- [ ] Verify the position and branch connections of the three remaining gauges
+  in the Po delta, then extend the profile at the documented junctions.
 - [ ] Per-station axis ceiling option for stations without published thresholds
   (e.g. Voltabarozzo, interim 10 m in the example dashboard).
 
