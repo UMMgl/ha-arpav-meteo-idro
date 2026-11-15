@@ -7,7 +7,8 @@ import pathlib
 import re
 
 COMPONENT = pathlib.Path(__file__).parent.parent / "custom_components" / "arpav_meteo_idro"
-KEY = re.compile(r"translation_key=\"([a-z_]+)\"")
+# translation_domain=DOMAIN, translation_key="..." only appears in exceptions
+KEY = re.compile(r"translation_domain=DOMAIN,\s*translation_key=\"([a-z_]+)\"")
 PLACEHOLDER = re.compile(r"\{([a-z_]+)\}")
 
 
