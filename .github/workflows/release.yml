@@ -11,6 +11,9 @@ permissions: {}
 jobs:
   quality:
     name: "Release quality (Gold)"
+    # stable releases need Gold; beta and release candidate tags (pre-releases,
+    # e.g. 0.15.5b1, 0.15.5rc1) skip this gate
+    if: ${{ !(github.ref_type == 'tag' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc'))) }}
     permissions:
       contents: read
     uses: $/.github/workflows/tests.yml
@@ -20,7 +23,11 @@ jobs:
   release:
     name: "Release"
     needs: quality
-    if: github.ref_type == 'tag'
+    # publish when the gate passed, or when it was skipped for a pre-release tag
+    if: >-
+      ${{ always() && github.ref_type == 'tag' &&
+      (needs.quality.result == 'success' ||
+      (needs.quality.result == 'skipped' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc')))) }}
     runs-on: "ubuntu-latest"
     permissions:
       contents: write

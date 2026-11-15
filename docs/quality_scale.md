@@ -17,6 +17,10 @@ coverage above 95% in every integration module. To preflight a candidate
 branch, run the Release workflow on that branch. Branch runs perform
 verification only. Release assets are published by tag runs.
 
+Beta and release candidate tags (e.g. `0.15.5b1`, `0.15.5rc1`) are published as
+pre-releases without the Gold gate, so they can be tested through HACS before
+the stable release.
+
 ## Bronze (enforced in pull request CI)
 
 `scripts/check_quality_scale.py bronze` runs in the Tests workflow and fails
