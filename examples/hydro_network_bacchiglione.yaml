@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+type: vertical-stack
+cards:
+  - type: markdown
+    title: Reticolo del Bacchiglione
+    content: |
+      Le frecce indicano i collegamenti da monte a valle. I riquadri azzurri identificano le stazioni ARPAV; quelli grigi indicano rami e recapiti.
+
+      A Voltabarozzo il percorso si divide verso il Brenta e verso il Roncajette. A Bovolenta il Cagnola confluisce nel Roncajette, che prosegue verso Pontelongo.
+
+      Le stazioni di Voltabarozzo e Bovolenta sono associate ai rispettivi nodi; lo schema non mostra la loro posizione rispetto a paratoie e confluenze.
+  - type: picture
+    image: /local/arpav/hydro_network_bacchiglione.png
+    tap_action:
+      action: none
+    hold_action:
+      action: none
