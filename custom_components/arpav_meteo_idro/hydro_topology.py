@@ -219,6 +219,10 @@ def _station_key(station_id: str) -> str:
     return station_id.lstrip("0") or "0"
 
 
+# public name for the other modules: the same matching of padded and unpadded IDs
+station_key = _station_key
+
+
 def _profile(river: str | None) -> dict[str, Reach]:
     key = normalize("NFC", (river or "").strip()).casefold()
     if key in {"gua'", "gua’"}:
