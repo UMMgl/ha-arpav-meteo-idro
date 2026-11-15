@@ -43,7 +43,9 @@ COLORS = {"below": "#1e88e5", "g1": "#fbc02d", "g2": "#ef6c00", "g3": "#c62828"}
 PERIOD_HELPER = "input_select.bacchiglione_periodo_grafici"
 # label, graph span, grouping of the states, hourly Recorder means
 PERIODS = [
-    ("Ultima ora", "1h", None, False),
+    # a grouping is needed in the last hour too: a level that did not change
+    # may return no point at all, and ApexCharts fails drawing the thresholds
+    ("Ultima ora", "1h", {"func": "last", "duration": "5min", "fill": "last"}, False),
     ("Ultimo giorno", "24h", {"func": "last", "duration": "10min", "fill": "null"}, False),
     ("Ultima settimana", "7d", {"func": "avg", "duration": "30min", "fill": "null"}, False),
     ("Ultimo mese", "30d", None, True),
@@ -91,7 +93,10 @@ def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False, group
             for v, k in zip(thresholds, ("g1", "g2", "g3"), strict=True)]}
     else:
         axis.update(min="|-0.5|", max=f"~{ceiling}" if ceiling else "|+0.5|")
-    return {"type": "custom:apexcharts-card", "graph_span": span, "update_interval": "5min",
+    # no update_interval: a card created hidden (period selector, phone/wide
+    # layout) would wait for the interval before loading and show N/A; without
+    # it the card loads at once and refreshes on every new state of the sensor
+    return {"type": "custom:apexcharts-card", "graph_span": span,
             "header": {"show": True, "title": name.split(" a ", 1)[-1], "show_states": not hourly},
             "series": all_series, "yaxis": [axis], "apex_config": apex}
 
