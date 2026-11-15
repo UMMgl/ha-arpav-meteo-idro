@@ -4,6 +4,12 @@
 - **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
 - **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
 
+### :white_check_mark: Tests
+- **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
+
+### :bug: Bug Fixes
+- **hydro**: `parse_instant` accepts only 12 ASCII digits; truncated or unpadded instants such as `20261115080` were silently read as a wrong time (#29)
+
 
 ## [0.15.2] - 2026-11-15
 ### :sparkles: New Features

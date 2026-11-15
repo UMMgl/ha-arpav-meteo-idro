@@ -339,3 +339,9 @@ def test_format_axis_ceilings_roundtrip():
     assert hydro.format_axis_ceilings(ceilings) == "334=10, 595=7.5"
     assert hydro.parse_axis_ceilings(hydro.format_axis_ceilings(ceilings)) == ceilings
     assert hydro.format_axis_ceilings({}) == ""
+
+
+@pytest.mark.parametrize("raw", ["20261115080", "2026111508", "2026111580", "202611158 0", "٢٠٢٦١١١٥٠٨٠٠"])
+def test_parse_instant_requires_twelve_ascii_digits(raw):
+    """Regression (found by fuzzing): strptime accepted truncated/unpadded instants."""
+    assert hydro.parse_instant(raw) is None
