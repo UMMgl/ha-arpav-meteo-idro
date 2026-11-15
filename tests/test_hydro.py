@@ -263,3 +263,9 @@ def test_registry_skips_stations_with_invalid_ids_and_sanitizes_links():
     stations = hydro.parse_registry(document)
     assert [(s.station_id, s.link) for s in stations] == [("287", "0287.xml")]
     assert stations[0].url == f"{hydro.XML_BASE}/0287.xml"
+
+
+@pytest.mark.parametrize("raw", ["20261115080", "2026111508", "2026111580", "202611158 0", "٢٠٢٦١١١٥٠٨٠٠"])
+def test_parse_instant_requires_twelve_ascii_digits(raw):
+    """Regression (found by fuzzing): strptime accepted truncated/unpadded instants."""
+    assert hydro.parse_instant(raw) is None
