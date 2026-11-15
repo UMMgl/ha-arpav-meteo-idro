@@ -46,7 +46,7 @@ async def _start_weather(hass):
     return await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "weather"})
 
 
-async def test_weather_flow_creates_entry(hass, arpav_lists):
+async def test_weather_flow_creates_entry(enable_custom_integrations, hass, arpav_lists):
     """Municipality → zone → station creates a weather location."""
     result = await _start_weather(hass)
     assert result["type"] is FlowResultType.FORM and result["step_id"] == "weather"
@@ -66,7 +66,7 @@ async def test_weather_flow_creates_entry(hass, arpav_lists):
     assert result["result"].unique_id == "z1_s1"
 
 
-async def test_weather_flow_rejects_duplicates(hass, arpav_lists):
+async def test_weather_flow_rejects_duplicates(enable_custom_integrations, hass, arpav_lists):
     """The same zone and station cannot be configured twice."""
     MockConfigEntry(domain=DOMAIN, unique_id="z1_s1", data={"station_id": "s1"}).add_to_hass(hass)
     result = await _start_weather(hass)
@@ -77,7 +77,7 @@ async def test_weather_flow_rejects_duplicates(hass, arpav_lists):
 
 
 @pytest.mark.parametrize("failing", ["fetch_zones", "fetch_zone_names", "fetch_stations"])
-async def test_weather_flow_aborts_when_arpav_is_unreachable(hass, arpav_lists, failing):
+async def test_weather_flow_aborts_when_arpav_is_unreachable(enable_custom_integrations, hass, arpav_lists, failing):
     """A network error at any step aborts cleanly with cannot_connect."""
     with patch(f"{FLOW}.{failing}", AsyncMock(side_effect=aiohttp.ClientError("down"))):
         result = await _start_weather(hass)
@@ -107,7 +107,7 @@ def option_lists():
         yield
 
 
-async def test_weather_options(hass, option_lists):
+async def test_weather_options(enable_custom_integrations, hass, option_lists):
     """The options are saved; the custom thresholds open a second step."""
     entry = _weather_entry(hass)
     answers = {CONF_INFER_CONDITION: CONF_INFER_CONDITION_FROM_SENSORS, CONF_OBSERVATIONS: {}, CONF_AIR_QUALITY: {}}
@@ -126,7 +126,7 @@ async def test_weather_options(hass, option_lists):
     assert result["type"] is FlowResultType.CREATE_ENTRY
 
 
-async def test_weather_options_abort_when_arpav_is_unreachable(hass):
+async def test_weather_options_abort_when_arpav_is_unreachable(enable_custom_integrations, hass):
     """The options flow aborts cleanly when the air quality lists cannot be read."""
     entry = _weather_entry(hass)
     with patch(f"{FLOW}.fetch_stations_air", AsyncMock(side_effect=aiohttp.ClientError("down"))):
