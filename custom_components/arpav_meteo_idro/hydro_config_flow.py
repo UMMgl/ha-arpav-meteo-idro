@@ -195,8 +195,11 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelector(selector.NumberSelectorConfig(
                     min=0, max=1440, step=5, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX)),
             vol.Optional(CONF_HYDRO_ARCHIVE, default=options.get(CONF_HYDRO_ARCHIVE, True)): bool,
+            # a suggested value, not a default: an emptied field is omitted by the
+            # frontend and a default would bring the old ceilings back
             vol.Optional(CONF_HYDRO_AXIS_CEILING,
-                         default=hydro.format_axis_ceilings(options.get(CONF_HYDRO_AXIS_CEILING) or {})):
+                         description={"suggested_value": hydro.format_axis_ceilings(
+                             options.get(CONF_HYDRO_AXIS_CEILING) or {})}):
                 selector.TextSelector(),
         }
         return self.async_show_form(

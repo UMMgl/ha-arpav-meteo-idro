@@ -358,11 +358,13 @@ async def test_options_flow_stores_axis_ceiling(enable_custom_integrations, hass
 
 
 async def test_options_flow_shows_stored_ceiling_as_text(enable_custom_integrations, hass, arpav):
-    """The stored mapping is the default of the text field."""
+    """The stored mapping is the suggested value of the text field, not a default."""
     entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0}})
     entry.add_to_hass(hass)
     form = await hass.config_entries.options.async_init(entry.entry_id)
-    assert form["data_schema"]({"stations": []})[CONF_HYDRO_AXIS_CEILING] == "334=10"
+    key = next(k for k in form["data_schema"].schema if k == CONF_HYDRO_AXIS_CEILING)
+    assert key.description == {"suggested_value": "334=10"}
+    assert CONF_HYDRO_AXIS_CEILING not in form["data_schema"]({"stations": []})
 
 
 async def test_options_flow_empty_ceiling_clears_it(enable_custom_integrations, hass, arpav):
@@ -371,6 +373,16 @@ async def test_options_flow_empty_ceiling_clears_it(enable_custom_integrations, 
     entry.add_to_hass(hass)
     with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
         result = await _options_flow(hass, entry, axis_ceiling="")
+    assert result["data"][CONF_HYDRO_AXIS_CEILING] == {}
+
+
+async def test_options_flow_omitted_ceiling_clears_it(enable_custom_integrations, hass, arpav):
+    """The frontend omits an emptied optional field: the ceilings must be removed."""
+    entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0}})
+    entry.add_to_hass(hass)
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await _options_flow(hass, entry)  # no axis_ceiling key at all
+    assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_HYDRO_AXIS_CEILING] == {}
 
 
