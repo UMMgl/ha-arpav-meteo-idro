@@ -1,3 +1,8 @@
+## [0.15.2] - 2026-11-15
+### :sparkles: New Features
+- [`07ddec1`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/07ddec11d69be83888f50818c3eeb7b5d2a892a4) - **hydro**: archive action returns a report (hours per level sensor) and logs it *(commit by [@UMMgl](https://github.com/UMMgl))*
+
+
 ## [0.15.1] - 2026-11-15
 ### :sparkles: New Features
 - [`c934ba8`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/c934ba84ac775a770e982bb2f7d09c96f0193b61) - **hydro**: normalized chart scale, example dashboard, credits *(commit by [@UMMgl](https://github.com/UMMgl))*
@@ -318,3 +323,4 @@
 [0.14.0]: https://github.com/davidecavestro/arpa-veneto-weather/compare/0.13.0...0.14.0
 [0.15.0]: https://github.com/UMMgl/ha-arpav-meteo-idro/compare/0.14.0...0.15.0
 [0.15.1]: https://github.com/UMMgl/ha-arpav-meteo-idro/compare/0.15.0...0.15.1
+[0.15.2]: https://github.com/UMMgl/ha-arpav-meteo-idro/compare/0.15.1...0.15.2
