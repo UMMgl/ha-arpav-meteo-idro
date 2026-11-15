@@ -1,4 +1,19 @@
 ## [Unreleased]
+### :sparkles: New Features
+- **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
+- **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
+- **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
+- **diagnostics**: config entry diagnostics for weather and hydrometric entries; coordinates and municipality are redacted (#6)
+- **hydro**: the devices of the stations deselected in the options are removed, and can be deleted by hand (#6)
+- **hydro**: "Observed at" and "Level change" are disabled by default on new installations; existing entities keep their state (#6)
+- **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
+
+### :white_check_mark: Tests
+- **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
+
+### :memo: Documentation
+- **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
+
 ### :wrench: Chores
 - **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
 

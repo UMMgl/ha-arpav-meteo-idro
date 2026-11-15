@@ -53,7 +53,8 @@
             "cannot_connect": "Unable to connect to the API. Check your settings.",
             "invalid_comune": "The selected municipality is invalid.",
             "no_stations": "Select at least one station.",
-            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287."
+            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287.",
+            "invalid_axis_ceiling": "Use station_id=metres for selected stations, between 0 and 100 m, e.g. 334=10."
         },
         "abort": {
             "cannot_connect": "Unable to read the ARPAV station registry. Try again later.",
@@ -117,9 +118,11 @@
                     "display_order": "Manual order (station IDs)",
                     "trend_threshold_cm": "Trend threshold",
                     "stale_minutes": "Stale after (0 = automatic)",
-                    "archive_history": "Complete the level statistics every day"
+                    "archive_history": "Complete the level statistics every day",
+                    "axis_ceiling": "Axis ceiling for stations without thresholds (m)"
                 },
                 "data_description": {
+                    "axis_ceiling": "Optional. Station ID and metres, e.g. 334=10 (several: 334=10, 595=8). Stations with ARPAV thresholds ignore it.",
                     "trend_threshold_cm": "Change over the last 4 readings from which the level is rising or falling.",
                     "stale_minutes": "Automatic: 90 minutes, more for series published every 30 minutes.",
                     "archive_history": "Rebuilds the hourly statistics from the last 2-3 days ARPAV publishes, filling the missed hours."
@@ -257,6 +260,12 @@
         }
     },
     "exceptions": {
+        "fetch_failed": {
+            "message": "Unable to fetch the ARPAV data (HTTP status {status})."
+        },
+        "no_station_readable": {
+            "message": "No ARPAV hydrometric station could be read."
+        },
         "archive_failed": {
             "message": "Unable to archive the data: {error}"
         },

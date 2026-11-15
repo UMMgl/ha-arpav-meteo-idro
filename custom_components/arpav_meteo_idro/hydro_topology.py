@@ -148,14 +148,15 @@ _VENETO_PATHS = {
         ("628", "661", 48144, 19583),
         ("652", "651", 25480, 38285),
     ),
-    # The delta is a branching network. The three terminal gauges keep
-    # selection order until each gauge's link to a branch is confirmed.
+    # Pila and Porto Barricata are on separate branches below the split.
     "po": (
         ("399", "562", 60245, 42269),
         ("562", "560", 42269, 115189),
         ("560", "pila_tolle_junction", 115189, 115196),
         ("pila_tolle_junction", "po_di_pila", 114007, 114007),
         ("pila_tolle_junction", "po_delle_tolle", 7637, 7637),
+        ("po_di_pila", "561", 114007, 2242),
+        ("po_delle_tolle", "552", 7637, 10042),
     ),
     "posina": (
         ("194", "407", 31597, 115229),
@@ -200,11 +201,26 @@ def _cartographic_profile(river: str, paths: tuple[tuple[str, str, int, int], ..
 
 _PROFILES = {river: _cartographic_profile(river, paths) for river, paths in _VENETO_PATHS.items()}
 _PROFILES["bacchiglione"] = _station_profile(BACCHIGLIONE_REACHES, _STATION_NODES)
+# ARPAV lists 319 under Po. Append its independent route after the Po di
+# Venezia branches for display. Volta Grimana is a navigation connection, so
+# there is no directed reach to this station from Cavanella Po.
+_PO_LEVANTE_REACH = Reach(
+    upstream="canal_bianco_volta_grimana",
+    downstream="319",
+    source_url="https://www.agenziapo.it/idrovia/idrovia-fissero-tartaro-canalbianco-po-di-levante",
+    source_reference="AIPo, Canal Bianco to Porto Levante via the Po-Brondolo junction",
+    confidence="medium",
+)
+_PROFILES["po"].update(_station_profile((_PO_LEVANTE_REACH,), {"319": "319"}))
 
 
 def _station_key(station_id: str) -> str:
     """Match padded and unpadded ARPAV IDs without changing the saved ID."""
     return station_id.lstrip("0") or "0"
+
+
+# public name for the other modules: the same matching of padded and unpadded IDs
+station_key = _station_key
 
 
 def _profile(river: str | None) -> dict[str, Reach]:

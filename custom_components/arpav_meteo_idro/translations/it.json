@@ -51,7 +51,8 @@
             "cannot_connect": "Impossibile connettersi all'API. Controlla le impostazioni.",
             "invalid_comune": "Il comune selezionato non è valido.",
             "no_stations": "Seleziona almeno una stazione.",
-            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287."
+            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287.",
+            "invalid_axis_ceiling": "Usa id_stazione=metri per stazioni selezionate, tra 0 e 100 m, es. 334=10."
         },
         "abort": {
             "cannot_connect": "Impossibile leggere l'anagrafica stazioni ARPAV. Riprova più tardi.",
@@ -115,9 +116,11 @@
                     "display_order": "Ordine manuale (ID stazioni)",
                     "trend_threshold_cm": "Soglia del trend",
                     "stale_minutes": "Obsoleto dopo (0 = automatico)",
-                    "archive_history": "Completa ogni giorno le statistiche del livello"
+                    "archive_history": "Completa ogni giorno le statistiche del livello",
+                    "axis_ceiling": "Tetto dell'asse per stazioni senza soglie (m)"
                 },
                 "data_description": {
+                    "axis_ceiling": "Facoltativo. ID stazione e metri, es. 334=10 (più stazioni: 334=10, 595=8). Le stazioni con soglie ARPAV lo ignorano.",
                     "trend_threshold_cm": "Variazione sulle ultime 4 misure da cui il livello è in salita o in discesa.",
                     "stale_minutes": "Automatico: 90 minuti, di più per le serie pubblicate ogni 30 minuti.",
                     "archive_history": "Ricostruisce le statistiche orarie dagli ultimi 2-3 giorni pubblicati da ARPAV, colmando le ore perse."
@@ -255,6 +258,12 @@
         }
     },
     "exceptions": {
+        "fetch_failed": {
+            "message": "Impossibile scaricare i dati ARPAV (stato HTTP {status})."
+        },
+        "no_station_readable": {
+            "message": "Nessuna stazione idrometrica ARPAV è leggibile."
+        },
         "archive_failed": {
             "message": "Impossibile archiviare i dati: {error}"
         },

@@ -15,6 +15,7 @@ from homeassistant.util import slugify
 from . import hydro
 from .const import (
     CONF_ENTRY_TYPE,
+    CONF_HYDRO_AXIS_CEILING,
     CONF_HYDRO_ARCHIVE,
     CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
@@ -26,11 +27,28 @@ from .const import (
     ENTRY_TYPE_HYDRO,
 )
 from .hydro_coordinator import async_fetch_registry, station_meta
-from .hydro_topology import ordered_selection
+from .hydro_topology import ordered_selection, station_key
 
 _LOGGER = logging.getLogger(__name__)
 
 STEP_STATIONS = "stations"
+
+
+def parse_ceilings(text: str | None, station_ids: list[str]) -> dict[str, float] | None:
+    """Return the axis ceilings typed by the user, or None when they are invalid.
+
+    The format is ``station_id=metres`` separated by commas; every station must
+    be one of ``station_ids`` (the stations of the entry, matched like the order
+    field, so ``0334`` and ``334`` are the same station) and every value in
+    (0, 100] metres. The result is keyed by the ID saved in the entry.
+    """
+    ceilings = hydro.parse_axis_ceilings(text)
+    if ceilings is None:
+        return None
+    by_key = {station_key(station_id): station_id for station_id in station_ids}
+    if any(station_key(station_id) not in by_key for station_id in ceilings):
+        return None
+    return {by_key[station_key(station_id)]: value for station_id, value in ceilings.items()}
 
 
 def _station_options(stations: list[hydro.HydroStation]) -> list[selector.SelectOptionDict]:
@@ -148,11 +166,14 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "no_stations"
             elif ordered is None:
                 errors[CONF_HYDRO_ORDER] = "invalid_order"
+            elif (ceilings := parse_ceilings(user_input.get(CONF_HYDRO_AXIS_CEILING), ordered)) is None:
+                errors[CONF_HYDRO_AXIS_CEILING] = "invalid_axis_ceiling"
             else:
                 by_id = {s.station_id: s for s in stations}
                 known = {m["id"]: m for m in current}
                 return self.async_create_entry(data={
                     CONF_HYDRO_STATIONS: [station_meta(by_id[i]) if i in by_id else known[i] for i in ordered],
+                    CONF_HYDRO_AXIS_CEILING: ceilings,
                     CONF_HYDRO_ORDER: order_text,
                     CONF_HYDRO_TREND_THRESHOLD: user_input[CONF_HYDRO_TREND_THRESHOLD],
                     CONF_HYDRO_STALE_MINUTES: user_input[CONF_HYDRO_STALE_MINUTES],
@@ -169,6 +190,12 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelector(selector.NumberSelectorConfig(
                     min=0, max=1440, step=5, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX)),
             vol.Optional(CONF_HYDRO_ARCHIVE, default=options.get(CONF_HYDRO_ARCHIVE, True)): bool,
+            # a suggested value, not a default: an emptied field is omitted by the
+            # frontend and a default would bring the old ceilings back
+            vol.Optional(CONF_HYDRO_AXIS_CEILING,
+                         description={"suggested_value": hydro.format_axis_ceilings(
+                             options.get(CONF_HYDRO_AXIS_CEILING) or {})}):
+                selector.TextSelector(),
         }
         return self.async_show_form(
             step_id="hydro_options",

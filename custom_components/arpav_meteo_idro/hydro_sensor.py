@@ -23,7 +23,7 @@ from . import hydro
 from .const import DOMAIN
 from .entity import ArpavHydroEntity
 from .hydro_coordinator import HydroCoordinator, HydroStationState
-from .hydro_topology import topology_evidence
+from .hydro_topology import station_key, topology_evidence
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -52,6 +52,8 @@ SENSORS: tuple[HydroSensorDescription, ...] = (
         translation_key="hydro_observed_at",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
+        # the time is also an attribute of every sensor: rarely needed as an entity
+        entity_registry_enabled_default=False,
         value_fn=lambda s: s.reading.observed_at if s.reading else None,
     ),
     HydroSensorDescription(
@@ -71,6 +73,8 @@ SENSORS: tuple[HydroSensorDescription, ...] = (
     HydroSensorDescription(
         key="level_change",
         translation_key="hydro_level_change",
+        # the trend sensor already says where the level is going
+        entity_registry_enabled_default=False,
         device_class=SensorDeviceClass.DISTANCE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfLength.METERS,
@@ -146,6 +150,8 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
         if self.entity_description.key == "status":
             g1, g2, g3 = reading.thresholds if reading else (None, None, None)
             axis = hydro.chart_axis((g1, g2, g3))
+            # ARPAV thresholds always win; the user ceiling only fills the gap
+            ceiling = None if axis else self.coordinator.axis_ceilings.get(station_key(self._station_id))
             evidence = topology_evidence(self.coordinator.river, self._station_id)
             order_text = self.coordinator.order_text
             if order_text is None:
@@ -157,9 +163,10 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
             attributes.update({
                 # normalized chart scale: G1 at 60% and G3 at 90% of the height
                 "chart_min_m": axis[0] if axis else None,
-                "chart_max_m": axis[1] if axis else None,
+                "chart_max_m": axis[1] if axis else ceiling,
+                "axis_ceiling_source": "user" if ceiling is not None else None,
                 # the essentials in one place, for tables that list every station
-                "station_name": state.meta.get("name"),
+                "station_name": hydro.normalize_name(state.meta.get("name") or "") or None,
                 "level_m": reading.level if reading else None,
                 "level_change_m": reading.change if reading else None,
                 "trend": reading.trend if reading else None,

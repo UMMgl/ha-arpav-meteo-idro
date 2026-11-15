@@ -10,8 +10,8 @@ Planned work, one pull request each. Quality items refer to
   date and confidence per reach. Manual overrides remain available.
 - [x] **Extend automatic ordering** to the 22 other multi-station water bodies
   in the 15 November 2026 registry. See [coverage and sources](docs/hydro_topology.md).
-- [ ] Verify the position and branch connections of the three remaining gauges
-  in the Po delta, then extend the profile at the documented junctions.
+- [x] Attach Pila and Porto Barricata to their separate Po delta branches.
+- [x] Model Porto Levante on the regulated Canal Bianco / Po di Levante route.
 - [ ] Per-station axis ceiling option for stations without published thresholds
   (e.g. Voltabarozzo, interim 10 m in the example dashboard).
 

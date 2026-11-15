@@ -47,7 +47,7 @@ class ArpavHydroEntity(CoordinatorEntity):
         self._station_id = meta["id"]
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"hydro_{self._station_id}")},
-            name=meta.get("name") or f"ARPAV {self._station_id}",
+            name=hydro.normalize_name(meta.get("name") or "") or f"ARPAV {self._station_id}",
             manufacturer="ARPAV",
             model="Hydrometric station",
             entry_type=DeviceEntryType.SERVICE,

@@ -19,3 +19,14 @@ include = ["custom_components*"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+# tests/test_hydro.py loads hydro.py by file path under another module name:
+# measuring by path keeps those runs counted for the package file
+relative_files = true
+
+[tool.coverage.report]
+# the Tests workflow runs pytest with --cov: pytest-cov enforces this threshold
+# (first step of the coverage plan, issue #5; next steps 85 %, then 95 %)
+fail_under = 70
+skip_empty = true
