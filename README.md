@@ -377,7 +377,7 @@ Raw data from the meteogram remote endpoint, exposed both as single attributes (
 |---|---|---|
 | `arpav_meteo_idro.refresh_data` | Fetch the data now instead of waiting for the next update | `entry_id` (optional): one configuration entry; all when omitted |
 | `arpav_meteo_idro.archive_brightness` | Import the night sky brightness of the last ~72 hours as statistics (weather locations) | `entry_id` (optional) |
-| `arpav_meteo_idro.archive_hydro_history` | Rebuild the hourly statistics of the water level sensors from the last 2-3 days (hydrometric stations) | `entry_id` (optional) |
+| `arpav_meteo_idro.archive_hydro_history` | Rebuild the hourly statistics of the water level sensors from the last 2-3 days (hydrometric stations). Returns `imported_hours` and, per level sensor, `hours`, `from`, `to` (enable "return response" in Developer tools to see it) | `entry_id` (optional) |
 
 An `entry_id` that is not loaded, or that is of the wrong kind for the action, is
 rejected with an error.

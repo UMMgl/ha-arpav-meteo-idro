@@ -47,25 +47,34 @@ def _metadata(entity_id: str) -> StatisticMetaData:
     )
 
 
-async def async_import_hydro_history(hass: HomeAssistant, coordinator: HydroCoordinator) -> int:
-    """Import the hourly statistics of every station; return how many hours."""
+async def async_import_hydro_history(hass: HomeAssistant, coordinator: HydroCoordinator) -> dict[str, dict]:
+    """Import the hourly statistics of every station.
+
+    Return, per level sensor, how many hours were written and the period.
+    """
     if "recorder" not in hass.config.components:
-        _LOGGER.debug("The recorder is not enabled: nothing to archive")
-        return 0
+        _LOGGER.warning("The recorder is not enabled: the hydrometric history cannot be archived")
+        return {}
     if not coordinator.data:
         await coordinator.async_request_refresh()
 
     registry = er.async_get(hass)
     cut = dt_util.utcnow().replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
-    imported = 0
+    report: dict[str, dict] = {}
     for station_id, state in (coordinator.data or {}).items():
         entity_id = registry.async_get_entity_id("sensor", DOMAIN, level_unique_id(station_id))
         if entity_id is None:
             continue
         statistics = hydro.hourly_statistics(state.series, before=cut)
-        if not statistics:
-            continue
-        async_import_statistics(hass, _metadata(entity_id), statistics)
-        imported += len(statistics)
-        _LOGGER.debug("Imported %s hourly statistics into %s", len(statistics), entity_id)
-    return imported
+        report[entity_id] = {
+            "station_id": station_id,
+            "hours": len(statistics),
+            "from": statistics[0]["start"].isoformat() if statistics else None,
+            "to": statistics[-1]["start"].isoformat() if statistics else None,
+        }
+        if statistics:
+            async_import_statistics(hass, _metadata(entity_id), statistics)
+    total = sum(item["hours"] for item in report.values())
+    _LOGGER.info("Hydrometric history: %s hourly statistics imported into %s level sensors",
+                 total, sum(1 for item in report.values() if item["hours"]))
+    return report

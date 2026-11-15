@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers import config_validation as cv
@@ -110,11 +110,9 @@ def _async_schedule_hydro_archive(hass: HomeAssistant, entry: ConfigEntry, coord
 
     async def archive(_now=None):
         try:
-            imported = await async_import_hydro_history(hass, coordinator)
+            await async_import_hydro_history(hass, coordinator)
         except HomeAssistantError as err:
             _LOGGER.warning("Unable to archive the hydrometric history: %s", err)
-            return
-        _LOGGER.debug("Imported %s hourly hydrometric statistics", imported)
 
     entry.async_on_unload(
         async_track_time_change(
@@ -179,11 +177,12 @@ async def async_setup(hass, config):
                     translation_placeholders={"error": str(err)}) from err
             _LOGGER.debug("Archived %s hourly night sky brightness statistics", imported)
 
-    async def handle_archive_hydro(call):
+    async def handle_archive_hydro(call: ServiceCall) -> ServiceResponse:
         """Handle the service call to complete the hydrometric history."""
+        sensors: dict[str, dict] = {}
         for coordinator in _called_coordinators(hass, call, HydroCoordinator):
-            imported = await async_import_hydro_history(hass, coordinator)
-            _LOGGER.debug("Imported %s hourly hydrometric statistics", imported)
+            sensors.update(await async_import_hydro_history(hass, coordinator))
+        return {"imported_hours": sum(s["hours"] for s in sensors.values()), "sensors": sensors}
 
     # Register the services
     hass.services.async_register(
@@ -193,7 +192,8 @@ async def async_setup(hass, config):
         DOMAIN, "archive_brightness", handle_archive_brightness
     )
     hass.services.async_register(
-        DOMAIN, "archive_hydro_history", handle_archive_hydro
+        DOMAIN, "archive_hydro_history", handle_archive_hydro,
+        supports_response=SupportsResponse.OPTIONAL,
     )
     return True
 

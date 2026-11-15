@@ -144,9 +144,10 @@ async def test_history_is_imported_into_the_level_statistics(hass, arpav, freeze
 
     with patch.object(hydro_statistics, "async_import_statistics") as imported:
         coordinator = entry.runtime_data.coordinator
-        count = await hydro_statistics.async_import_hydro_history(hass, coordinator)
+        report = await hydro_statistics.async_import_hydro_history(hass, coordinator)
 
-    assert count > 0 and imported.call_count == len(STATIONS)
+    assert imported.call_count == len(STATIONS)
+    assert len(report) == len(STATIONS) and all(item["hours"] > 0 for item in report.values())
     metadata, statistics = imported.call_args_list[-1].args[1:]
     assert metadata["source"] == "recorder"
     assert metadata["statistic_id"].startswith("sensor.")
@@ -162,3 +163,21 @@ async def test_weather_entries_are_untouched(hass):
     weather = MockConfigEntry(domain=DOMAIN, data={"station_id": "1"})
     assert not _is_hydro(weather)
     assert _is_hydro(_entry())
+
+
+async def test_archive_action_returns_a_report(hass, arpav, freezer):
+    """The action answers how many hours it wrote, per level sensor."""
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    hass.config.components.add("recorder")
+
+    from custom_components.arpav_meteo_idro import hydro_statistics
+
+    with patch.object(hydro_statistics, "async_import_statistics"):
+        response = await hass.services.async_call(
+            DOMAIN, "archive_hydro_history", {"entry_id": entry.entry_id}, blocking=True, return_response=True)
+    assert response["imported_hours"] > 0
+    assert len(response["sensors"]) == len(STATIONS)
