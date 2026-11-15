@@ -23,6 +23,7 @@ Rules that come from the data and must not be relaxed:
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta, timezone
 
@@ -33,6 +34,25 @@ from defusedxml import ElementTree as ET  # type: ignore[import-untyped]
 
 XML_BASE = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml"
 REGISTRY_URL = f"{XML_BASE}/stazioni_idro.xml"
+# station file names come from the remote registry (LINKSTAZ): only plain
+# numeric XML names are accepted, so a tampered registry cannot make the
+# integration request arbitrary paths
+STATION_FILE = re.compile(r"^[0-9]{1,6}\.xml$")
+STATION_ID = re.compile(r"^[0-9]{1,6}$")
+
+
+def station_file(link: str | None, station_id: str) -> str:
+    """Return a safe file name for a station: LINKSTAZ if well formed, else from the ID."""
+    if link and STATION_FILE.fullmatch(link.strip()):
+        return link.strip()
+    if not STATION_ID.fullmatch(str(station_id).strip()):
+        raise HydroParseError(f"invalid station id {station_id!r}")
+    return f"{int(station_id):04d}.xml"
+
+
+def station_url(link: str | None, station_id: str) -> str:
+    """Return the URL of a station file, always under XML_BASE."""
+    return f"{XML_BASE}/{station_file(link, station_id)}"
 
 # ARPAV timestamps carry no offset and are on a fixed +0100 all year round
 ARPAV_TZ = timezone(timedelta(hours=1))
@@ -92,7 +112,7 @@ class HydroStation:
     @property
     def url(self) -> str:
         """Return the URL of the station file."""
-        return f"{XML_BASE}/{self.link}"
+        return station_url(self.link, self.station_id)
 
 
 @dataclass
@@ -229,9 +249,9 @@ def parse_registry(document: bytes | str) -> list[HydroStation]:
     for node in root.findall("STAZIONE"):
         station_id = (node.findtext("IDSTAZ") or "").strip()
         name = (node.findtext("NOME") or "").strip()
-        if not station_id or not name:
+        if not STATION_ID.fullmatch(station_id) or not name:
             continue
-        link = (node.findtext("LINKSTAZ") or "").strip() or f"{int(station_id):04d}.xml"
+        link = station_file(node.findtext("LINKSTAZ"), station_id)
         river, place = split_name(name)
         stations.append(HydroStation(
             station_id=station_id,

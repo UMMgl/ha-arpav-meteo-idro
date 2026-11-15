@@ -139,7 +139,7 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
             "station_id": self._station_id,
             "sensor_id": state.series.sensor_id if state.series else None,
             "source": "arpav_hydrometric_station",
-            "source_url": f"{hydro.XML_BASE}/{state.meta.get('link') or ''}",
+            "source_url": hydro.station_url(state.meta.get("link"), self._station_id),
             "source_observed_at": reading.observed_at.isoformat() if reading and reading.observed_at else None,
         }
         if self.entity_description.key == "status":
