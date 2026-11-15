@@ -47,6 +47,7 @@ a finding. Dependabot's pip ecosystem is enabled for the repository, but it is
 not relied on for these files: it is not verified that it updates hashed
 compiled files consistently, so review any Dependabot pull request that touches
 them and regenerate the file with `uv` before merging.
+
 pip-audit runs on every `requirements*.txt` file and on the `requirements` of
 `manifest.json` in each CI run and every Monday; a finding fails the check and is
 either fixed by upgrading or listed here with the reason.
