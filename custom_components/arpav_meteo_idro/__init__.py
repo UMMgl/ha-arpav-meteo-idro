@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, Supp
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 
 from .brightness_statistics import async_archive_brightness
 from .coordinator import ArpaVenetoDataUpdateCoordinator
@@ -18,6 +19,7 @@ from .const import (
     CONF_ARCHIVE_BRIGHTNESS,
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
+    CONF_HYDRO_STATIONS,
     DOMAIN,
     ENTRY_TYPE_HYDRO,
 )
@@ -38,6 +40,9 @@ HYDRO_PLATFORMS = ["sensor"]
 # is past it both in winter and in summer time
 BRIGHTNESS_ARCHIVE_HOUR = 11
 BRIGHTNESS_ARCHIVE_MINUTE = 15
+
+# prefix of the device identifier of a station: (DOMAIN, f"hydro_{station_id}")
+HYDRO_DEVICE_PREFIX = "hydro_"
 
 # the station files cover the last 2-3 days: once a day is enough
 HYDRO_ARCHIVE_HOUR = 3
@@ -98,11 +103,46 @@ async def _async_setup_hydro_entry(hass: HomeAssistant, entry: ConfigEntry) -> b
     entry.async_on_unload(entry.add_update_listener(options_update_listener))
 
     await hass.config_entries.async_forward_entry_setups(entry, HYDRO_PLATFORMS)
+    _async_remove_stale_hydro_devices(hass, entry, coordinator)
 
     if entry.options.get(CONF_HYDRO_ARCHIVE, True):
         _async_schedule_hydro_archive(hass, entry, coordinator)
 
     return True
+
+
+def _hydro_device_station_id(device: dr.DeviceEntry) -> str | None:
+    """Return the station a device of a hydrometric entry stands for."""
+    for domain, identifier in device.identifiers:
+        if domain == DOMAIN and identifier.startswith(HYDRO_DEVICE_PREFIX):
+            return identifier.removeprefix(HYDRO_DEVICE_PREFIX)
+    return None
+
+
+def _async_remove_stale_hydro_devices(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: HydroCoordinator
+) -> None:
+    """Remove the devices of the stations the user deselected in the options."""
+    selected = {meta["id"] for meta in coordinator.stations}
+    registry = dr.async_get(hass)
+    for device in dr.async_entries_for_config_entry(registry, entry.entry_id):
+        station_id = _hydro_device_station_id(device)
+        if station_id is not None and station_id not in selected:
+            _LOGGER.debug("Removing the device of the deselected station %s", station_id)
+            registry.async_update_device(device.id, remove_config_entry_id=entry.entry_id)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: ConfigEntry, device: dr.DeviceEntry
+) -> bool:
+    """Let the user delete the device of a station that is no longer selected."""
+    if not _is_hydro(entry):
+        return False
+    station_id = _hydro_device_station_id(device)
+    if station_id is None:
+        return False
+    selected = {meta["id"] for meta in entry.options.get(CONF_HYDRO_STATIONS, [])}
+    return station_id not in selected
 
 
 def _async_schedule_hydro_archive(hass: HomeAssistant, entry: ConfigEntry, coordinator):

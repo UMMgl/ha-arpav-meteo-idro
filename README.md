@@ -216,10 +216,10 @@ Each station is a device with these sensors:
 | Sensor | Meaning |
 |---|---|
 | Water level | Last valid reading, in m, relative to the **local hydrometric zero** of the station: levels of different stations are not comparable and can be negative |
-| Observed at | Time of that reading (ARPAV solar time, a fixed UTC+1, converted to UTC) |
+| Observed at | Time of that reading (ARPAV solar time, a fixed UTC+1, converted to UTC). Diagnostic, disabled by default on new installations |
 | Status | `below_g1`, `g1_g2`, `g2_g3`, `above_g3` against the alert thresholds (GUARDIA1/2/3) published for the series; `no_thresholds` when ARPAV publishes none; `stale` when the reading is older than the staleness limit; `missing` when there is no valid reading |
 | Trend | `rising`, `steady`, `falling`: least squares change over the last 4 valid readings, rising or falling from the threshold (default 5 cm) |
-| Level change | That change, in m |
+| Level change | That change, in m. Disabled by default on new installations (also available as `level_change_m` on the Status sensor) |
 
 The Status sensor also exposes `guardia1_m`/`guardia2_m`/`guardia3_m` (null when
 not published, never 0), `quality`, `age_minutes`, `last_sample_valid`,
@@ -384,6 +384,43 @@ Raw data from the meteogram remote endpoint, exposed both as single attributes (
 An `entry_id` that is not loaded, or that is of the wrong kind for the action, is
 rejected with an error.
 
+## Use cases
+
+* **River level dashboard.** Paste one of the ready views in
+  [`examples/`](examples) (see *Example dashboards*): a table of the stations of
+  the river with level, status, age and trend, plus 24-hour and 72-hour charts
+  against the alert thresholds.
+* **Threshold notifications.** Trigger an automation on the Status sensor of a
+  station, for example to be told when the Bacchiglione at Vicenza passes the
+  second alert threshold:
+
+  ```yaml
+  automation:
+    - alias: River above G2
+      triggers:
+        - trigger: state
+          entity_id: sensor.bacchiglione_a_vicenza_status
+          to:
+            - g2_g3
+            - above_g3
+      actions:
+        - action: notify.mobile_app_phone
+          data:
+            title: "{{ trigger.to_state.attributes.station_name }}"
+            message: >-
+              Level {{ trigger.to_state.attributes.level_m }} m
+              ({{ trigger.to_state.attributes.trend }}),
+              observed {{ trigger.to_state.attributes.age_minutes | round(0) }} minutes ago.
+  ```
+
+  The entity ID depends on the station name. This is not an official warning
+  service: refer to ARPAV and Civil Protection.
+* **History import.** Recover the hourly statistics of the days the installation
+  was offline, or fill the history right after installing, with the
+  `arpav_meteo_idro.archive_hydro_history` action (see *Completing the level
+  history*): the water level then shows up in the statistics graph and in
+  history charts.
+
 ## Data updates
 
 * Weather locations: every 5 minutes; METAR at most every 10 minutes; night sky
@@ -413,11 +450,33 @@ rejected with an error.
 
 * *Cannot connect while adding the integration*: the ARPAV servers are
   unreachable or returned an HTML page; try again later.
+* *The data are delayed*: ARPAV publishes in batches, usually 20-60 minutes after
+  the observation, and the integration reads the files every 5 minutes. The
+  **Observed at** time (attribute `source_observed_at` on every sensor) is when
+  the value was measured, not when it was downloaded.
 * *A station is always `stale`*: check the station file
   (`source_url` attribute) for its latest `DATI` time; some stations stop
-  publishing for maintenance.
-* *A station is `missing`*: ARPAV published only sentinels (for example `>>`)
-  for the whole period.
+  publishing for maintenance. The staleness limit can be changed in the options.
+* *A value is missing or a station is `missing`*: ARPAV writes sentinels such as
+  `>>` where a measurement is not available. They are never turned into 0: the
+  last valid value is kept and `quality` is `last_sample_invalid`; when the whole
+  period holds only sentinels the status is `missing`.
+* *A station has the status `no_thresholds`*: ARPAV publishes no alert
+  thresholds (GUARDIA1/2/3) for it. The level is still reported; the thresholds
+  are never borrowed from a nearby station.
+* *The Observed at and Level change sensors are not there*: they are disabled by
+  default on new installations (the same information is in the attributes and
+  in the Trend sensor); enable them from **Settings → Devices & services →
+  Entities**.
+* *The icon in the HACS update dialog is a placeholder*: HACS 2.0.5 takes the
+  icon from the central brands site, where this integration is not listed;
+  Home Assistant 2026.11 and its Marketplace fix this. The integration page and
+  the device pages show the local icon.
+* *A removed station still has a device*: devices of deselected stations are
+  removed when the entry reloads; otherwise delete the device from its page.
+* To report a problem, download the **diagnostics** of the entry (**Settings →
+  Devices & services → ARPAV Meteo e Idro → ⋮ → Download diagnostics**): the
+  coordinates and the municipality are redacted.
 * Enable debug logging (see below) and look for `arpav_meteo_idro` in the logs.
 
 ## Removing the integration
