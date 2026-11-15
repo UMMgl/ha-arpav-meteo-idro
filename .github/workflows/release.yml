@@ -63,9 +63,5 @@ jobs:
           body: ${{ steps.changelog.outputs.changes }}
           files: ${{ runner.temp }}/ha-arpav-meteo-idro.zip
 
-      - name: Commit CHANGELOG.md
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          branch: main
-          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
-          file_pattern: CHANGELOG.md
+      # main is protected (changes only through pull requests): the changelog of each
+      # version is published in the release notes, not committed back to main
