@@ -8,6 +8,9 @@
 ### :memo: Documentation
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
+### :warning: Deprecations
+- **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).
+
 ### :white_check_mark: Tests
 - **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
 

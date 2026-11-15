@@ -42,10 +42,10 @@
             },
             "hydro_stations": {
                 "title": "Stations of {river}",
-                "description": "Select the stations and, optionally, their order from upstream to downstream as a comma separated list of IDs (empty: as selected). The order is a display order, not a verified hydraulic topology.\n\nStations: {stations}",
+                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
                 "data": {
                     "stations": "Stations",
-                    "display_order": "Order (IDs, upstream first)"
+                    "display_order": "Manual order (station IDs)"
                 }
             }
         },
@@ -111,10 +111,10 @@
             },
             "hydro_options": {
                 "title": "Stations of {river}",
-                "description": "Stations: {stations}",
+                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
                 "data": {
                     "stations": "Stations",
-                    "display_order": "Order (IDs, upstream first)",
+                    "display_order": "Manual order (station IDs)",
                     "trend_threshold_cm": "Trend threshold",
                     "stale_minutes": "Stale after (0 = automatic)",
                     "archive_history": "Complete the level statistics every day"
@@ -248,6 +248,12 @@
             "arpav": {
                 "name": "Conditions in {station_name} - forecast for {comune_name}"
             }
+        }
+    },
+    "issues": {
+        "hydro_manual_order_deprecated": {
+            "title": "Manual station order is deprecated",
+            "description": "The hydrometric entry **{entry_title}** uses a saved station order. Manual ordering is deprecated in ARPAV Meteo e Idro 0.15.5 and will be removed in 0.16.0. Open the integration options, clear the **Manual order (station IDs)** field and save to use the verified river profile where available. Stations outside a profile keep their selection order."
         }
     },
     "exceptions": {
