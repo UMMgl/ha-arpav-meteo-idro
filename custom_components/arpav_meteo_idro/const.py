@@ -199,6 +199,8 @@ CONF_HYDRO_RIVER = "river"
 # selected stations, in display order (upstream first), with their metadata
 CONF_HYDRO_STATIONS = "stations"
 CONF_HYDRO_ORDER = "display_order"
+# {station_id: metres}: axis ceiling for stations without published thresholds
+CONF_HYDRO_AXIS_CEILING = "axis_ceiling"
 CONF_HYDRO_TREND_THRESHOLD = "trend_threshold_cm"
 CONF_HYDRO_TREND_THRESHOLD_DEFAULT = 5
 # 0 means: derived from the frequency of each series

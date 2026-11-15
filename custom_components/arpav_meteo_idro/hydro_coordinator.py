@@ -19,6 +19,7 @@ from homeassistant.util import dt as dt_util
 
 from . import hydro
 from .const import (
+    CONF_HYDRO_AXIS_CEILING,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STATIONS,
@@ -87,6 +88,7 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
         self.stations: list[dict] = list(entry.options.get(CONF_HYDRO_STATIONS, []))
         self.trend_threshold = (entry.options.get(
             CONF_HYDRO_TREND_THRESHOLD, CONF_HYDRO_TREND_THRESHOLD_DEFAULT)) / 100
+        self.axis_ceilings: dict[str, float] = dict(entry.options.get(CONF_HYDRO_AXIS_CEILING) or {})
         self.stale_minutes = entry.options.get(CONF_HYDRO_STALE_MINUTES) or 0
         self._session = async_get_clientsession(hass)
         self._station_requests = asyncio.Semaphore(MAX_CONCURRENT_STATIONS)

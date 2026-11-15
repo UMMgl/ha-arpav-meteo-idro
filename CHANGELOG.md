@@ -1,3 +1,10 @@
+## [Unreleased]
+### :sparkles: New Features
+- **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
+- **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
+- **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
+
+
 ## [0.15.2] - 2026-11-15
 ### :sparkles: New Features
 - [`07ddec1`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/07ddec11d69be83888f50818c3eeb7b5d2a892a4) - **hydro**: archive action returns a report (hours per level sensor) and logs it *(commit by [@UMMgl](https://github.com/UMMgl))*

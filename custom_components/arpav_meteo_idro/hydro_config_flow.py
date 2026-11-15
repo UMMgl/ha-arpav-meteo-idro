@@ -15,6 +15,7 @@ from homeassistant.util import slugify
 from . import hydro
 from .const import (
     CONF_ENTRY_TYPE,
+    CONF_HYDRO_AXIS_CEILING,
     CONF_HYDRO_ARCHIVE,
     CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
@@ -46,6 +47,19 @@ def ordered_selection(selected: list[str], order_text: str | None) -> list[str] 
         return None
     ordered = [t for t in dict.fromkeys(tokens) if t in selected]
     return ordered + [s for s in selected if s not in ordered]
+
+
+def parse_ceilings(text: str | None, station_ids: list[str]) -> dict[str, float] | None:
+    """Return the axis ceilings typed by the user, or None when they are invalid.
+
+    The format is ``station_id=metres`` separated by commas; every station must
+    be one of ``station_ids`` (the stations of the entry) and every value in
+    (0, 100] metres.
+    """
+    ceilings = hydro.parse_axis_ceilings(text)
+    if ceilings is None or any(station_id not in station_ids for station_id in ceilings):
+        return None
+    return ceilings
 
 
 def _station_options(stations: list[hydro.HydroStation]) -> list[selector.SelectOptionDict]:
@@ -157,11 +171,14 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "no_stations"
             elif ordered is None:
                 errors[CONF_HYDRO_ORDER] = "invalid_order"
+            elif (ceilings := parse_ceilings(user_input.get(CONF_HYDRO_AXIS_CEILING), ordered)) is None:
+                errors[CONF_HYDRO_AXIS_CEILING] = "invalid_axis_ceiling"
             else:
                 by_id = {s.station_id: s for s in stations}
                 known = {m["id"]: m for m in current}
                 return self.async_create_entry(data={
                     CONF_HYDRO_STATIONS: [station_meta(by_id[i]) if i in by_id else known[i] for i in ordered],
+                    CONF_HYDRO_AXIS_CEILING: ceilings,
                     CONF_HYDRO_TREND_THRESHOLD: user_input[CONF_HYDRO_TREND_THRESHOLD],
                     CONF_HYDRO_STALE_MINUTES: user_input[CONF_HYDRO_STALE_MINUTES],
                     CONF_HYDRO_ARCHIVE: user_input[CONF_HYDRO_ARCHIVE],
@@ -178,6 +195,9 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelector(selector.NumberSelectorConfig(
                     min=0, max=1440, step=5, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX)),
             vol.Optional(CONF_HYDRO_ARCHIVE, default=options.get(CONF_HYDRO_ARCHIVE, True)): bool,
+            vol.Optional(CONF_HYDRO_AXIS_CEILING,
+                         default=hydro.format_axis_ceilings(options.get(CONF_HYDRO_AXIS_CEILING) or {})):
+                selector.TextSelector(),
         }
         return self.async_show_form(
             step_id="hydro_options",

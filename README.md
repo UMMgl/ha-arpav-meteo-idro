@@ -271,7 +271,8 @@ file (or add it as a view of an existing dashboard).
 The charts use a **normalized scale**: the first alert threshold (G1) at 60%
 and the third (G3) at 90% of the height, so every station is read against its
 own thresholds. The Status sensor exposes this scale as `chart_min_m` and
-`chart_max_m` (null when the thresholds are not published). The area is blue
+`chart_max_m` (null when the thresholds are not published, unless you set an
+axis ceiling, see Options). The area is blue
 below G1 and yellow, orange, red above G1, G2, G3, filled from the bottom of
 the axis (negative levels are real values).
 
@@ -279,7 +280,21 @@ the axis (negative levels are real values).
 
 Stations and their order, trend threshold (cm), staleness limit (0 = automatic:
 90 minutes, longer for series published every 30 minutes), daily history
-completion.
+completion and the **axis ceiling for stations without thresholds**.
+
+The axis ceiling is an optional text field, `station_id=metres`, several
+separated by commas (for example `334=10, 595=8`): the stations must be selected
+in the entry, each value between 0 (excluded) and 100 m, with a dot as decimal
+separator. For a station that publishes no GUARDIA thresholds (such as
+Voltabarozzo, 334) the Status sensor then exposes `chart_max_m` with that value,
+`chart_min_m` null (the chart keeps a soft minimum from the data) and
+`axis_ceiling_source: user`. Stations with ARPAV thresholds ignore the option:
+the published values always win. The entry reloads when the options are saved.
+The example dashboard generator takes the same value with `--chart-max 334=10`.
+
+Station names: ARPAV writes accents as apostrophes (`Ponte San Nicolo'`); the
+names shown (devices, `station_name` attribute) now carry the accent
+(`Ponte San Nicolò`). Entity IDs and unique IDs do not change.
 
 > The levels and thresholds are automatic ARPAV data, not previously validated.
 > This is not an official warning service: refer to ARPAV and Civil Protection.

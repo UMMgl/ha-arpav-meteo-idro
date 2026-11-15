@@ -442,7 +442,7 @@ sections:
       - decimals: 2
         show: false
         min: '|-0.5|'
-        max: ~10.0
+        max: ~10
       apex_config:
         legend:
           show: false
@@ -455,7 +455,7 @@ sections:
       graph_span: 24h
       header:
         show: true
-        title: Ponte San Nicolo'
+        title: Ponte San Nicolò
         show_states: true
       series:
       - entity: sensor.bacchiglione_a_ponte_san_nicolo_water_level
@@ -988,7 +988,7 @@ sections:
     - decimals: 2
       show: false
       min: '|-0.5|'
-      max: ~10.0
+      max: ~10
     apex_config:
       legend:
         show: false
@@ -1005,7 +1005,7 @@ sections:
     graph_span: 24h
     header:
       show: true
-      title: Ponte San Nicolo'
+      title: Ponte San Nicolò
       show_states: true
     series:
     - entity: sensor.bacchiglione_a_ponte_san_nicolo_water_level
@@ -1392,7 +1392,7 @@ sections:
     - decimals: 2
       show: false
       min: '|-0.5|'
-      max: ~10.0
+      max: ~10
     apex_config:
       legend:
         show: false
@@ -1405,7 +1405,7 @@ sections:
     graph_span: 72h
     header:
       show: true
-      title: Ponte San Nicolo'
+      title: Ponte San Nicolò
       show_states: false
     series:
     - entity: sensor.bacchiglione_a_ponte_san_nicolo_water_level

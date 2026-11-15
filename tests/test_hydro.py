@@ -263,3 +263,72 @@ def test_registry_skips_stations_with_invalid_ids_and_sanitizes_links():
     stations = hydro.parse_registry(document)
     assert [(s.station_id, s.link) for s in stations] == [("287", "0287.xml")]
     assert stations[0].url == f"{hydro.XML_BASE}/0287.xml"
+
+
+@pytest.mark.parametrize(("raw", "expected"), [
+    ("Bacchiglione a Ponte San Nicolo'", "Bacchiglione a Ponte San Nicolò"),
+    ("Perche' Citta' Virtu' Cosi' Lunedi'", "Perchè Città Virtù Così Lunedì"),
+    ("Nicolo\u2019", "Nicolò"),
+    ("NICOLO'", "NICOLÒ"),
+    ("Nicolo', Padova", "Nicolò, Padova"),
+    # elisions and plain names are left alone
+    ("Sant'Antonio", "Sant'Antonio"),
+    ("Bacchiglione a L'Aquila", "Bacchiglione a L'Aquila"),
+    ("Bacchiglione a Vicenza", "Bacchiglione a Vicenza"),
+    ("", ""),
+])
+def test_normalize_name(raw, expected):
+    """A vowel + apostrophe ending a word becomes the accented vowel."""
+    assert hydro.normalize_name(raw) == expected
+    assert hydro.normalize_name(expected) == expected  # idempotent
+
+
+def test_registry_names_are_normalized_but_ids_and_river_are_not():
+    """Only the display names change: the station ID and the river stay as published."""
+    document = (
+        b"<METEOGRAMMI><STAZIONE><IDSTAZ>595</IDSTAZ>"
+        b"<NOME>Bacchiglione a Ponte San Nicolo'</NOME><LINKSTAZ>0595.xml</LINKSTAZ></STAZIONE></METEOGRAMMI>"
+    )
+    (station,) = hydro.parse_registry(document)
+    assert station.station_id == "595"
+    assert station.river == "Bacchiglione"
+    assert station.name == "Bacchiglione a Ponte San Nicolò"
+    assert station.place == "Ponte San Nicolò"
+
+
+def test_station_file_name_is_normalized():
+    """The station file carries the same apostrophe."""
+    data = hydro.parse_station(fixture("0595.xml"))
+    assert "'" not in (data.name or "")
+
+
+@pytest.mark.parametrize(("text", "expected"), [
+    (None, {}),
+    ("", {}),
+    ("  ", {}),
+    ("334=10", {"334": 10.0}),
+    ("334 = 10, 595=7.5", {"334": 10.0, "595": 7.5}),
+    ("334=10;595=7.5", {"334": 10.0, "595": 7.5}),
+    ("334=100", {"334": 100.0}),
+    ("334=0.5,", {"334": 0.5}),
+])
+def test_parse_axis_ceilings_valid(text, expected):
+    """Well formed ceilings, separated by commas or semicolons."""
+    assert hydro.parse_axis_ceilings(text) == expected
+
+
+@pytest.mark.parametrize("text", [
+    "334", "334=", "=10", "x=10", "334=abc", "334=0", "334=-1", "334=100.5", "334=nan", "334=inf", "../1=5",
+    "595=7,5",  # the comma separates entries: the decimal separator is the dot
+])
+def test_parse_axis_ceilings_invalid(text):
+    """Malformed, non positive, too large or non finite values make the text invalid."""
+    assert hydro.parse_axis_ceilings(text) is None
+
+
+def test_format_axis_ceilings_roundtrip():
+    """The text form parses back to the same ceilings."""
+    ceilings = {"334": 10.0, "595": 7.5}
+    assert hydro.format_axis_ceilings(ceilings) == "334=10, 595=7.5"
+    assert hydro.parse_axis_ceilings(hydro.format_axis_ceilings(ceilings)) == ceilings
+    assert hydro.format_axis_ceilings({}) == ""

@@ -234,6 +234,22 @@ def _float(text: str | None) -> float | None:
     return parse_number(text)
 
 
+# ARPAV writes accented vowels as vowel + apostrophe ("Nicolo'", "Perche'")
+_ACCENTED = {"a": "à", "e": "è", "i": "ì", "o": "ò", "u": "ù",
+             "A": "À", "E": "È", "I": "Ì", "O": "Ò", "U": "Ù"}
+_APOSTROPHE_ACCENT = re.compile(r"([aeiouAEIOU])['’](?![^\W\d_])")
+
+
+def normalize_name(name: str) -> str:
+    """Turn a vowel + apostrophe at the end of a word into the accented vowel.
+
+    ``Ponte San Nicolo'`` becomes ``Ponte San Nicolò``. An apostrophe followed
+    by a letter is an elision (``Sant'Antonio``) and is left alone. Applying it
+    twice gives the same result, so it is safe on names already normalized.
+    """
+    return _APOSTROPHE_ACCENT.sub(lambda m: _ACCENTED[m.group(1)], name)
+
+
 def split_name(name: str) -> tuple[str | None, str | None]:
     """Split an ARPAV station name "<river> a <place>" into its parts."""
     river, sep, place = name.partition(" a ")
@@ -255,9 +271,9 @@ def parse_registry(document: bytes | str) -> list[HydroStation]:
         river, place = split_name(name)
         stations.append(HydroStation(
             station_id=station_id,
-            name=name,
+            name=normalize_name(name),
             river=river,
-            place=place,
+            place=normalize_name(place) if place else None,
             latitude=_float(node.findtext("Y")),
             longitude=_float(node.findtext("X")),
             link=link,
@@ -308,7 +324,7 @@ def parse_station(document: bytes | str) -> HydroStationData:
 
     return HydroStationData(
         station_id=(node.findtext("IDSTAZ") or "").strip(),
-        name=(node.findtext("NOME") or "").strip() or None,
+        name=normalize_name((node.findtext("NOME") or "").strip()) or None,
         latitude=_float(node.findtext("Y")),
         longitude=_float(node.findtext("X")),
         generated_at=parse_instant(root.findtext("ISTANTERUN")),
@@ -412,6 +428,36 @@ def evaluate(
 # normalized charts: the first and the third threshold always at the same height
 CHART_G1_POSITION = 0.6
 CHART_G3_POSITION = 0.9
+
+
+MAX_AXIS_CEILING_M = 100.0
+
+
+def parse_axis_ceilings(text: str | None) -> dict[str, float] | None:
+    """Parse ``station_id=metres[, ...]`` into ``{station_id: metres}``.
+
+    Empty text gives an empty dict. Anything malformed, or a ceiling that is not
+    in (0, 100] metres, makes the whole text invalid: None.
+    """
+    if not text or not text.strip():
+        return {}
+    result: dict[str, float] = {}
+    for token in (t.strip() for t in text.replace(";", ",").split(",")):
+        if not token:
+            continue
+        station_id, sep, raw = token.partition("=")
+        station_id = station_id.strip()
+        value = parse_number(raw) if sep else None
+        if (not STATION_ID.fullmatch(station_id) or value is None
+                or not 0 < value <= MAX_AXIS_CEILING_M):
+            return None
+        result[station_id] = value
+    return result
+
+
+def format_axis_ceilings(ceilings: dict[str, float]) -> str:
+    """Return the text form of the ceilings, the inverse of ``parse_axis_ceilings``."""
+    return ", ".join(f"{sid}={value:g}" for sid, value in ceilings.items())
 
 
 def chart_axis(
