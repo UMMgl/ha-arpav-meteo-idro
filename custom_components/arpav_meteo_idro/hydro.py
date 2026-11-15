@@ -26,10 +26,10 @@ import math
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta, timezone
 
-try:  # a malicious or broken XML must not be able to expand entities
-    from defusedxml import ElementTree as ET  # type: ignore[import-untyped]
-except ImportError:  # pragma: no cover - defusedxml is a declared requirement
-    from xml.etree import ElementTree as ET  # noqa: N817
+# defusedxml only: a malicious or broken XML must not be able to expand entities
+# or reach external resources. There is deliberately no fallback to the
+# standard library parser (defusedxml is a requirement of the manifest).
+from defusedxml import ElementTree as ET  # type: ignore[import-untyped]
 
 XML_BASE = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml"
 REGISTRY_URL = f"{XML_BASE}/stazioni_idro.xml"

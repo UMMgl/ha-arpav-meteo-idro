@@ -149,7 +149,8 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
                 # Let the first failure retry at the normal polling cadence.
                 if state.consecutive_failures > 1:
                     delay = POLL_INTERVAL * 2 ** min(state.consecutive_failures - 1, 3)
-                    delay *= random.uniform(1.0, 1.2)
+                    # jitter of the retry time, not a security use of randomness
+                    delay *= random.uniform(1.0, 1.2)  # nosec B311
                     state.next_retry_at = dt_util.utcnow() + min(delay, MAX_RETRY_DELAY)
                 _LOGGER.debug("ARPAV station %s: %s (%s)", meta["id"], state.acquisition_status, state.error)
 
