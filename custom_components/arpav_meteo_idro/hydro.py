@@ -237,7 +237,9 @@ def _float(text: str | None) -> float | None:
 # ARPAV writes accented vowels as vowel + apostrophe ("Nicolo'", "Perche'")
 _ACCENTED = {"a": "à", "e": "è", "i": "ì", "o": "ò", "u": "ù",
              "A": "À", "E": "È", "I": "Ì", "O": "Ò", "U": "Ù"}
-_APOSTROPHE_ACCENT = re.compile(r"([aeiouAEIOU])['’](?![^\W\d_])")
+_APOSTROPHE_ACCENT = re.compile(r"\b([^\W\d_]*)([aeiouAEIOU])['’](?![^\W\d_])")
+# truncations, not accents: "Ca'" (casa) and "Po'" stay as written
+_TRUNCATIONS = frozenset({"ca", "po"})
 
 
 def normalize_name(name: str) -> str:
@@ -246,8 +248,15 @@ def normalize_name(name: str) -> str:
     ``Ponte San Nicolo'`` becomes ``Ponte San Nicolò``. An apostrophe followed
     by a letter is an elision (``Sant'Antonio``) and is left alone. Applying it
     twice gives the same result, so it is safe on names already normalized.
+    The Veneto truncations ``Ca'`` (casa) and ``Po'`` are whole words that
+    keep their apostrophe: ``Ca' Bianca`` is not ``Cà Bianca``.
     """
-    return _APOSTROPHE_ACCENT.sub(lambda m: _ACCENTED[m.group(1)], name)
+    def accent(match: re.Match[str]) -> str:
+        if (match.group(1) + match.group(2)).lower() in _TRUNCATIONS:
+            return match.group(0)
+        return match.group(1) + _ACCENTED[match.group(2)]
+
+    return _APOSTROPHE_ACCENT.sub(accent, name)
 
 
 def split_name(name: str) -> tuple[str | None, str | None]:

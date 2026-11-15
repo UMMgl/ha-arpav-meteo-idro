@@ -273,6 +273,13 @@ def test_registry_skips_stations_with_invalid_ids_and_sanitizes_links():
     ("Nicolo', Padova", "Nicolò, Padova"),
     # elisions and plain names are left alone
     ("Sant'Antonio", "Sant'Antonio"),
+    # Veneto truncations (casa, Po) are not accents; only the whole word
+    ("Ca' Bianca", "Ca' Bianca"),
+    ("CA' Bianca", "CA' Bianca"),
+    ("Fiume a Ca’ Sabbioni", "Fiume a Ca’ Sabbioni"),
+    ("Po' a Piacenza", "Po' a Piacenza"),
+    ("Fiume a Ca' Nicolo'", "Fiume a Ca' Nicolò"),
+    ("Cica' Bianca, Spo'", "Cicà Bianca, Spò"),
     ("Bacchiglione a L'Aquila", "Bacchiglione a L'Aquila"),
     ("Bacchiglione a Vicenza", "Bacchiglione a Vicenza"),
     ("", ""),
