@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Completion of the long-term statistics of the hydrometric level sensors.
 
 Every station file holds the last ~2-3 days of readings. Once a day (and at

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Home Assistant tests for the hydrometric stations (config flow, sensors, history)."""
 
 import pathlib
@@ -107,11 +108,13 @@ async def test_sensors_from_real_files(hass, arpav, freezer):
     assert status.attributes["guardia3_m"] == 7.0
     assert status.attributes["display_order"] == 30
     assert status.attributes["latitude"] == 45.27
+    assert (status.attributes["chart_min_m"], status.attributes["chart_max_m"]) == (2.5, 7.5)
 
     # Voltabarozzo publishes no thresholds
     volta = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_334_status")
     assert hass.states.get(volta).state == "no_thresholds"
     assert hass.states.get(volta).attributes["guardia1_m"] is None
+    assert hass.states.get(volta).attributes["chart_max_m"] is None
 
     trend = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_trend")
     assert hass.states.get(trend).state in hydro.TRENDS

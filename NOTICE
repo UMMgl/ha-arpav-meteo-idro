@@ -7,6 +7,10 @@ The original code is licensed under the BSD 3-Clause License; its full text
 and copyright notice are kept in LICENSE-BSD-3-Clause and apply to all
 original portions of the code.
 
+Hydrometric stations part (hydro*.py, the related config and options flow
+steps, tests, examples and documentation):
+Copyright (c) 2026 Gianluca Nardin (https://github.com/UMMgl), Apache-2.0.
+
 New files and modifications made in this fork are licensed under the
 Apache License, Version 2.0 (see LICENSE), unless a file states otherwise.
 Files that contain original code keep the BSD 3-Clause terms for those parts.

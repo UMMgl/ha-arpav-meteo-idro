@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Sensors of the ARPAV hydrometric stations."""
 
 from __future__ import annotations
@@ -154,7 +155,16 @@ class HydroSensor(CoordinatorEntity[HydroCoordinator], SensorEntity):
         }
         if self.entity_description.key == "status":
             g1, g2, g3 = reading.thresholds if reading else (None, None, None)
+            axis = hydro.chart_axis((g1, g2, g3))
             attributes.update({
+                # normalized chart scale: G1 at 60% and G3 at 90% of the height
+                "chart_min_m": axis[0] if axis else None,
+                "chart_max_m": axis[1] if axis else None,
+                # the essentials in one place, for tables that list every station
+                "station_name": state.meta.get("name"),
+                "level_m": reading.level if reading else None,
+                "level_change_m": reading.change if reading else None,
+                "trend": reading.trend if reading else None,
                 "guardia1_m": g1,
                 "guardia2_m": g2,
                 "guardia3_m": g3,

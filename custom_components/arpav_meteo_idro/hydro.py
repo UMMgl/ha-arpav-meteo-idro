@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """ARPAV hydrometric stations: parsing and evaluation of the open-data XML.
 
 This module has no Home Assistant dependency, so it can be tested on its own.
@@ -386,6 +387,28 @@ def evaluate(
         age_minutes=round(age, 1),
         thresholds=series.thresholds,
     )
+
+
+# normalized charts: the first and the third threshold always at the same height
+CHART_G1_POSITION = 0.6
+CHART_G3_POSITION = 0.9
+
+
+def chart_axis(
+    thresholds: tuple[float | None, float | None, float | None],
+) -> tuple[float, float] | None:
+    """Return the (min, max) of a chart axis that puts G1 at 60% and G3 at 90%.
+
+    Charts of different stations then share the same visual reference: the
+    level is read against the thresholds, not against an absolute scale.
+    Without published thresholds there is no reference: None.
+    """
+    g1, _, g3 = thresholds
+    if g1 is None or g3 is None or g3 <= g1:
+        return None
+    span = (g3 - g1) / (CHART_G3_POSITION - CHART_G1_POSITION)
+    low = g1 - CHART_G1_POSITION * span
+    return round(low, 2), round(low + span, 2)
 
 
 def default_stale_minutes(series: HydroSeries | None) -> float:

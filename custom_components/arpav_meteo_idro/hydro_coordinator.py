@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Coordinator of the ARPAV hydrometric stations of a config entry."""
 
 from __future__ import annotations

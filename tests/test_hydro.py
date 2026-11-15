@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Tests for the ARPAV hydrometric parser (no Home Assistant needed)."""
 
 import importlib.util
@@ -174,6 +175,21 @@ def test_stale_and_missing():
     assert reading.band == hydro.BAND_STALE and reading.trend is None
     assert hydro.evaluate(series_of([">>"]), later).band == hydro.BAND_MISSING
     assert hydro.evaluate(None, later).band == hydro.BAND_MISSING
+
+
+@pytest.mark.parametrize("thresholds", [(1.0, 2.2, 3.2), (3.0, 4.6, 5.4), (5.5, 6.5, 7.0)])
+def test_chart_axis_puts_g1_at_60_and_g3_at_90(thresholds):
+    """The normalized scale gives every station the same visual reference."""
+    low, high = hydro.chart_axis(thresholds)
+    position = lambda v: (v - low) / (high - low)  # noqa: E731
+    assert position(thresholds[0]) == pytest.approx(0.6, abs=0.01)
+    assert position(thresholds[2]) == pytest.approx(0.9, abs=0.01)
+
+
+def test_chart_axis_without_thresholds():
+    """No published thresholds, no reference scale."""
+    assert hydro.chart_axis((None, None, None)) is None
+    assert hydro.chart_axis((2.0, 2.0, 1.0)) is None
 
 
 def test_default_stale_minutes():

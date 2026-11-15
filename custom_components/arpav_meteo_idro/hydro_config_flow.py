@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Config and options flow steps for the ARPAV hydrometric stations."""
 
 from __future__ import annotations
