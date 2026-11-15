@@ -21,6 +21,7 @@ jobs:
       - name: "Checkout the full history"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: "Scan every commit for credentials"
@@ -36,6 +37,8 @@ jobs:
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: "Set up Python"
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -56,6 +59,27 @@ jobs:
           PY
           python3 -m pip_audit -r requirements_runtime.txt --progress-spinner off
 
+  workflows:
+    name: "Workflows (zizmor)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Set up Python"
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: "Static analysis of the GitHub Actions workflows"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m pip install zizmor
+          zizmor --format=github --min-severity=low .github/workflows
+
   codeql:
     name: "CodeQL"
     runs-on: "ubuntu-latest"
@@ -69,6 +93,8 @@ jobs:
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: "Initialize CodeQL"
         uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066  # v4

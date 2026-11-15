@@ -224,3 +224,42 @@ def test_hourly_statistics_thirty_minute_series():
     """A 30-minute series has 2 readings an hour and is still archived."""
     level = hydro.parse_station(fixture("0334.xml")).level_series()
     assert hydro.hourly_statistics(level)
+
+
+# --- untrusted registry data (OWASP A10 / ASVS input validation) ---------------
+
+@pytest.mark.parametrize(("link", "station_id", "expected"), [
+    ("0287.xml", "287", "0287.xml"),
+    (" 0287.xml ", "287", "0287.xml"),
+    (None, "287", "0287.xml"),
+    ("", "287", "0287.xml"),
+    ("../../etc/passwd", "287", "0287.xml"),
+    ("//evil.example/x.xml", "287", "0287.xml"),
+    ("0287.xml?x=1", "287", "0287.xml"),
+    ("https://evil.example/0287.xml", "287", "0287.xml"),
+    ("0287.xml/../../admin", "287", "0287.xml"),
+])
+def test_station_file_accepts_only_plain_numeric_names(link, station_id, expected):
+    """A tampered LINKSTAZ never changes the requested path: the ID is used instead."""
+    assert hydro.station_file(link, station_id) == expected
+    assert hydro.station_url(link, station_id) == f"{hydro.XML_BASE}/{expected}"
+
+
+@pytest.mark.parametrize("station_id", ["", "abc", "1/2", "../1", "1234567"])
+def test_station_file_rejects_invalid_ids(station_id):
+    """Without a valid LINKSTAZ, an invalid station ID is an error, not a URL."""
+    with pytest.raises(hydro.HydroParseError):
+        hydro.station_file("../bad", station_id)
+
+
+def test_registry_skips_stations_with_invalid_ids_and_sanitizes_links():
+    """Registry entries with non-numeric IDs are skipped; bad links fall back to the ID."""
+    document = (
+        b"<METEOGRAMMI>"
+        b"<STAZIONE><IDSTAZ>287</IDSTAZ><NOME>Fiume a Luogo</NOME><LINKSTAZ>../../x</LINKSTAZ></STAZIONE>"
+        b"<STAZIONE><IDSTAZ>../1</IDSTAZ><NOME>Altro a Posto</NOME><LINKSTAZ>0001.xml</LINKSTAZ></STAZIONE>"
+        b"</METEOGRAMMI>"
+    )
+    stations = hydro.parse_registry(document)
+    assert [(s.station_id, s.link) for s in stations] == [("287", "0287.xml")]
+    assert stations[0].url == f"{hydro.XML_BASE}/0287.xml"

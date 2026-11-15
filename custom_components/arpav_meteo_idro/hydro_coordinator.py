@@ -159,7 +159,7 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
         return state
 
     async def _async_fetch_station(self, meta: dict) -> hydro.HydroStationData:
-        url = f"{hydro.XML_BASE}/{meta.get('link') or f'{int(meta['id']):04d}.xml'}"
+        url = hydro.station_url(meta.get("link"), meta["id"])
         document = await async_fetch_document(self._session, url)
         return hydro.parse_station(document)
 

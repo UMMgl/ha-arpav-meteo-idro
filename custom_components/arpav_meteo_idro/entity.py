@@ -51,5 +51,5 @@ class ArpavHydroEntity(CoordinatorEntity):
             manufacturer="ARPAV",
             model="Hydrometric station",
             entry_type=DeviceEntryType.SERVICE,
-            configuration_url=f"{hydro.XML_BASE}/{meta.get('link') or ''}",
+            configuration_url=hydro.station_url(meta.get("link"), meta["id"]),
         )

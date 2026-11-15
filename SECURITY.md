@@ -28,3 +28,19 @@ Actions), known vulnerabilities of the runtime requirements (pip-audit), and
 the Home Assistant validations (hassfest, HACS). Dependabot updates the
 workflows and the Python requirements; GitHub secret scanning with push
 protection is enabled on the repository.
+
+## Verifying a release
+
+Every release from 0.15.4 on carries, next to `ha-arpav-meteo-idro.zip`:
+
+* `ha-arpav-meteo-idro.cdx.json`: software bill of materials (OWASP CycloneDX)
+  of the runtime requirements;
+* `SHA256SUMS`: SHA-256 checksums of the ZIP and of the SBOM;
+* a build provenance attestation of the ZIP, signed by GitHub Actions.
+
+```bash
+sha256sum -c SHA256SUMS
+gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro
+```
+
+Workflows are checked by zizmor; OpenSSF Scorecard results are published in code scanning.
