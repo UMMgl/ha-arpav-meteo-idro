@@ -1,3 +1,24 @@
+## [0.15.0] - 2026-11-15
+### :sparkles: New Features
+- [`8798ac8`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/8798ac8caf12986760bca1a63da560de66c56a4d) - **hydro**: ARPAV hydrometric stations (levels, thresholds, trend, history) *(commit by [@UMMgl](https://github.com/UMMgl))*
+
+### :bug: Bug Fixes
+- [`bb1f117`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/bb1f1170f2579eeeac810ed1ee530d1d829b5a02) - **deps**: update dependency pytz to v2026.5 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`5e326ad`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/5e326ad5acffda7c96759d6a45f5bee2a6899a3c) - pass hassfest, HACS validation and the HA test harness *(commit by [@UMMgl](https://github.com/UMMgl))*
+
+### :wrench: Chores
+- [`e1a89d7`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/e1a89d77dec83de8032e2eece671aa621a853a1b) - **deps**: update dependency ruff to v0.16.4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`d798f44`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/d798f442b18fa136411b3ace481760ec9c3381bb) - **deps**: update dependency homeassistant to v2026.8.3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1776e7d`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/1776e7d320a14d99873815e483b7947563c05f70) - **deps**: update dependency ruff to v0.16.7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`142a2b1`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/142a2b188f1444ca49ccf980f4d2ad001728f516) - **deps**: update dependency homeassistant to v2026.9.2 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`c422716`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/c422716f307d0ccfd0fe5e372e5b13211c2dade6) - **deps**: update dependency ruff to v0.17.1 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`fcfe488`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/fcfe488b69826a9767f47fe2cf701234db799c67) - **deps**: update dependency pre-commit to v4.7.0 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`79d9e18`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/79d9e1827ddc44f663fdbcc17bbf906ec89f5f66) - **deps**: update dependency mypy to v2.4.0 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`2a2b451`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/2a2b451a44f75ca1248fb1817c945a890a4d62d0) - **deps**: update dependency homeassistant to v2026.10.2 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`a208b5e`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/a208b5ebf09983c5db3d0a2804e0840b83bad074) - fork licensing (Apache-2.0 for changes, BSD-3-Clause kept for original code) *(commit by [@UMMgl](https://github.com/UMMgl))*
+- [`e00431d`](https://github.com/UMMgl/ha-arpav-meteo-idro/commit/e00431db30743974225543331ecb8ef909462e29) - **fork**: rename to ARPAV Meteo e Idro (domain arpav_meteo_idro) *(commit by [@UMMgl](https://github.com/UMMgl))*
+
+
 ## [0.14.0] - 2026-08-19
 ### :sparkles: New Features
 - [`dcd2b8e`](https://github.com/davidecavestro/arpa-veneto-weather/commit/dcd2b8efd07c1dc98b371e5da1c66dcbb80588d2) - let the day condition come from an aerodrome too
@@ -290,3 +311,4 @@
 [0.12.4]: https://github.com/davidecavestro/arpa-veneto-weather/compare/0.12.3...0.12.4
 [0.13.0]: https://github.com/davidecavestro/arpa-veneto-weather/compare/0.12.4...0.13.0
 [0.14.0]: https://github.com/davidecavestro/arpa-veneto-weather/compare/0.13.0...0.14.0
+[0.15.0]: https://github.com/UMMgl/ha-arpav-meteo-idro/compare/0.14.0...0.15.0
