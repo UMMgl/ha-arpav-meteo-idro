@@ -61,7 +61,12 @@ jobs:
           status=0
           for file in "$RUNNER_TEMP/requirements_manifest.txt" requirements*.txt; do
             echo "::group::pip-audit $file"
-            python3 -m pip_audit -r "$file" --progress-spinner off || status=1
+            args=()
+            if [ "$file" = requirements_test.txt ]; then
+              # accepted findings, justified in SECURITY.md
+              while read -r id; do args+=(--ignore-vuln "$id"); done < <(grep -v '^#' .github/pip-audit-ignore-test.txt)
+            fi
+            python3 -m pip_audit -r "$file" --progress-spinner off "${args[@]}" || status=1
             echo "::endgroup::"
           done
           exit $status
