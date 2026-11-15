@@ -72,6 +72,16 @@ def test_registry_lists_the_bacchiglione_stations():
     assert "Bacchiglione" in hydro.rivers(stations)
 
 
+def test_registry_recognizes_both_station_name_connectors():
+    """Parse station names from the registry written with either a or ad."""
+    stations = {s.station_id: (s.river, s.place) for s in hydro.parse_registry(fixture("stazioni_idro.xml"))}
+    assert stations["287"] == ("Bacchiglione", "Bovolenta")
+    assert stations["664"] == ("Canal Bianco", "Adria")
+    assert stations["649"] == ("Cordevole", "Agordo")
+    assert stations["684"] == ("Cordevole", "Alleghe")
+    assert stations["554"] == ("Muson dei Sassi", "Asolo")
+
+
 # --- station files ----------------------------------------------------------
 
 def test_bovolenta_level_series_and_thresholds():

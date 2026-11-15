@@ -36,6 +36,8 @@ order. Newly listed or unverified gauges can also be ordered manually.
   §6.1.1 allows a conventional direction where the flow direction cannot be
   established. In regulated reaches such as the Canal Bianco, the order
   follows the documented network and [AIPo waterway route](https://www.agenziapo.it/idrovia/idrovia-fissero-tartaro-canalbianco-po-di-levante).
+  Canal Bianco reaches carry medium confidence because that route establishes
+  connectivity, while flow direction may depend on regulation.
   A verified profile gives connectivity for display. It provides no estimate
   of current flows or gate states.
 

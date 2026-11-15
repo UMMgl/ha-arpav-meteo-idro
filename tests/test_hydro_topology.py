@@ -81,3 +81,18 @@ def test_veneto_profiles_follow_reaches_and_keep_po_delta_selection_order():
         "561", "399", "552", "562", "560", "319",
     ]
     assert topology_evidence("Piave", "406").source_reference == "WFS v_idrografia_rete, HYDROID 40466 to 25480"
+
+
+def test_gua_profile_accepts_registry_and_accented_names():
+    """Both ARPAV spelling and accented river labels identify the Guà profile."""
+    expected = ["313", "317", "555", "304", "295"]
+    for river in ("Gua'", "Guà", " GUA’ ", "Gua\u0300"):
+        assert ordered_selection(expected[::-1], "", river) == expected
+        assert topology_evidence(river, "0313") == topology_evidence("Guà", "313")
+
+
+def test_canal_bianco_uses_medium_confidence():
+    """A regulated route keeps its ordering with documented confidence."""
+    for station in ("693", "665", "666", "664"):
+        assert topology_evidence("Canal Bianco", station).confidence == "medium"
+    assert topology_evidence("Brenta", "374").confidence == "high"

@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 from graphlib import TopologicalSorter
+from unicodedata import normalize
 
 _ARPAV_MAPS = (
     "https://www.arpa.veneto.it/api/temi-ambientali/idrologia/file-e-allegati/rapporti-e-documenti/"
@@ -110,7 +111,7 @@ _VENETO_PATHS = {
     "gorzone": (
         ("291", "328", 60135, 122965),
     ),
-    "gua'": (
+    "guà": (
         ("304", "295", 10049, 43456),
         ("555", "304", 8058, 10049),
         ("313", "317", 14026, 35866),
@@ -181,10 +182,14 @@ def _station_profile(reaches: tuple[Reach, ...], station_nodes: dict[str, str]) 
     }
 
 
-def _cartographic_profile(paths: tuple[tuple[str, str, int, int], ...]) -> dict[str, Reach]:
+def _cartographic_profile(river: str, paths: tuple[tuple[str, str, int, int], ...]) -> dict[str, Reach]:
     """Build a profile from station-scale paths with traceable WFS endpoints."""
+    # The regulated Canal Bianco path establishes order for display; its
+    # cartographic direction does not establish the direction of actual flow.
+    confidence = "medium" if river == "canal bianco" else "high"
     reaches = tuple(
-        Reach(upstream, downstream, _RIVER_GRAPH_URL, f"WFS v_idrografia_rete, HYDROID {first} to {last}")
+        Reach(upstream, downstream, _RIVER_GRAPH_URL, f"WFS v_idrografia_rete, HYDROID {first} to {last}",
+              confidence=confidence)
         for upstream, downstream, first, last in paths
     )
     station_nodes = {
@@ -193,8 +198,9 @@ def _cartographic_profile(paths: tuple[tuple[str, str, int, int], ...]) -> dict[
     return _station_profile(reaches, station_nodes)
 
 
-_PROFILES = {river: _cartographic_profile(paths) for river, paths in _VENETO_PATHS.items()}
+_PROFILES = {river: _cartographic_profile(river, paths) for river, paths in _VENETO_PATHS.items()}
 _PROFILES["bacchiglione"] = _station_profile(BACCHIGLIONE_REACHES, _STATION_NODES)
+
 
 def _station_key(station_id: str) -> str:
     """Match padded and unpadded ARPAV IDs without changing the saved ID."""
@@ -202,7 +208,10 @@ def _station_key(station_id: str) -> str:
 
 
 def _profile(river: str | None) -> dict[str, Reach]:
-    return _PROFILES.get((river or "").strip().casefold(), {})
+    key = normalize("NFC", (river or "").strip()).casefold()
+    if key in {"gua'", "gua’"}:
+        key = "guà"
+    return _PROFILES.get(key, {})
 
 
 def ordered_selection(
