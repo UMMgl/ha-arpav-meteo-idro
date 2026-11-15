@@ -6,6 +6,7 @@ Home Assistant unofficial integration for ARPAV (Veneto) weather (current condit
 [![License][license-shield]](LICENSE)
 [![hacs][hacsbadge]][hacs]
 [![Community Forum][forum-shield]][forum]
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16742/badge)](https://www.bestpractices.dev/projects/16742)
 
 > **Fork notice** – This is a fork of [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather) by Davide Cavestro, who wrote the weather part (© 2024, BSD 3-Clause). The ARPAV **hydrometric stations** part (river water levels, alert thresholds, trend and long-term history) is by Gianluca Nardin ([@UMMgl](https://github.com/UMMgl)) (© 2026, Apache-2.0). See [Credits and licensing](#credits-and-licensing).
 
@@ -296,7 +297,22 @@ own thresholds. The Status sensor exposes this scale as `chart_min_m` and
 below G1 and yellow, orange, red above G1, G2, G3, filled from the bottom of
 the axis (negative levels are real values).
 
-### Options
+#### Bacchiglione river network schematic
+
+Copy [the PNG](examples/hydro_network_bacchiglione.png) to
+`www/arpav/hydro_network_bacchiglione.png` in your Home Assistant configuration
+directory. Paste [the example card YAML](examples/hydro_network_bacchiglione.yaml)
+into a manual card on your dashboard. The card uses the built-in Picture and
+Markdown cards. It shows the documented connections and gauge IDs, including the
+two outlets at Voltabarozzo and the Cagnola confluence. The layout is schematic,
+with no geographic scale or live flow indication.
+
+To refresh the image after editing the topology, run
+`python examples/generate_hydro_network.py` with Graphviz (`dot`) and the
+DejaVu Sans font installed. Source references for the reaches are included in
+[the profile](custom_components/arpav_meteo_idro/hydro_topology.py).
+
+## Options
 
 Stations and their order, trend threshold (cm), staleness limit (0 = automatic:
 90 minutes, longer for series published every 30 minutes), daily history
