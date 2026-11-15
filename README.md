@@ -6,6 +6,7 @@ Home Assistant unofficial integration for ARPAV (Veneto) weather (current condit
 [![License][license-shield]](LICENSE)
 [![hacs][hacsbadge]][hacs]
 [![Community Forum][forum-shield]][forum]
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16742/badge)](https://www.bestpractices.dev/projects/16742)
 
 > **Fork notice** – This is a fork of [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather) by Davide Cavestro, who wrote the weather part (© 2024, BSD 3-Clause). The ARPAV **hydrometric stations** part (river water levels, alert thresholds, trend and long-term history) is by Gianluca Nardin ([@UMMgl](https://github.com/UMMgl)) (© 2026, Apache-2.0). See [Credits and licensing](#credits-and-licensing).
 
