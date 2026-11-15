@@ -2,12 +2,15 @@
 # Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Generate example dashboard views for the hydrometric stations of a river.
 
-Usage: python generate_hydro_dashboard.py [--lang en|it] [--full] > view.yaml
+Usage: python generate_hydro_dashboard.py [--lang en|it] [--full] [--chart-max ID=m,...] > view.yaml
 
 * basic: table, 24-hour charts and 72-hour hourly Recorder means
 * --full: also legend, alert badges and a period selector (last hour / day /
   week / month), which needs the helper of ``helpers_bacchiglione.yaml``
 * --lang: entity IDs as created by Home Assistant in that language
+* --chart-max: axis maximum of the stations without thresholds, i.e. the value
+  of the ``chart_max_m`` attribute of their Status sensor, which the integration
+  takes from the "axis ceiling" option (default ``334=10``, as in the README)
 
 The charts use the normalized scale of the integration: the first alert
 threshold (G1) at 60% and the third (G3) at 90% of the height, so every station
@@ -22,17 +25,20 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "custom_components" / "arpav_meteo_idro"))
 import hydro  # noqa: E402
 
-# station id, device name, thresholds as published by ARPAV (None: not published),
-# interim axis ceiling for stations without thresholds. Upstream first.
+# station id, device name (as ARPAV writes it: the entity IDs derive from it),
+# thresholds as published by ARPAV (None: not published). Upstream first.
 STATIONS = [
-    ("276", "Bacchiglione a Ponte Marchese", (1.0, 2.2, 3.2), None),
-    ("333", "Bacchiglione a Vicenza", (3.0, 4.6, 5.4), None),
-    ("303", "Bacchiglione a Longare", (3.8, 5.0, 6.3), None),
-    ("308", "Bacchiglione a Montegalda", (3.0, 5.5, 6.5), None),
-    ("334", "Bacchiglione a Padova Voltabarozzo", None, 10.0),
-    ("595", "Bacchiglione a Ponte San Nicolo'", None, None),
-    ("287", "Bacchiglione a Bovolenta", (5.5, 6.5, 7.0), None),
+    ("276", "Bacchiglione a Ponte Marchese", (1.0, 2.2, 3.2)),
+    ("333", "Bacchiglione a Vicenza", (3.0, 4.6, 5.4)),
+    ("303", "Bacchiglione a Longare", (3.8, 5.0, 6.3)),
+    ("308", "Bacchiglione a Montegalda", (3.0, 5.5, 6.5)),
+    ("334", "Bacchiglione a Padova Voltabarozzo", None),
+    ("595", "Bacchiglione a Ponte San Nicolo'", None),
+    ("287", "Bacchiglione a Bovolenta", (5.5, 6.5, 7.0)),
 ]
+# chart_max_m of the stations without thresholds (None: the sensor has none);
+# changed with --chart-max
+CHART_MAX: dict[str, float] = {"334": 10.0}
 # entity names in the language of the installation
 SUFFIXES = {
     "en": {"level": "water_level", "status": "status"},
@@ -60,7 +66,7 @@ def slug(text: str) -> str:
     return out.strip("_")
 
 
-def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False, group_by=PERIODS[1][2]):
+def chart(station_id, name, thresholds, span="24h", height=260, hourly=False, group_by=PERIODS[1][2]):
     """Return an ApexCharts card for a station."""
     entity = f"sensor.{slug(name)}_{LEVEL_SUFFIX}"
 
@@ -92,12 +98,14 @@ def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False, group
              "label": {"text": k.upper(), "style": {"background": COLORS[k], "color": "#fff"}}}
             for v, k in zip(thresholds, ("g1", "g2", "g3"), strict=True)]}
     else:
-        axis.update(min="|-0.5|", max=f"~{ceiling}" if ceiling else "|+0.5|")
+        # no ARPAV thresholds: the soft maximum is the chart_max_m of the sensor, if any
+        ceiling = CHART_MAX.get(station_id)
+        axis.update(min="|-0.5|", max=f"~{ceiling:g}" if ceiling else "|+0.5|")
     # no update_interval: a card created hidden (period selector, phone/wide
     # layout) would wait for the interval before loading and show N/A; without
     # it the card loads at once and refreshes on every new state of the sensor
     return {"type": "custom:apexcharts-card", "graph_span": span,
-            "header": {"show": True, "title": name.split(" a ", 1)[-1], "show_states": not hourly},
+            "header": {"show": True, "title": hydro.normalize_name(name.split(" a ", 1)[-1]), "show_states": not hourly},
             "series": all_series, "yaxis": [axis], "apex_config": apex}
 
 
@@ -131,9 +139,9 @@ def chart_rows(span="24h", group_by=PERIODS[1][2], hourly=False, extra=()):
     """Charts side by side on wide screens, stacked on phones."""
     return [
         {"type": "horizontal-stack", "grid_options": {"columns": "full"}, "visibility": [*extra, WIDE],
-         "cards": [chart(n, t, c, span, 260, hourly, group_by) for _, n, t, c in STATIONS]},
-        *[dict(chart(n, t, c, span, 170, hourly, group_by), grid_options={"columns": "full"},
-               visibility=[*extra, NARROW]) for _, n, t, c in STATIONS],
+         "cards": [chart(i, n, t, span, 260, hourly, group_by) for i, n, t in STATIONS]},
+        *[dict(chart(i, n, t, span, 170, hourly, group_by), grid_options={"columns": "full"},
+               visibility=[*extra, NARROW]) for i, n, t in STATIONS],
     ]
 
 
@@ -141,7 +149,7 @@ def recorder_section():
     """Hourly Recorder means, including the hours recovered by the archive action."""
     return {"type": "grid", "column_span": 4, "cards": [
         {"type": "heading", "heading": "Ultime 72 ore, medie orarie dal Recorder"},
-        *[chart(n, t, c, span="72h", height=190, hourly=True) for _, n, t, c in STATIONS],
+        *[chart(i, n, t, span="72h", height=190, hourly=True) for i, n, t in STATIONS],
     ]}
 
 
@@ -170,7 +178,7 @@ def build_view(lang="en", full=False):
         {"type": "entity", "entity": f"sensor.{slug(n)}_{status}", "name": n.split(" a ", 1)[-1],
          "show_name": True, "show_state": True, "icon": "mdi:alert", "color": color,
          "visibility": [{"condition": "state", "entity": f"sensor.{slug(n)}_{status}", "state": band}]}
-        for _, n, t, _c in STATIONS if t
+        for _, n, t in STATIONS if t
         for band, color in (("g1_g2", "amber"), ("g2_g3", "orange"), ("above_g3", "red"))
     ]
     return {
@@ -191,7 +199,17 @@ def build_view(lang="en", full=False):
     }
 
 
+def parse_chart_max(text: str) -> dict[str, float]:
+    """Parse ``ID=m,ID=m`` (the chart_max_m of stations without thresholds)."""
+    parsed = hydro.parse_axis_ceilings(text)
+    if parsed is None:
+        raise SystemExit(f"--chart-max: use ID=metres, between 0 and {hydro.MAX_AXIS_CEILING_M:g}: {text!r}")
+    return parsed
+
+
 if __name__ == "__main__":
+    if "--chart-max" in sys.argv:
+        CHART_MAX = parse_chart_max(sys.argv[sys.argv.index("--chart-max") + 1])
     lang = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "en"
     view = build_view(lang, "--full" in sys.argv)
     header = ("# Generated by examples/generate_hydro_dashboard.py " + " ".join(sys.argv[1:])).rstrip() + "\n"

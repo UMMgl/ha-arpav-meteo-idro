@@ -23,6 +23,7 @@ from custom_components.arpav_meteo_idro import hydro, hydro_coordinator, hydro_s
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
+    CONF_HYDRO_AXIS_CEILING,
     CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
@@ -192,6 +193,8 @@ async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, 
     assert hass.states.get(volta).state == "no_thresholds"
     assert hass.states.get(volta).attributes["guardia1_m"] is None
     assert hass.states.get(volta).attributes["chart_max_m"] is None
+    assert hass.states.get(volta).attributes["chart_min_m"] is None
+    assert hass.states.get(volta).attributes["axis_ceiling_source"] is None
 
     trend = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_trend")
     assert hass.states.get(trend).state in hydro.TRENDS
@@ -363,3 +366,129 @@ async def test_archive_action_returns_a_report(
         DOMAIN, "archive_hydro_history", {"entry_id": entry.entry_id}, blocking=True, return_response=True)
     assert response["imported_hours"] > 0
     assert len(response["sensors"]) == len(STATIONS)
+
+
+async def _status(hass, station_id):
+    registry = er.async_get(hass)
+    return hass.states.get(registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_{station_id}_status"))
+
+
+async def test_axis_ceiling_fills_only_stations_without_thresholds(
+    enable_custom_integrations, hass, arpav, freezer,
+):
+    """The user ceiling sets chart_max_m without thresholds; ARPAV thresholds always win."""
+    freezer.move_to(NOW)
+    entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0, "287": 99.0}})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    volta = (await _status(hass, "334")).attributes
+    assert volta["chart_max_m"] == 10.0
+    assert volta["chart_min_m"] is None
+    assert volta["axis_ceiling_source"] == "user"
+    assert volta["guardia1_m"] is None
+
+    bovolenta = (await _status(hass, "287")).attributes
+    assert (bovolenta["chart_min_m"], bovolenta["chart_max_m"]) == (2.5, 7.5)
+    assert bovolenta["axis_ceiling_source"] is None
+
+
+async def test_entity_ids_and_names_with_apostrophe_station(enable_custom_integrations, hass, arpav, freezer):
+    """The accented name is only a display name: unique IDs and entity IDs stay as they were."""
+    freezer.move_to(NOW)
+    stations = [*STATIONS, _meta("595", "Bacchiglione a Ponte San Nicolo'", "Ponte San Nicolo'", 45.37, 11.97)]
+    entry = _entry(**{CONF_HYDRO_STATIONS: stations})
+    entry.add_to_hass(hass)
+    registry = er.async_get(hass)
+    # the entity registered by a previous release, from the raw ARPAV name
+    old = registry.async_get_or_create(
+        "sensor", DOMAIN, f"{DOMAIN}_hydro_595_status", suggested_object_id="bacchiglione_a_ponte_san_nicolo_stato",
+        config_entry=entry)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    entity_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_status")
+    assert entity_id == old.entity_id
+    assert hass.states.get(entity_id).attributes["station_name"] == "Bacchiglione a Ponte San Nicolò"
+
+
+async def _options_flow(hass, entry, **user_input):
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] is FlowResultType.FORM and result["step_id"] == "hydro_options"
+    base = {"stations": ["333", "334", "287"], "display_order": "", "trend_threshold_cm": 5,
+            "stale_minutes": 0, "archive_history": False}
+    return await hass.config_entries.options.async_configure(result["flow_id"], {**base, **user_input})
+
+
+async def test_options_flow_stores_axis_ceiling(enable_custom_integrations, hass, arpav):
+    """A valid ceiling is stored as a mapping and shown again as text."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await _options_flow(hass, entry, axis_ceiling="334=10, 287 = 8.5")
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"][CONF_HYDRO_AXIS_CEILING] == {"334": 10.0, "287": 8.5}
+
+
+async def test_options_flow_shows_stored_ceiling_as_text(enable_custom_integrations, hass, arpav):
+    """The stored mapping is the suggested value of the text field, not a default."""
+    entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0}})
+    entry.add_to_hass(hass)
+    form = await hass.config_entries.options.async_init(entry.entry_id)
+    key = next(k for k in form["data_schema"].schema if k == CONF_HYDRO_AXIS_CEILING)
+    assert key.description == {"suggested_value": "334=10"}
+    assert CONF_HYDRO_AXIS_CEILING not in form["data_schema"]({"stations": []})
+
+
+async def test_options_flow_matches_padded_station_ids(enable_custom_integrations, hass, arpav):
+    """Like the order field, 0334 and 334 are the same station (saved under the entry's ID)."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await _options_flow(hass, entry, axis_ceiling="0334=10")
+    assert result["data"][CONF_HYDRO_AXIS_CEILING] == {"334": 10.0}
+
+
+async def test_axis_ceiling_matches_padded_stored_ids(enable_custom_integrations, hass, arpav, freezer):
+    """A ceiling stored under a padded ID still applies to the station."""
+    freezer.move_to(NOW)
+    stored = _entry(**{CONF_HYDRO_AXIS_CEILING: {"0334": 12.0}})
+    stored.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(stored.entry_id)
+    await hass.async_block_till_done()
+    assert (await _status(hass, "334")).attributes["chart_max_m"] == 12.0
+
+
+async def test_options_flow_empty_ceiling_clears_it(enable_custom_integrations, hass, arpav):
+    """An empty field removes every ceiling."""
+    entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0}})
+    entry.add_to_hass(hass)
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await _options_flow(hass, entry, axis_ceiling="")
+    assert result["data"][CONF_HYDRO_AXIS_CEILING] == {}
+
+
+async def test_options_flow_omitted_ceiling_clears_it(enable_custom_integrations, hass, arpav):
+    """The frontend omits an emptied optional field: the ceilings must be removed."""
+    entry = _entry(**{CONF_HYDRO_AXIS_CEILING: {"334": 10.0}})
+    entry.add_to_hass(hass)
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await _options_flow(hass, entry)  # no axis_ceiling key at all
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"][CONF_HYDRO_AXIS_CEILING] == {}
+
+
+@pytest.mark.parametrize("text", [
+    "999=10",    # not a station of the entry
+    "595=10",    # known to ARPAV but not selected
+    "334=abc", "334=0", "334=-2", "334=100.5", "334", "334=10, x=2",
+])
+async def test_options_flow_rejects_invalid_ceiling(enable_custom_integrations, hass, arpav, text):
+    """Unknown stations and invalid numbers give a translated error and store nothing."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await _options_flow(hass, entry, axis_ceiling=text)
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {CONF_HYDRO_AXIS_CEILING: "invalid_axis_ceiling"}
+    assert CONF_HYDRO_AXIS_CEILING not in entry.options
