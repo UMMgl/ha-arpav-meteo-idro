@@ -1,0 +1,12 @@
+# Helper used by the period selector of the full example dashboards.
+# Create it from the UI (Settings → Devices & services → Helpers → Dropdown,
+# name "Bacchiglione periodo grafici", the four options below) or in YAML:
+input_select:
+  bacchiglione_periodo_grafici:
+    name: Bacchiglione periodo grafici
+    icon: mdi:calendar-range
+    options:
+      - Ultima ora
+      - Ultimo giorno
+      - Ultima settimana
+      - Ultimo mese
