@@ -288,7 +288,22 @@ own thresholds. The Status sensor exposes this scale as `chart_min_m` and
 below G1 and yellow, orange, red above G1, G2, G3, filled from the bottom of
 the axis (negative levels are real values).
 
-### Options
+#### Bacchiglione river network schematic
+
+Copy [the PNG](examples/hydro_network_bacchiglione.png) to
+`www/arpav/hydro_network_bacchiglione.png` in your Home Assistant configuration
+directory. Paste [the example card YAML](examples/hydro_network_bacchiglione.yaml)
+into a manual card on your dashboard. The card uses the built-in Picture and
+Markdown cards. It shows the documented connections and gauge IDs, including the
+two outlets at Voltabarozzo and the Cagnola confluence. The layout is schematic,
+with no geographic scale or live flow indication.
+
+To refresh the image after editing the topology, run
+`python examples/generate_hydro_network.py` with Graphviz (`dot`) and the
+DejaVu Sans font installed. Source references for the reaches are included in
+[the profile](custom_components/arpav_meteo_idro/hydro_topology.py).
+
+## Options
 
 Stations and their order, trend threshold (cm), staleness limit (0 = automatic:
 90 minutes, longer for series published every 30 minutes), daily history
