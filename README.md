@@ -439,6 +439,10 @@ logger:
     custom_components.arpa-veneto-weather: debug
 ```
 
+## Quality
+
+Self-assessment against the Home Assistant integration quality scale (target: Bronze) and how to run the tests: [docs/quality_scale.md](docs/quality_scale.md).
+
 ## Credits and licensing
 
 - Weather part and original code: Davide Cavestro, from [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather).
