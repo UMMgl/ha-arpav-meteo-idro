@@ -58,7 +58,7 @@ def test_registry_profiles_cover_all_multi_station_water_bodies():
         if not topology_evidence(river, station_id)
     }
     assert len(multiple) == 23
-    assert unverified == {("Po", "319"), ("Po", "552"), ("Po", "561")}
+    assert unverified == {("Po", "319")}
 
 
 def test_veneto_profiles_follow_reaches_and_keep_po_delta_selection_order():
@@ -76,7 +76,15 @@ def test_veneto_profiles_follow_reaches_and_keep_po_delta_selection_order():
         expected = sequence.split()
         assert ordered_selection(expected[::-1], "", river) == expected
     selected = ["552", "562", "561", "560", "399", "319"]
-    assert ordered_selection(selected, "", "Po") == ["399", "562", "560", "552", "561", "319"]
+    assert ordered_selection(selected, "", "Po") == ["399", "562", "560", "561", "552", "319"]
+    assert ordered_selection(["0561", "560"], "", "Po") == ["560", "0561"]
+    assert ordered_selection(["0552", "560"], "", "Po") == ["560", "0552"]
+    p = topology_evidence("Po", "0561")
+    b = topology_evidence("Po", "0552")
+    assert (p.upstream, p.downstream) == ("po_di_pila", "561")
+    assert (b.upstream, b.downstream) == ("po_delle_tolle", "552")
+    assert p.source_reference.endswith("114007 to 2242")
+    assert b.source_reference.endswith("7637 to 10042")
     assert ordered_selection(selected, "0561, 0399", "Po") == [
         "561", "399", "552", "562", "560", "319",
     ]
