@@ -8,16 +8,19 @@ part inherited from the original project. Rule status per rule:
 [`custom_components/arpav_meteo_idro/quality_scale.yaml`](../custom_components/arpav_meteo_idro/quality_scale.yaml).
 Open items are listed in [ROADMAP.md](../ROADMAP.md).
 
-## Bronze (target)
+## Bronze (target, enforced in CI)
+
+`scripts/check_quality_scale.py bronze` runs in the Tests workflow and fails
+when a Bronze rule is open; higher tiers are reported.
 
 | Rule | Status | Notes |
 |---|---|---|
 | action-setup | ✅ | actions registered in `async_setup` |
 | appropriate-polling | ✅ | 5 minutes (weather and hydro), METAR at most every 10 minutes |
 | brands | ✅ | `custom_components/arpav_meteo_idro/brand/icon.png` |
-| common-modules | ⚠️ | coordinators in `coordinator.py` / `hydro_coordinator.py`; no shared `entity.py` yet |
+| common-modules | ✅ | coordinators in `coordinator.py` / `hydro_coordinator.py`, base entities in `entity.py` |
 | config-flow | ✅ | menu: weather location / hydrometric stations |
-| config-flow-test-coverage | ⚠️ | hydrometric steps tested (including errors); weather steps not yet |
+| config-flow-test-coverage | ✅ | weather and hydrometric flows and options, including network errors |
 | dependency-transparency | ✅ | defusedxml from PyPI |
 | docs-actions, docs-high-level-description, docs-installation-instructions, docs-removal-instructions | ✅ | README |
 | entity-event-setup, docs-conditions, docs-triggers | ➖ | not applicable |

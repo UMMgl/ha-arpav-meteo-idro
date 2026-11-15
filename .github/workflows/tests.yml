@@ -29,4 +29,7 @@ jobs:
         run: python3 -m pip install -r requirements_test.txt
 
       - name: "Run"
-        run: python3 -m pytest -q tests
+        run: python3 -m pytest -q tests --cov=custom_components.arpav_meteo_idro --cov-report=term-missing:skip-covered
+
+      - name: "Quality scale: Bronze required, higher tiers reported"
+        run: python3 scripts/check_quality_scale.py bronze

@@ -1,24 +1,22 @@
 """Main entity for Arpa Veneto Weather component."""
 from __future__ import annotations
+
+import json
 from collections import defaultdict
 from datetime import datetime
-import json
 
-from homeassistant.components.weather import WeatherEntity, Forecast
+from homeassistant.components.weather import Forecast, WeatherEntity
 from homeassistant.components.weather.const import WeatherEntityFeature
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-
 
 from .const import (
+    API_BASE,
     CONF_EXPOSE_FORECAST_JSON,
     CONF_EXPOSE_FORECAST_RAW,
     CONF_EXPOSE_SENSORS_RAW,
     CONF_METAR_STATION,
     CONF_OBSERVATIONS,
-    DOMAIN,
-    API_BASE
 )
+from .entity import ArpavWeatherEntity
 
 
 async def async_get_forecast(session):
@@ -57,13 +55,12 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super().default(obj)
 
-class ArpaVenetoWeatherEntity(CoordinatorEntity, WeatherEntity):
+class ArpaVenetoWeatherEntity(ArpavWeatherEntity, WeatherEntity):
     """Representation of the ARPA Veneto weather entity."""
 
     def __init__(self, coordinator, config_entry):
         """Init the entity with config data."""
-        super().__init__(coordinator)  # Initialize the CoordinatorEntity
-        self._config_entry = config_entry
+        super().__init__(coordinator, config_entry)
         self.comune_name = config_entry.data['comune_name']
         self.comune_id = config_entry.data['comune_id']
         self.station_name = config_entry.data['station_name']
@@ -75,7 +72,6 @@ class ArpaVenetoWeatherEntity(CoordinatorEntity, WeatherEntity):
 
         self._attr_unique_id = f"weather.arpav_{self.comune_id}_{self.station_id}"
 
-        self._attr_has_entity_name = True
         self._attr_translation_key = 'arpav'
         self._attr_attribution = "Weather data by ARPA Veneto"
 
@@ -88,15 +84,6 @@ class ArpaVenetoWeatherEntity(CoordinatorEntity, WeatherEntity):
             "station_name": self.station_name,
         }
         self._attr_available = False  # Default to unavailable
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return the device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._config_entry.entry_id)},
-            name="Arpa Veneto Weather",
-            entry_type=DeviceEntryType.SERVICE
-        )
 
     @property
     def native_temperature(self):
