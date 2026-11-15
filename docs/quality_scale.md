@@ -6,7 +6,7 @@ are assigned to core integrations only; for this HACS integration they are used
 as a checklist. They apply to the **whole** integration, including the weather
 part inherited from the original project. Rule status per rule:
 [`custom_components/arpav_meteo_idro/quality_scale.yaml`](../custom_components/arpav_meteo_idro/quality_scale.yaml).
-Open items are tracked as GitHub issues with the `quality` label.
+Open items are listed in [ROADMAP.md](../ROADMAP.md).
 
 ## Bronze (target)
 
