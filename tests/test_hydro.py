@@ -72,6 +72,16 @@ def test_registry_lists_the_bacchiglione_stations():
     assert "Bacchiglione" in hydro.rivers(stations)
 
 
+def test_registry_recognizes_both_station_name_connectors():
+    """Parse station names from the registry written with either a or ad."""
+    stations = {s.station_id: (s.river, s.place) for s in hydro.parse_registry(fixture("stazioni_idro.xml"))}
+    assert stations["287"] == ("Bacchiglione", "Bovolenta")
+    assert stations["664"] == ("Canal Bianco", "Adria")
+    assert stations["649"] == ("Cordevole", "Agordo")
+    assert stations["684"] == ("Cordevole", "Alleghe")
+    assert stations["554"] == ("Muson dei Sassi", "Asolo")
+
+
 # --- station files ----------------------------------------------------------
 
 def test_bovolenta_level_series_and_thresholds():
@@ -263,3 +273,9 @@ def test_registry_skips_stations_with_invalid_ids_and_sanitizes_links():
     stations = hydro.parse_registry(document)
     assert [(s.station_id, s.link) for s in stations] == [("287", "0287.xml")]
     assert stations[0].url == f"{hydro.XML_BASE}/0287.xml"
+
+
+@pytest.mark.parametrize("raw", ["20261115080", "2026111508", "2026111580", "202611158 0", "٢٠٢٦١١١٥٠٨٠٠"])
+def test_parse_instant_requires_twelve_ascii_digits(raw):
+    """Regression (found by fuzzing): strptime accepted truncated/unpadded instants."""
+    assert hydro.parse_instant(raw) is None

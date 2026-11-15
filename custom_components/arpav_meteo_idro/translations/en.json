@@ -250,6 +250,12 @@
             }
         }
     },
+    "issues": {
+        "hydro_manual_order_deprecated": {
+            "title": "Manual station order is deprecated",
+            "description": "The hydrometric entry **{entry_title}** uses a saved station order. Manual ordering is deprecated in ARPAV Meteo e Idro 0.15.5 and will be removed in 0.16.0. Open the integration options, clear the **Manual order (station IDs)** field and save to use the verified river profile where available. Stations outside a profile keep their selection order."
+        }
+    },
     "exceptions": {
         "archive_failed": {
             "message": "Unable to archive the data: {error}"

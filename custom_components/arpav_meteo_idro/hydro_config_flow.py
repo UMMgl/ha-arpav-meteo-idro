@@ -44,7 +44,7 @@ def _stations_schema(stations, selected, order_text, extra=None) -> vol.Schema:
             selector.SelectSelectorConfig(options=_station_options(stations), multiple=True,
                                           mode=selector.SelectSelectorMode.LIST)
         ),
-        vol.Optional(CONF_HYDRO_ORDER, default=order_text): selector.TextSelector(),
+        vol.Optional(CONF_HYDRO_ORDER, description={"suggested_value": order_text}): selector.TextSelector(),
     }
     schema.update(extra or {})
     return vol.Schema(schema)
@@ -142,7 +142,7 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
 
         errors = {}
         if user_input is not None:
-            order_text = user_input.get(CONF_HYDRO_ORDER, saved_order).strip()
+            order_text = user_input.get(CONF_HYDRO_ORDER, "").strip()
             ordered = ordered_selection(user_input[STEP_STATIONS], order_text, river)
             if not user_input[STEP_STATIONS]:
                 errors["base"] = "no_stations"

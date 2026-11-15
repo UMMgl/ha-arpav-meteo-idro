@@ -16,7 +16,7 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant import config_entries  # noqa: E402
 from homeassistant.components.recorder.statistics import async_import_statistics, statistics_during_period  # noqa: E402
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
-from homeassistant.helpers import entity_registry as er  # noqa: E402
+from homeassistant.helpers import entity_registry as er, issue_registry as ir  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
 from custom_components.arpav_meteo_idro import hydro, hydro_coordinator, hydro_statistics  # noqa: E402
@@ -94,12 +94,26 @@ async def test_config_flow_creates_ordered_entry(enable_custom_integrations, has
     assert result["options"][CONF_HYDRO_ORDER] == "276, 333"
 
 
-async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
-    enable_custom_integrations, hass, arpav, freezer,
+async def test_config_flow_uses_automatic_profile_for_brenta(enable_custom_integrations, hass, arpav):
+    """Apply the Brenta profile on first setup when the order field is omitted."""
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "hydro"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Brenta"})
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_HYDRO_STATIONS: ["646", "374", "329", "629"]})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["options"][CONF_HYDRO_ORDER] == ""
+    assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["374", "629", "329", "646"]
+
+
+@pytest.mark.parametrize("order_options", [{}, {CONF_HYDRO_ORDER: "287, 334, 333"}], ids=["legacy", "manual"])
+async def test_saved_order_can_be_cleared_and_removes_repair(
+    enable_custom_integrations, hass, arpav, freezer, order_options,
 ):
-    """Upgrades keep the saved order. Clearing the override enables the profile."""
+    """Both saved order modes advertise the deprecation until the field is cleared."""
     freezer.move_to(NOW)
-    entry = _entry(stations=list(reversed(STATIONS)))
+    entry = _entry(stations=list(reversed(STATIONS)), **order_options)
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
@@ -107,14 +121,21 @@ async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
     entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_status")
     before = hass.states.get(entity_id)
     assert before.attributes["display_order"] == 10
-    assert before.attributes["display_order_source"] == "legacy"
+    assert before.attributes["display_order_source"] == ("manual" if order_options else "legacy")
+    issue_registry = ir.async_get(hass)
+    issue_id = f"hydro_manual_order_deprecated_{entry.entry_id}"
+    issue = issue_registry.async_get_issue(DOMAIN, issue_id)
+    assert issue is not None
+    assert issue.severity == ir.IssueSeverity.WARNING
+    assert issue.translation_key == "hydro_manual_order_deprecated"
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["step_id"] == "hydro_options"
-    assert result["data_schema"]({})[CONF_HYDRO_ORDER] == "287, 334, 333"
+    order_field = next(field for field in result["data_schema"].schema if field.schema == CONF_HYDRO_ORDER)
+    assert order_field.description["suggested_value"] == "287, 334, 333"
+    assert CONF_HYDRO_ORDER not in result["data_schema"]({})
     result = await hass.config_entries.options.async_configure(result["flow_id"], {
         CONF_HYDRO_STATIONS: ["287", "334", "333"],
-        CONF_HYDRO_ORDER: "",
         CONF_HYDRO_TREND_THRESHOLD: 5,
         CONF_HYDRO_STALE_MINUTES: 0,
         CONF_HYDRO_ARCHIVE: False,
@@ -122,6 +143,7 @@ async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert entry.options[CONF_HYDRO_ORDER] == ""
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is None
     assert [s["id"] for s in entry.options[CONF_HYDRO_STATIONS]] == ["333", "334", "287"]
     after = hass.states.get(entity_id)
     assert after.attributes["display_order"] == 30
@@ -129,6 +151,19 @@ async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
     assert after.attributes["topology_status"] == "verified"
     assert after.attributes["topology_source_reference"] == "Tavola 05"
     assert after.attributes["topology_confidence"] == "high"
+
+
+async def test_removing_entry_clears_manual_order_repair(enable_custom_integrations, hass, arpav, freezer):
+    """Deleting a manual entry clears its warning from the issue registry."""
+    freezer.move_to(NOW)
+    entry = _entry(display_order="287, 334, 333")
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    issue_registry = ir.async_get(hass)
+    issue_id = f"hydro_manual_order_deprecated_{entry.entry_id}"
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is not None
+    await hass.config_entries.async_remove(entry.entry_id)
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is None
 
 
 async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, freezer):

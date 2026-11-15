@@ -46,18 +46,30 @@ jobs:
           python-version: "3.14"
 
       - name: "Install the scanners"
-        run: python3 -m pip install bandit pip-audit
+        run: python3 -m pip install --require-hashes -r requirements_security.txt
 
       - name: "Static analysis of the integration (bandit)"
         run: python3 -m bandit -r custom_components examples -ll
 
-      - name: "Known vulnerabilities of the runtime requirements (pip-audit)"
+      - name: "Known vulnerabilities of every requirements file (pip-audit)"
         run: |
-          python3 - <<'PY' > requirements_runtime.txt
+          # the requirements that Home Assistant installs for the integration
+          python3 - <<'PY' > "$RUNNER_TEMP/requirements_manifest.txt"
           import json
-          print("\n".join(json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"]))
+          print(*json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"], sep="\n")
           PY
-          python3 -m pip_audit -r requirements_runtime.txt --progress-spinner off
+          status=0
+          for file in "$RUNNER_TEMP/requirements_manifest.txt" requirements*.txt; do
+            echo "::group::pip-audit $file"
+            args=()
+            if [ "$file" = requirements_test.txt ]; then
+              # accepted findings, justified in SECURITY.md
+              while read -r id; do args+=(--ignore-vuln "$id"); done < <(grep -v '^#' .github/pip-audit-ignore-test.txt)
+            fi
+            python3 -m pip_audit -r "$file" --progress-spinner off "${args[@]}" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
 
   workflows:
     name: "Workflows (zizmor)"
@@ -77,7 +89,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python3 -m pip install zizmor
+          python3 -m pip install --require-hashes -r requirements_security.txt
           zizmor --format=github --min-severity=low .github/workflows
 
   codeql:
