@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+name: "Security"
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: "Secrets (gitleaks)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout the full history"
+        uses: "actions/checkout@v7.0.1"
+        with:
+          fetch-depth: 0
+
+      - name: "Scan every commit for credentials"
+        uses: "gitleaks/gitleaks-action@v2"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  python:
+    name: "Code and dependencies (bandit, pip-audit)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout the repository"
+        uses: "actions/checkout@v7.0.1"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: "Install the scanners"
+        run: python3 -m pip install bandit pip-audit
+
+      - name: "Static analysis of the integration (bandit)"
+        run: python3 -m bandit -r custom_components examples -ll
+
+      - name: "Known vulnerabilities of the runtime requirements (pip-audit)"
+        run: |
+          python3 - <<'PY' > requirements_runtime.txt
+          import json
+          print("\n".join(json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"]))
+          PY
+          python3 -m pip_audit -r requirements_runtime.txt --progress-spinner off
+
+  codeql:
+    name: "CodeQL"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python", "actions"]
+    steps:
+      - name: "Checkout the repository"
+        uses: "actions/checkout@v7.0.1"
+
+      - name: "Initialize CodeQL"
+        uses: "github/codeql-action/init@v4"
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: "Analyze"
+        uses: "github/codeql-action/analyze@v4"
+        with:
+          category: "/language:${{ matrix.language }}"
