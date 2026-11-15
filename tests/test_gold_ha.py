@@ -128,8 +128,8 @@ async def test_weather_diagnostics_are_redacted(enable_custom_integrations, hass
 
     assert result["entry_type"] == "weather"
     data = result["entry"]["data"]
-    assert data["zone_id"] == "z1" and data["station_id"] == "s1"
-    for key in ("comune_id", "comune_name", "station_latitude", "station_longitude"):
+    assert data["zone_id"] == "z1" and data["zone_name"] == "Pianura centrale"
+    for key in ("comune_id", "comune_name", "station_id", "station_name", "station_latitude", "station_longitude"):
         assert data[key] == REDACTED
     assert result["entry"]["title"] == REDACTED
     assert result["entry"]["options"] == {"update_interval": 10}
@@ -137,7 +137,7 @@ async def test_weather_diagnostics_are_redacted(enable_custom_integrations, hass
     assert result["data"] == {
         "sensors_with_value": ["temperature"], "sensors_without_value": ["humidity"], "forecast_entries": 2,
     }
-    assert "Padova" not in str(result) and "45.34" not in str(result)
+    assert "Padova" not in str(result) and "45.34" not in str(result) and "Legnaro" not in str(result)
 
 
 async def test_deselected_station_loses_its_device(enable_custom_integrations, hass, arpav, freezer):

@@ -12,13 +12,15 @@ from homeassistant.core import HomeAssistant
 
 from .hydro_coordinator import HydroCoordinator
 
-# whatever locates the user: the coordinates and the municipality of the weather
-# entry (the entry title is built from it)
+# whatever locates the user: the coordinates, the municipality and the nearest
+# weather station of the weather entry (the entry title is built from them)
 TO_REDACT = {
     "latitude",
     "longitude",
     "station_latitude",
     "station_longitude",
+    "station_id",
+    "station_name",
     "comune_id",
     "comune_name",
     "title",
