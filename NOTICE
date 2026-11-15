@@ -1,0 +1,17 @@
+ARPA Veneto Weather – fork with hydrometric stations support
+
+This project is a fork of "arpa-veneto-weather"
+(https://github.com/davidecavestro/arpa-veneto-weather)
+Copyright (c) 2024, Davide Cavestro.
+The original code is licensed under the BSD 3-Clause License; its full text
+and copyright notice are kept in LICENSE-BSD-3-Clause and apply to all
+original portions of the code.
+
+New files and modifications made in this fork are licensed under the
+Apache License, Version 2.0 (see LICENSE), unless a file states otherwise.
+Files that contain original code keep the BSD 3-Clause terms for those parts.
+
+Data: ARPAV (Agenzia Regionale per la Prevenzione e Protezione Ambientale del
+Veneto) open data, released under CC BY 4.0. Automatic data, not previously
+validated. This integration is not affiliated with ARPAV and is not an
+official warning service.

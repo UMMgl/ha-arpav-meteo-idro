@@ -7,6 +7,8 @@ Home Assistant unofficial integration for Arpa Veneto Weather current conditions
 [![hacs][hacsbadge]][hacs]
 [![Community Forum][forum-shield]][forum]
 
+> **Fork notice** – This is a fork of [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather) that adds ARPAV **hydrometric stations** (river water levels, GUARDIA thresholds, trend and long-term history). Original code © 2024 Davide Cavestro, BSD 3-Clause; new files and changes in this fork are Apache-2.0. See [Licensing](#licensing).
+
 
 This integration adds support for retrieving the Forecast data from the
 [Arpav bulletin endpoint](https://api.arpa.veneto.it/REST/v1/bollettini_meteo_simboli_en)
@@ -307,6 +309,12 @@ logger:
   logs:
     custom_components.arpa-veneto-weather: debug
 ```
+
+## Licensing
+
+- Original code from [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather): Copyright (c) 2024 Davide Cavestro, [BSD 3-Clause License](LICENSE-BSD-3-Clause).
+- New files and modifications introduced in this fork: [Apache License 2.0](LICENSE).
+- See [NOTICE](NOTICE) for details. ARPAV data are CC BY 4.0 (see Disclaimer).
 
 ## Disclaimer
 
