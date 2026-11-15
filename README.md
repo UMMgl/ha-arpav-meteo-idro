@@ -206,9 +206,11 @@ downstream. The profile covers Ponte Marchese, Vicenza, Longare, Montegalda,
 Voltabarozzo, Ponte San Nicolò and Bovolenta. Other selected stations follow in
 their selected order. Rivers without a profile use the selected order throughout.
 
-Enter station IDs separated by commas to override the display order. Existing
-configurations keep their order. To switch an existing entry to automatic order,
-clear the manual order in the integration's options.
+Manual station order is deprecated in 0.15.5 and scheduled for removal in
+0.16.0. In 0.15.5, existing entries retain their saved order and station IDs
+separated by commas still override the display order. Home Assistant Repairs
+shows a warning for entries using the saved order. To switch to automatic
+ordering, clear **Manual order (station IDs)** in the integration options and save.
 
 The status sensor exposes `display_order_source` (`topology`, `manual`,
 `selection` or `legacy`). `topology_status: verified` means the station is
@@ -218,6 +220,10 @@ available in the status attributes of covered stations. The [Bacchiglione
 profile](custom_components/arpav_meteo_idro/hydro_topology.py) represents the
 Voltabarozzo diversion towards the Brenta and the Cagnola confluence at Bovolenta.
 The two gauges at those junctions are placed at the named nodes for display.
+The reach between Montegalda and Voltabarozzo summarizes the main connection
+through Bassanello. The [SIR3 hydrological report (§2.2, figures 6–7)](https://www.comune.padova.it/urbanistica/Varianti_Pi_2021/44_progetto_variante_SIR3/051_NP00-00-D-Z2-RI-ID0001-001-A.pdf#page=8)
+shows the additional urban Padova and Canale Battaglia branches, which are
+outside this station-ordering profile.
 
 Source: the ARPAV open-data XML files (`stazioni_idro.xml` and one
 `<IDSTAZ>.xml` per station under `https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/`),
@@ -236,8 +242,10 @@ Each station is a device with these sensors:
 
 The Status sensor also exposes `guardia1_m`/`guardia2_m`/`guardia3_m` (null when
 not published, never 0), `quality`, `age_minutes`, `last_sample_valid`,
-`display_order`, `latitude` and `longitude`. The Status sensor also shows
-`acquisition_status`, `last_successful_acquisition` and `next_retry_at` when
+`display_order`, `display_order_source`, `topology_status`, `latitude` and
+`longitude`. Covered stations include `topology_source_url`,
+`topology_source_reference`, `topology_verified_on` and `topology_confidence`.
+The Status sensor also shows `acquisition_status`, `last_successful_acquisition` and `next_retry_at` when
 applicable. Every sensor exposes `station_id`,
 `sensor_id`, `source_url` and `source_observed_at`.
 
