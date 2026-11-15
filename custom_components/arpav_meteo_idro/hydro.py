@@ -423,30 +423,38 @@ def hourly_statistics(
     series: HydroSeries | None,
     before: datetime | None = None,
     min_readings: int = 3,
+    *,
+    complete_hours_only: bool = False,
 ) -> list[dict]:
-    """Aggregate the valid readings into hourly mean/min/max.
-
-    Only hours that ended before ``before`` are returned, so an hour the
-    recorder may still be compiling is never written.
-    """
+    """Aggregate distinct valid observations into completed hourly buckets."""
     if series is None:
         return []
-    by_hour: dict[datetime, list[float]] = {}
+    by_hour: dict[datetime, dict[datetime, float]] = {}
     for sample in series.valid_samples:
         hour = sample.observed_at.replace(minute=0, second=0, microsecond=0)
-        by_hour.setdefault(hour, []).append(float(sample.value))  # type: ignore[arg-type]
+        by_hour.setdefault(hour, {})[sample.observed_at] = float(sample.value)  # type: ignore[arg-type]
 
-    # a 30-minute series has at most 2 readings an hour
-    if series.frequency_minutes and series.frequency_minutes >= 30:
-        min_readings = min(min_readings, max(1, 60 // series.frequency_minutes))
+    frequency = series.frequency_minutes
+    if complete_hours_only and (not frequency or frequency <= 0 or 60 % frequency):
+        return []
+    if frequency and frequency >= 30:
+        min_readings = min(min_readings, max(1, 60 // frequency))
 
-    return [
-        {
+    statistics = []
+    for hour, observations in sorted(by_hour.items()):
+        if before is not None and hour + timedelta(hours=1) > before:
+            continue
+        if complete_hours_only and frequency:
+            phases = {timestamp.minute % frequency for timestamp in observations}
+            if len(observations) != 60 // frequency or len(phases) != 1:
+                continue
+        if len(observations) < min_readings and not complete_hours_only:
+            continue
+        values = observations.values()
+        statistics.append({
             "start": hour,
             "mean": round(sum(values) / len(values), 3),
             "min": min(values),
             "max": max(values),
-        }
-        for hour, values in sorted(by_hour.items())
-        if len(values) >= min_readings and (before is None or hour + timedelta(hours=1) <= before)
-    ]
+        })
+    return statistics

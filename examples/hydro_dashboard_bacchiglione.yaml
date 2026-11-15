@@ -14,18 +14,19 @@ sections:
 
       {%- set arrow = {''rising'':''mdi:arrow-top-right-thick'',''steady'':''mdi:arrow-right-thick'',''falling'':''mdi:arrow-bottom-right-thick''} -%}
 
-      | Stazione | Livello | Stato | Trend |
+      | Stazione | Livello | Stato | Età (min) | Trend |
 
-      |---|---:|:---:|:---:|
+      |---|---:|:---:|---:|:---:|
 
       {% for s in states.sensor | selectattr(''attributes.source'', ''defined'') | selectattr(''attributes.source'', ''eq'', ''arpav_hydrometric_station'') | selectattr(''attributes.display_order'', ''defined'')
-      | sort(attribute=''attributes.display_order'') -%}
+      | selectattr(''attributes.station_id'', ''in'', ["276", "333", "303", "308", "334", "595", "287"]) | sort(attribute=''attributes.display_order'') -%}
 
       {%- set d = s.attributes.level_change_m -%}
 
       | <small>{{ (s.attributes.station_name or s.name).split('' a '')[-1] }}</small> | <small>{{ ''%.2f'' | format(s.attributes.level_m) if s.attributes.level_m is number else ''—'' }}</small> | <font
-      size="4" color="{{ dot.get(s.state, ''#9e9e9e'') }}">{{ ''◯'' if s.state in [''stale'', ''missing''] else ''⬤'' }}</font> | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{%
-      if s.attributes.trend != ''steady'' and d is number %} <small>{{ ''%+.0f'' | format(d * 100) }}</small>{% endif %}{% else %}—{% endif %} |
+      size="4" color="{{ dot.get(s.state, ''#9e9e9e'') }}">{{ ''◯'' if s.state in [''stale'', ''missing''] else ''⬤'' }}</font> | {{ s.attributes.age_minutes | round(0) | int if s.attributes.age_minutes
+      is number else ''—'' }} | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{% if s.attributes.trend != ''steady'' and d is number %} <small>{{ ''%+.0f'' | format(d
+      * 100) }}</small>{% endif %}{% else %}—{% endif %} |
 
       {% endfor %}'
   - type: markdown
@@ -34,7 +35,7 @@ sections:
   column_span: 4
   cards:
   - type: heading
-    heading: Ultime 24 ore, dalla sorgente alla foce
+    heading: Ultime 24 ore, stazioni monitorate da monte a valle
   - type: horizontal-stack
     grid_options:
       columns: full
@@ -57,11 +58,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_ponte_marchese_water_level
         name: '>= 1.0'
         type: area
@@ -69,12 +70,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 1.0 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -85,12 +86,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 2.2 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -101,12 +102,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 3.2 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -164,11 +165,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_vicenza_water_level
         name: '>= 3.0'
         type: area
@@ -176,12 +177,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 3.0 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -192,12 +193,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 4.6 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -208,12 +209,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 5.4 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -271,11 +272,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_longare_water_level
         name: '>= 3.8'
         type: area
@@ -283,12 +284,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 3.8 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -299,12 +300,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 5.0 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -315,12 +316,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 6.3 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -378,11 +379,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_montegalda_water_level
         name: '>= 3.0'
         type: area
@@ -390,12 +391,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 3.0 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -406,12 +407,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 5.5 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -422,12 +423,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 6.5 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -485,11 +486,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       yaxis:
       - decimals: 2
         show: false
@@ -518,11 +519,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       yaxis:
       - decimals: 2
         show: false
@@ -551,11 +552,11 @@ sections:
         opacity: 0.35
         stroke_width: 2
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
+          fill: 'null'
       - entity: sensor.bacchiglione_a_bovolenta_water_level
         name: '>= 5.5'
         type: area
@@ -563,12 +564,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 5.5 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -579,12 +580,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 6.5 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -595,12 +596,12 @@ sections:
         opacity: 0.55
         stroke_width: 0
         curve: stepline
-        fill_raw: last
+        fill_raw: 'null'
         group_by:
           func: last
           duration: 10min
-          fill: last
-        transform: 'return x >= 7.0 ? x : null;'
+          fill: 'null'
+        transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
           in_legend: false
@@ -658,11 +659,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     - entity: sensor.bacchiglione_a_ponte_marchese_water_level
       name: '>= 1.0'
       type: area
@@ -670,12 +671,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 1.0 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 1.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -686,12 +687,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 2.2 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 2.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -702,12 +703,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 3.2 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 3.2 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -770,11 +771,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     - entity: sensor.bacchiglione_a_vicenza_water_level
       name: '>= 3.0'
       type: area
@@ -782,12 +783,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 3.0 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -798,12 +799,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 4.6 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 4.6 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -814,12 +815,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 5.4 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 5.4 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -882,11 +883,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     - entity: sensor.bacchiglione_a_longare_water_level
       name: '>= 3.8'
       type: area
@@ -894,12 +895,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 3.8 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 3.8 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -910,12 +911,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 5.0 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 5.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -926,12 +927,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 6.3 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 6.3 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -994,11 +995,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     - entity: sensor.bacchiglione_a_montegalda_water_level
       name: '>= 3.0'
       type: area
@@ -1006,12 +1007,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 3.0 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 3.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1022,12 +1023,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 5.5 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1038,12 +1039,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 6.5 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1106,11 +1107,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     yaxis:
     - decimals: 2
       show: false
@@ -1144,11 +1145,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     yaxis:
     - decimals: 2
       show: false
@@ -1182,11 +1183,11 @@ sections:
       opacity: 0.35
       stroke_width: 2
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
+        fill: 'null'
     - entity: sensor.bacchiglione_a_bovolenta_water_level
       name: '>= 5.5'
       type: area
@@ -1194,12 +1195,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 5.5 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 5.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1210,12 +1211,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 6.5 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 6.5 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1226,12 +1227,12 @@ sections:
       opacity: 0.55
       stroke_width: 0
       curve: stepline
-      fill_raw: last
+      fill_raw: 'null'
       group_by:
         func: last
         duration: 10min
-        fill: last
-      transform: 'return x >= 7.0 ? x : null;'
+        fill: 'null'
+      transform: 'return x !== null && x >= 7.0 ? x : null;'
       show:
         in_header: false
         in_legend: false
@@ -1279,3 +1280,369 @@ sections:
     visibility:
     - condition: screen
       media_query: '(max-width: 767px)'
+- type: grid
+  column_span: 4
+  cards:
+  - type: heading
+    heading: Ultime 72 ore, medie orarie dal Recorder
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Ponte Marchese
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_ponte_marchese_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-3.4
+      max: ~3.93
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 1.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 2.2
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 3.2
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Vicenza
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_vicenza_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-1.8
+      max: ~6.2
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 4.6
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 5.4
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Longare
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_longare_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-1.2
+      max: ~7.13
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.8
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 5.0
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 6.3
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Montegalda
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_montegalda_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~-4.0
+      max: ~7.67
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 3.0
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 5.5
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 6.5
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Padova Voltabarozzo
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_padova_voltabarozzo_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: '|-0.5|'
+      max: ~10.0
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Ponte San Nicolo'
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_ponte_san_nicolo_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: '|-0.5|'
+      max: '|+0.5|'
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+  - type: custom:apexcharts-card
+    graph_span: 72h
+    update_interval: 5min
+    header:
+      show: true
+      title: Bovolenta
+      show_states: false
+    series:
+    - entity: sensor.bacchiglione_a_bovolenta_water_level
+      name: Media oraria
+      type: area
+      color: '#1e88e5'
+      opacity: 0.35
+      stroke_width: 2
+      curve: stepline
+      fill_raw: 'null'
+      statistics:
+        type: mean
+        period: hour
+        align: start
+    yaxis:
+    - decimals: 2
+      show: false
+      min: ~2.5
+      max: ~7.5
+    apex_config:
+      legend:
+        show: false
+      plotOptions:
+        area:
+          fillTo: end
+      chart:
+        height: 190
+      annotations:
+        yaxis:
+        - y: 5.5
+          borderColor: '#fbc02d'
+          strokeDashArray: 4
+          label:
+            text: G1
+            style:
+              background: '#fbc02d'
+              color: '#fff'
+        - y: 6.5
+          borderColor: '#ef6c00'
+          strokeDashArray: 4
+          label:
+            text: G2
+            style:
+              background: '#ef6c00'
+              color: '#fff'
+        - y: 7.0
+          borderColor: '#c62828'
+          strokeDashArray: 4
+          label:
+            text: G3
+            style:
+              background: '#c62828'
+              color: '#fff'

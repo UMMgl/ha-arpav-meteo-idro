@@ -176,5 +176,8 @@ class HydroSensor(CoordinatorEntity[HydroCoordinator], SensorEntity):
                 "latitude": state.meta.get("latitude"),
                 "longitude": state.meta.get("longitude"),
                 "fetch_error": state.error,
+                "acquisition_status": state.acquisition_status,
+                "last_successful_acquisition": state.fetched_at.isoformat() if state.fetched_at else None,
+                "next_retry_at": state.next_retry_at.isoformat() if state.next_retry_at else None,
             })
         return attributes

@@ -41,28 +41,32 @@ def slug(text: str) -> str:
     return out.strip("_")
 
 
-def chart(name, thresholds, ceiling, span="24h", height=260):
+def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False):
     """Return an ApexCharts card for a station."""
     entity = f"sensor.{slug(name)}_{LEVEL_SUFFIX}"
 
     def series(label, color, opacity, transform=None, main=False):
         s = {"entity": entity, "name": label, "type": "area", "color": color, "opacity": opacity,
-             "stroke_width": 2 if main else 0, "curve": "stepline", "fill_raw": "last",
-             "group_by": {"func": "last", "duration": "10min", "fill": "last"}}
+             "stroke_width": 2 if main else 0, "curve": "stepline", "fill_raw": "null"}
+        if hourly:
+            s["statistics"] = {"type": "mean", "period": "hour", "align": "start"}
+        else:
+            s["group_by"] = {"func": "last", "duration": "10min", "fill": "null"}
         if transform:
             s["transform"] = transform
             s["show"] = {"in_header": False, "in_legend": False}
         return s
 
-    all_series = [series("Livello", COLORS["below"], 0.35, main=True)]
+    all_series = [series("Media oraria" if hourly else "Livello", COLORS["below"], 0.35, main=True)]
     axis = {"decimals": 2, "show": False}
     apex = {"legend": {"show": False}, "plotOptions": {"area": {"fillTo": "end"}}, "chart": {"height": height}}
     normalized = hydro.chart_axis(thresholds) if thresholds else None
     if normalized:
         # soft bounds: the scale grows only if the level leaves it
         axis.update(min=f"~{normalized[0]}", max=f"~{normalized[1]}")
-        for value, key in zip(thresholds, ("g1", "g2", "g3"), strict=True):
-            all_series.append(series(f">= {value}", COLORS[key], 0.55, transform=f"return x >= {value} ? x : null;"))
+        if not hourly:
+            for value, key in zip(thresholds, ("g1", "g2", "g3"), strict=True):
+                all_series.append(series(f">= {value}", COLORS[key], 0.55, transform=f"return x !== null && x >= {value} ? x : null;"))
         apex["annotations"] = {"yaxis": [
             {"y": v, "borderColor": COLORS[k], "strokeDashArray": 4,
              "label": {"text": k.upper(), "style": {"background": COLORS[k], "color": "#fff"}}}
@@ -70,18 +74,18 @@ def chart(name, thresholds, ceiling, span="24h", height=260):
     else:
         axis.update(min="|-0.5|", max=f"~{ceiling}" if ceiling else "|+0.5|")
     return {"type": "custom:apexcharts-card", "graph_span": span, "update_interval": "5min",
-            "header": {"show": True, "title": name.split(" a ", 1)[-1], "show_states": True},
+            "header": {"show": True, "title": name.split(" a ", 1)[-1], "show_states": not hourly},
             "series": all_series, "yaxis": [axis], "apex_config": apex}
 
 
 TABLE = """{%- set dot = {'below_g1':'#2e7d32','g1_g2':'#fbc02d','g2_g3':'#ef6c00','above_g3':'#c62828'} -%}
 {%- set arrow = {'rising':'mdi:arrow-top-right-thick','steady':'mdi:arrow-right-thick','falling':'mdi:arrow-bottom-right-thick'} -%}
-| Stazione | Livello | Stato | Trend |
-|---|---:|:---:|:---:|
-{% for s in states.sensor | selectattr('attributes.source', 'defined') | selectattr('attributes.source', 'eq', 'arpav_hydrometric_station') | selectattr('attributes.display_order', 'defined') | sort(attribute='attributes.display_order') -%}
+| Stazione | Livello | Stato | Età (min) | Trend |
+|---|---:|:---:|---:|:---:|
+{% for s in states.sensor | selectattr('attributes.source', 'defined') | selectattr('attributes.source', 'eq', 'arpav_hydrometric_station') | selectattr('attributes.display_order', 'defined') | selectattr('attributes.station_id', 'in', STATION_IDS) | sort(attribute='attributes.display_order') -%}
 {%- set d = s.attributes.level_change_m -%}
-| <small>{{ (s.attributes.station_name or s.name).split(' a ')[-1] }}</small> | <small>{{ '%.2f' | format(s.attributes.level_m) if s.attributes.level_m is number else '—' }}</small> | <font size="4" color="{{ dot.get(s.state, '#9e9e9e') }}">{{ '◯' if s.state in ['stale', 'missing'] else '⬤' }}</font> | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{% if s.attributes.trend != 'steady' and d is number %} <small>{{ '%+.0f' | format(d * 100) }}</small>{% endif %}{% else %}—{% endif %} |
-{% endfor %}"""
+| <small>{{ (s.attributes.station_name or s.name).split(' a ')[-1] }}</small> | <small>{{ '%.2f' | format(s.attributes.level_m) if s.attributes.level_m is number else '—' }}</small> | <font size="4" color="{{ dot.get(s.state, '#9e9e9e') }}">{{ '◯' if s.state in ['stale', 'missing'] else '⬤' }}</font> | {{ s.attributes.age_minutes | round(0) | int if s.attributes.age_minutes is number else '—' }} | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{% if s.attributes.trend != 'steady' and d is number %} <small>{{ '%+.0f' | format(d * 100) }}</small>{% endif %}{% else %}—{% endif %} |
+{% endfor %}""".replace("STATION_IDS", json.dumps([station[0] for station in STATIONS]))
 
 view = {
     "title": "Bacchiglione",
@@ -94,13 +98,17 @@ view = {
             {"type": "markdown", "content": TABLE},
             {"type": "markdown", "content": "<small>Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta.</small>"}]},
         {"type": "grid", "column_span": 4, "cards": [
-            {"type": "heading", "heading": "Ultime 24 ore, dalla sorgente alla foce"},
+            {"type": "heading", "heading": "Ultime 24 ore, stazioni monitorate da monte a valle"},
             {"type": "horizontal-stack", "grid_options": {"columns": "full"},
              "visibility": [{"condition": "screen", "media_query": "(min-width: 768px)"}],
              "cards": [chart(n, t, c) for _, n, t, c in STATIONS]},
             *[dict(chart(n, t, c, height=170), grid_options={"columns": "full"},
                    visibility=[{"condition": "screen", "media_query": "(max-width: 767px)"}])
               for _, n, t, c in STATIONS]]},
+        {"type": "grid", "column_span": 4, "cards": [
+            {"type": "heading", "heading": "Ultime 72 ore, medie orarie dal Recorder"},
+            *[chart(n, t, c, span="72h", height=190, hourly=True) for _, n, t, c in STATIONS],
+        ]},
     ],
 }
 
