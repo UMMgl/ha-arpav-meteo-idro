@@ -9,8 +9,18 @@ on:
 permissions: {}
 
 jobs:
+  quality:
+    name: "Release quality (Gold)"
+    permissions:
+      contents: read
+    uses: ./.github/workflows/tests.yml
+    with:
+      quality_tier: "gold"
+
   release:
     name: "Release"
+    needs: quality
+    if: github.ref_type == 'tag'
     runs-on: "ubuntu-latest"
     permissions:
       contents: write

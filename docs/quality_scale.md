@@ -8,7 +8,16 @@ part inherited from the original project. Rule status per rule:
 [`custom_components/arpav_meteo_idro/quality_scale.yaml`](../custom_components/arpav_meteo_idro/quality_scale.yaml).
 Open items are listed in [ROADMAP.md](../ROADMAP.md).
 
-## Bronze (target, enforced in CI)
+## Release gate (Gold)
+
+The Release workflow runs the test suite and requires Gold on the candidate
+commit before building or publishing. Gold includes all Bronze and Silver
+rules. The workflow checks the rule declarations and requires measured
+coverage above 95% in every integration module. To preflight a candidate
+branch, run the Release workflow on that branch. Branch runs perform
+verification only. Release assets are published by tag runs.
+
+## Bronze (enforced in pull request CI)
 
 `scripts/check_quality_scale.py bronze` runs in the Tests workflow and fails
 when a Bronze rule is open; higher tiers are reported.
