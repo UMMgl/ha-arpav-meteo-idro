@@ -5,14 +5,12 @@ Planned work, one pull request each. Quality items refer to
 
 ## Hydrometric stations
 
-- [ ] **Automatic upstream-to-downstream ordering** of the stations of a river,
-  instead of the order typed by the user. The ARPAV XML files publish no
-  adjacency, so the order must come from the river network (Regione Veneto /
-  basin authority cartography) and be stored per segment with source,
-  verification date and confidence (`topology_status: verified`). Confluences,
-  diversions and side branches (e.g. Cagnola at Bovolenta) need a graph, not a
-  list; never order by IDSTAZ, node order, latitude, longitude or QUOTA. The
-  manual order stays as an override.
+- [x] **Automatic upstream-to-downstream ordering for Bacchiglione**, using a
+  documented graph covering the first seven stations, with source, verification
+  date and confidence per reach. Manual overrides remain available.
+- [ ] **Extend automatic ordering to other rivers** as cartographic evidence
+  becomes available. Use the documented river network for adjacency, with a
+  manual override and a fallback to selection order for uncovered stations.
 - [ ] Per-station axis ceiling option for stations without published thresholds
   (e.g. Voltabarozzo, interim 10 m in the example dashboard).
 

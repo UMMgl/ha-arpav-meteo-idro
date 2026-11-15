@@ -200,11 +200,24 @@ once every 10 minutes, since a METAR is issued every 30.
 
 *Fork addition.* Besides weather locations, the integration can add the ARPAV
 **hydrometric stations** of a river. Add the integration again and choose
-**Hydrometric stations**, then the river and its stations. Optionally type their
-order from upstream to downstream as a comma separated list of station IDs
-(for example `276, 333, 303, 308, 334, 595, 287` for the Bacchiglione).
-The order is a display order (`topology_status: candidate`), not a verified
-hydraulic topology.
+**Hydrometric stations**, then the river and its stations. For Bacchiglione,
+new configurations automatically order covered stations from upstream to
+downstream. The profile covers Ponte Marchese, Vicenza, Longare, Montegalda,
+Voltabarozzo, Ponte San Nicolò and Bovolenta. Other selected stations follow in
+their selected order. Rivers without a profile use the selected order throughout.
+
+Enter station IDs separated by commas to override the display order. Existing
+configurations keep their order. To switch an existing entry to automatic order,
+clear the manual order in the integration's options.
+
+The status sensor exposes `display_order_source` (`topology`, `manual`,
+`selection` or `legacy`). `topology_status: verified` means the station is
+covered by the documented profile, even when a manual display order is in use.
+The source URL, document reference, verification date and confidence are
+available in the status attributes of covered stations. The [Bacchiglione
+profile](custom_components/arpav_meteo_idro/hydro_topology.py) represents the
+Voltabarozzo diversion towards the Brenta and the Cagnola confluence at Bovolenta.
+The two gauges at those junctions are placed at the named nodes for display.
 
 Source: the ARPAV open-data XML files (`stazioni_idro.xml` and one
 `<IDSTAZ>.xml` per station under `https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/`),
@@ -401,8 +414,9 @@ rejected with an error.
   or be invalidated by ARPAV.
 * Water levels are relative to the local hydrometric zero of each station: they
   are not altitudes and cannot be compared between stations.
-* The upstream-to-downstream order is a display order typed by the user, not a
-  verified hydraulic topology (confluences, diversions and backwater are not modelled).
+* The verified display order currently covers seven Bacchiglione stations.
+  The graph describes connections at the scale of the named reaches and junctions.
+  The display order gives no information about gate settings, travel times or backwater.
 * Home Assistant cannot back-date states: the history of the days before the
   installation only reaches the long-term statistics, and only for the 2-3 days
   ARPAV still publishes.

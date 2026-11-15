@@ -40,10 +40,10 @@
             },
             "hydro_stations": {
                 "title": "Stazioni del {river}",
-                "description": "Seleziona le stazioni e, se vuoi, il loro ordine da monte a valle come elenco di ID separati da virgole (vuoto: come selezionate). È un ordine di visualizzazione, non una topologia idraulica verificata.\n\nStazioni: {stations}",
+                "description": "Seleziona le stazioni. Lascia vuoto l’ordine manuale per usare il profilo del fiume, dove disponibile. Per i fiumi senza profilo vale l’ordine di selezione. Inserisci gli ID delle stazioni separati da virgole per impostare l’ordine di visualizzazione.\n\nStazioni: {stations}",
                 "data": {
                     "stations": "Stazioni",
-                    "display_order": "Ordine (ID, da monte)"
+                    "display_order": "Ordine manuale (ID stazioni)"
                 }
             }
         },
@@ -109,10 +109,10 @@
             },
             "hydro_options": {
                 "title": "Stazioni del {river}",
-                "description": "Stazioni: {stations}",
+                "description": "Seleziona le stazioni. Lascia vuoto l’ordine manuale per usare il profilo del fiume, dove disponibile. Per i fiumi senza profilo vale l’ordine di selezione. Inserisci gli ID delle stazioni separati da virgole per impostare l’ordine di visualizzazione.\n\nStazioni: {stations}",
                 "data": {
                     "stations": "Stazioni",
-                    "display_order": "Ordine (ID, da monte)",
+                    "display_order": "Ordine manuale (ID stazioni)",
                     "trend_threshold_cm": "Soglia del trend",
                     "stale_minutes": "Obsoleto dopo (0 = automatico)",
                     "archive_history": "Completa ogni giorno le statistiche del livello"

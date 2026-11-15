@@ -42,10 +42,10 @@
             },
             "hydro_stations": {
                 "title": "Stations of {river}",
-                "description": "Select the stations and, optionally, their order from upstream to downstream as a comma separated list of IDs (empty: as selected). The order is a display order, not a verified hydraulic topology.\n\nStations: {stations}",
+                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
                 "data": {
                     "stations": "Stations",
-                    "display_order": "Order (IDs, upstream first)"
+                    "display_order": "Manual order (station IDs)"
                 }
             }
         },
@@ -111,10 +111,10 @@
             },
             "hydro_options": {
                 "title": "Stations of {river}",
-                "description": "Stations: {stations}",
+                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
                 "data": {
                     "stations": "Stations",
-                    "display_order": "Order (IDs, upstream first)",
+                    "display_order": "Manual order (station IDs)",
                     "trend_threshold_cm": "Trend threshold",
                     "stale_minutes": "Stale after (0 = automatic)",
                     "archive_history": "Complete the level statistics every day"

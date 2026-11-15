@@ -23,6 +23,7 @@ from custom_components.arpav_meteo_idro import hydro, hydro_coordinator, hydro_s
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
+    CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STATIONS,
@@ -90,6 +91,44 @@ async def test_config_flow_creates_ordered_entry(enable_custom_integrations, has
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: "Bacchiglione"}
     assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["276", "333", "287"]
+    assert result["options"][CONF_HYDRO_ORDER] == "276, 333"
+
+
+async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
+    enable_custom_integrations, hass, arpav, freezer,
+):
+    """Upgrades keep the saved order. Clearing the override enables the profile."""
+    freezer.move_to(NOW)
+    entry = _entry(stations=list(reversed(STATIONS)))
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_status")
+    before = hass.states.get(entity_id)
+    assert before.attributes["display_order"] == 10
+    assert before.attributes["display_order_source"] == "legacy"
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["step_id"] == "hydro_options"
+    assert result["data_schema"]({})[CONF_HYDRO_ORDER] == "287, 334, 333"
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {
+        CONF_HYDRO_STATIONS: ["287", "334", "333"],
+        CONF_HYDRO_ORDER: "",
+        CONF_HYDRO_TREND_THRESHOLD: 5,
+        CONF_HYDRO_STALE_MINUTES: 0,
+        CONF_HYDRO_ARCHIVE: False,
+    })
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.options[CONF_HYDRO_ORDER] == ""
+    assert [s["id"] for s in entry.options[CONF_HYDRO_STATIONS]] == ["333", "334", "287"]
+    after = hass.states.get(entity_id)
+    assert after.attributes["display_order"] == 30
+    assert after.attributes["display_order_source"] == "topology"
+    assert after.attributes["topology_status"] == "verified"
+    assert after.attributes["topology_source_reference"] == "Tavola 05"
+    assert after.attributes["topology_confidence"] == "high"
 
 
 async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, freezer):
