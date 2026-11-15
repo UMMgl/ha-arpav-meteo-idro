@@ -38,10 +38,15 @@ SHA-256 hashes for Linux and CPython 3.14, installed with `pip install
 --require-hashes`. They are generated from the matching `.in` files:
 
 ```bash
-uv pip compile --generate-hashes --python-version 3.14 --python-platform linux   requirements_security.in -o requirements_security.txt
+uv pip compile --generate-hashes --python-version 3.14 --python-platform linux requirements_security.in -o requirements_security.txt
 ```
 
-Dependabot (daily, one grouped pull request) updates the `.in` and `.txt` files.
+The lock files are refreshed by regenerating them with the command above (also
+the first line of each file), for example when the weekly pip-audit run reports
+a finding. Dependabot's pip ecosystem is enabled for the repository, but it is
+not relied on for these files: it is not verified that it updates hashed
+compiled files consistently, so review any Dependabot pull request that touches
+them and regenerate the file with `uv` before merging.
 pip-audit runs on every `requirements*.txt` file and on the `requirements` of
 `manifest.json` in each CI run and every Monday; a finding fails the check and is
 either fixed by upgrading or listed here with the reason.
@@ -74,7 +79,7 @@ Every release from 0.15.4 on carries, next to `ha-arpav-meteo-idro.zip`:
 sha256sum -c SHA256SUMS
 gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro
 # offline, with the bundle downloaded from the same release
-gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro   --bundle ha-arpav-meteo-idro.intoto.jsonl
+gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro --bundle ha-arpav-meteo-idro.intoto.jsonl
 ```
 
 Workflows are checked by zizmor; OpenSSF Scorecard results are published in code scanning.
