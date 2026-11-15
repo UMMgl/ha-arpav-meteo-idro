@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Gianluca Nardin (@UMMgl)
-"""Generate an example dashboard view for the hydrometric stations of a river.
+"""Generate example dashboard views for the hydrometric stations of a river.
 
-Usage: python generate_hydro_dashboard.py > hydro_dashboard_bacchiglione.yaml
+Usage: python generate_hydro_dashboard.py [--lang en|it] [--full] > view.yaml
+
+* basic: table, 24-hour charts and 72-hour hourly Recorder means
+* --full: also legend, alert badges and a period selector (last hour / day /
+  week / month), which needs the helper of ``helpers_bacchiglione.yaml``
+* --lang: entity IDs as created by Home Assistant in that language
 
 The charts use the normalized scale of the integration: the first alert
 threshold (G1) at 60% and the third (G3) at 90% of the height, so every station
-is read against its own thresholds. Requires the ApexCharts card (HACS).
+is read against its own thresholds. Missing measurements stay visible as gaps.
+Requires the ApexCharts card (HACS).
 """
 
 import json
@@ -27,10 +33,21 @@ STATIONS = [
     ("595", "Bacchiglione a Ponte San Nicolo'", None, None),
     ("287", "Bacchiglione a Bovolenta", (5.5, 6.5, 7.0), None),
 ]
-# entity name of the water level sensor in the language of the installation
-# ("water_level" in English, "livello_idrometrico" in Italian)
-LEVEL_SUFFIX = "water_level"
+# entity names in the language of the installation
+SUFFIXES = {
+    "en": {"level": "water_level", "status": "status"},
+    "it": {"level": "livello_idrometrico", "status": "stato"},
+}
+LEVEL_SUFFIX = SUFFIXES["en"]["level"]
 COLORS = {"below": "#1e88e5", "g1": "#fbc02d", "g2": "#ef6c00", "g3": "#c62828"}
+PERIOD_HELPER = "input_select.bacchiglione_periodo_grafici"
+# label, graph span, grouping of the states, hourly Recorder means
+PERIODS = [
+    ("Ultima ora", "1h", None, False),
+    ("Ultimo giorno", "24h", {"func": "last", "duration": "10min", "fill": "null"}, False),
+    ("Ultima settimana", "7d", {"func": "avg", "duration": "30min", "fill": "null"}, False),
+    ("Ultimo mese", "30d", None, True),
+]
 
 
 def slug(text: str) -> str:
@@ -41,7 +58,7 @@ def slug(text: str) -> str:
     return out.strip("_")
 
 
-def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False):
+def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False, group_by=PERIODS[1][2]):
     """Return an ApexCharts card for a station."""
     entity = f"sensor.{slug(name)}_{LEVEL_SUFFIX}"
 
@@ -50,8 +67,8 @@ def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False):
              "stroke_width": 2 if main else 0, "curve": "stepline", "fill_raw": "null"}
         if hourly:
             s["statistics"] = {"type": "mean", "period": "hour", "align": "start"}
-        else:
-            s["group_by"] = {"func": "last", "duration": "10min", "fill": "null"}
+        elif group_by:
+            s["group_by"] = group_by
         if transform:
             s["transform"] = transform
             s["show"] = {"in_header": False, "in_legend": False}
@@ -66,7 +83,8 @@ def chart(name, thresholds, ceiling, span="24h", height=260, hourly=False):
         axis.update(min=f"~{normalized[0]}", max=f"~{normalized[1]}")
         if not hourly:
             for value, key in zip(thresholds, ("g1", "g2", "g3"), strict=True):
-                all_series.append(series(f">= {value}", COLORS[key], 0.55, transform=f"return x !== null && x >= {value} ? x : null;"))
+                all_series.append(series(f">= {value}", COLORS[key], 0.55,
+                                         transform=f"return x !== null && x >= {value} ? x : null;"))
         apex["annotations"] = {"yaxis": [
             {"y": v, "borderColor": COLORS[k], "strokeDashArray": 4,
              "label": {"text": k.upper(), "style": {"background": COLORS[k], "color": "#fff"}}}
@@ -87,35 +105,93 @@ TABLE = """{%- set dot = {'below_g1':'#2e7d32','g1_g2':'#fbc02d','g2_g3':'#ef6c0
 | <small>{{ (s.attributes.station_name or s.name).split(' a ')[-1] }}</small> | <small>{{ '%.2f' | format(s.attributes.level_m) if s.attributes.level_m is number else '—' }}</small> | <font size="4" color="{{ dot.get(s.state, '#9e9e9e') }}">{{ '◯' if s.state in ['stale', 'missing'] else '⬤' }}</font> | {{ s.attributes.age_minutes | round(0) | int if s.attributes.age_minutes is number else '—' }} | {% if s.attributes.trend %}<ha-icon icon="{{ arrow[s.attributes.trend] }}"></ha-icon>{% if s.attributes.trend != 'steady' and d is number %} <small>{{ '%+.0f' | format(d * 100) }}</small>{% endif %}{% else %}—{% endif %} |
 {% endfor %}""".replace("STATION_IDS", json.dumps([station[0] for station in STATIONS]))
 
-view = {
-    "title": "Bacchiglione",
-    "path": "bacchiglione",
-    "type": "sections",
-    "max_columns": 4,
-    "sections": [
-        {"type": "grid", "column_span": 2, "cards": [
-            {"type": "heading", "heading": "Livelli ARPAV (monte → valle)"},
-            {"type": "markdown", "content": TABLE},
-            {"type": "markdown", "content": "<small>Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta.</small>"}]},
-        {"type": "grid", "column_span": 4, "cards": [
-            {"type": "heading", "heading": "Ultime 24 ore, stazioni monitorate da monte a valle"},
-            {"type": "horizontal-stack", "grid_options": {"columns": "full"},
-             "visibility": [{"condition": "screen", "media_query": "(min-width: 768px)"}],
-             "cards": [chart(n, t, c) for _, n, t, c in STATIONS]},
-            *[dict(chart(n, t, c, height=170), grid_options={"columns": "full"},
-                   visibility=[{"condition": "screen", "media_query": "(max-width: 767px)"}])
-              for _, n, t, c in STATIONS]]},
-        {"type": "grid", "column_span": 4, "cards": [
-            {"type": "heading", "heading": "Ultime 72 ore, medie orarie dal Recorder"},
-            *[chart(n, t, c, span="72h", height=190, hourly=True) for _, n, t, c in STATIONS],
-        ]},
-    ],
-}
+SOURCE = "<small>Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta.</small>"
+LEGEND = (
+    "<small>**Grafici**: area blu sotto G1, gialla oltre G1, arancione oltre G2, rossa oltre G3; "
+    "scala normalizzata con G1 al 60% e G3 al 90% dell'altezza (si allarga se il livello esce); "
+    "i buchi sono misure mancanti.<br>"
+    '**Stato**: <font color="#2e7d32">⬤</font> sotto G1 · <font color="#fbc02d">⬤</font> G1–G2 · '
+    '<font color="#ef6c00">⬤</font> G2–G3 · <font color="#c62828">⬤</font> da G3 · '
+    '<font color="#9e9e9e">⬤</font> soglie non pubblicate · <font color="#9e9e9e">◯</font> dato mancante o vecchio.<br>'
+    "**Trend**: ultime 4 misure; freccia inclinata e variazione in cm da ±5 cm.<br>"
+    "Livelli rispetto allo zero idrometrico locale: non confrontabili tra stazioni. "
+    "Stazioni monitorate mostrate da monte a valle (ordine candidato).<br>"
+    "_Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta._</small>"
+)
+WIDE = {"condition": "screen", "media_query": "(min-width: 768px)"}
+NARROW = {"condition": "screen", "media_query": "(max-width: 767px)"}
+
+
+def chart_rows(span="24h", group_by=PERIODS[1][2], hourly=False, extra=()):
+    """Charts side by side on wide screens, stacked on phones."""
+    return [
+        {"type": "horizontal-stack", "grid_options": {"columns": "full"}, "visibility": [*extra, WIDE],
+         "cards": [chart(n, t, c, span, 260, hourly, group_by) for _, n, t, c in STATIONS]},
+        *[dict(chart(n, t, c, span, 170, hourly, group_by), grid_options={"columns": "full"},
+               visibility=[*extra, NARROW]) for _, n, t, c in STATIONS],
+    ]
+
+
+def recorder_section():
+    """Hourly Recorder means, including the hours recovered by the archive action."""
+    return {"type": "grid", "column_span": 4, "cards": [
+        {"type": "heading", "heading": "Ultime 72 ore, medie orarie dal Recorder"},
+        *[chart(n, t, c, span="72h", height=190, hourly=True) for _, n, t, c in STATIONS],
+    ]}
+
+
+def build_view(lang="en", full=False):
+    """Return the view for a language, basic or full."""
+    global LEVEL_SUFFIX
+    LEVEL_SUFFIX = SUFFIXES[lang]["level"]
+    status = SUFFIXES[lang]["status"]
+    table = [{"type": "heading", "heading": "Livelli ARPAV (monte → valle)"}, {"type": "markdown", "content": TABLE}]
+    if not full:
+        return {
+            "title": "Bacchiglione", "path": "bacchiglione", "type": "sections", "max_columns": 4,
+            "sections": [
+                {"type": "grid", "column_span": 2, "cards": [*table, {"type": "markdown", "content": SOURCE}]},
+                {"type": "grid", "column_span": 4, "cards": [
+                    {"type": "heading", "heading": "Ultime 24 ore, stazioni monitorate da monte a valle"},
+                    *chart_rows()]},
+                recorder_section(),
+            ],
+        }
+    charts = []
+    for label, span, group_by, hourly in PERIODS:
+        charts += chart_rows(span, group_by, hourly,
+                             extra=[{"condition": "state", "entity": PERIOD_HELPER, "state": label}])
+    badges = [
+        {"type": "entity", "entity": f"sensor.{slug(n)}_{status}", "name": n.split(" a ", 1)[-1],
+         "show_name": True, "show_state": True, "icon": "mdi:alert", "color": color,
+         "visibility": [{"condition": "state", "entity": f"sensor.{slug(n)}_{status}", "state": band}]}
+        for _, n, t, _c in STATIONS if t
+        for band, color in (("g1_g2", "amber"), ("g2_g3", "orange"), ("above_g3", "red"))
+    ]
+    return {
+        "title": "Bacchiglione", "path": "bacchiglione", "type": "sections", "max_columns": 4, "badges": badges,
+        "sections": [
+            {"type": "grid", "column_span": 2, "cards": table},
+            {"type": "grid", "column_span": 2, "cards": [
+                {"type": "heading", "heading": "Legenda", "heading_style": "subtitle"},
+                {"type": "markdown", "content": LEGEND}]},
+            {"type": "grid", "column_span": 4, "cards": [
+                {"type": "heading", "heading": "Stazioni monitorate da monte a valle (con soglie)"},
+                {"type": "tile", "entity": PERIOD_HELPER, "name": "Periodo", "hide_state": True,
+                 "features": [{"type": "select-options"}], "features_position": "inline",
+                 "grid_options": {"columns": 12}},
+                *charts]},
+            recorder_section(),
+        ],
+    }
+
 
 if __name__ == "__main__":
+    lang = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "en"
+    view = build_view(lang, "--full" in sys.argv)
+    header = ("# Generated by examples/generate_hydro_dashboard.py " + " ".join(sys.argv[1:])).rstrip() + "\n"
     try:
         import yaml
-        sys.stdout.write("# Generated by examples/generate_hydro_dashboard.py\n")
-        sys.stdout.write(yaml.safe_dump(view, allow_unicode=True, sort_keys=False, width=200))
+        sys.stdout.write(header + yaml.safe_dump(view, allow_unicode=True, sort_keys=False, width=200))
     except ImportError:  # JSON is valid YAML
-        sys.stdout.write(json.dumps(view, ensure_ascii=False, indent=2))
+        sys.stdout.write(header + json.dumps(view, ensure_ascii=False, indent=2))
