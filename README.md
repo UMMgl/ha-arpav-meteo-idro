@@ -6,6 +6,7 @@ Home Assistant unofficial integration for ARPAV (Veneto) weather (current condit
 [![License][license-shield]](LICENSE)
 [![hacs][hacsbadge]][hacs]
 [![Community Forum][forum-shield]][forum]
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16742/badge)](https://www.bestpractices.dev/projects/16742)
 
 > **Fork notice** – This is a fork of [davidecavestro/arpa-veneto-weather](https://github.com/davidecavestro/arpa-veneto-weather) by Davide Cavestro, who wrote the weather part (© 2024, BSD 3-Clause). The ARPAV **hydrometric stations** part (river water levels, alert thresholds, trend and long-term history) is by Gianluca Nardin ([@UMMgl](https://github.com/UMMgl)) (© 2026, Apache-2.0). See [Credits and licensing](#credits-and-licensing).
 
@@ -200,11 +201,11 @@ once every 10 minutes, since a METAR is issued every 30.
 
 *Fork addition.* Besides weather locations, the integration can add the ARPAV
 **hydrometric stations** of a river. Add the integration again and choose
-**Hydrometric stations**, then the river and its stations. For Bacchiglione,
-new configurations automatically order covered stations from upstream to
-downstream. The profile covers Ponte Marchese, Vicenza, Longare, Montegalda,
-Voltabarozzo, Ponte San Nicolò and Bovolenta. Other selected stations follow in
-their selected order. Rivers without a profile use the selected order throughout.
+**Hydrometric stations**, then the river and its stations. Automatic order
+covers 86 stations across the 23 ARPAV water bodies with multiple gauges in
+the 15 November 2026 registry. See the [profile coverage and sources](docs/hydro_topology.md).
+Other selected stations follow in their selected order. Rivers without a profile
+use the selected order throughout.
 
 Manual station order is deprecated in 0.15.5 and scheduled for removal in
 0.16.0. In 0.15.5, existing entries retain their saved order and station IDs
@@ -422,7 +423,7 @@ rejected with an error.
   or be invalidated by ARPAV.
 * Water levels are relative to the local hydrometric zero of each station: they
   are not altitudes and cannot be compared between stations.
-* The verified display order currently covers seven Bacchiglione stations.
+* The verified display order covers the documented station paths in each profile.
   The graph describes connections at the scale of the named reaches and junctions.
   The display order gives no information about gate settings, travel times or backwater.
 * Home Assistant cannot back-date states: the history of the days before the
