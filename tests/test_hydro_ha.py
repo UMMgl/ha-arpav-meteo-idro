@@ -94,6 +94,19 @@ async def test_config_flow_creates_ordered_entry(enable_custom_integrations, has
     assert result["options"][CONF_HYDRO_ORDER] == "276, 333"
 
 
+async def test_config_flow_uses_automatic_profile_for_brenta(enable_custom_integrations, hass, arpav):
+    """Apply the Brenta profile on first setup when the order field is omitted."""
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "hydro"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Brenta"})
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_HYDRO_STATIONS: ["646", "374", "329", "629"]})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["options"][CONF_HYDRO_ORDER] == ""
+    assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["374", "629", "329", "646"]
+
+
 async def test_existing_entry_can_switch_from_legacy_to_automatic_order(
     enable_custom_integrations, hass, arpav, freezer,
 ):
