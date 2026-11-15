@@ -1,16 +1,11 @@
 """Sensors for Arpa Veneto Weather component."""
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
-from .const import (
-    CONF_ENTRY_TYPE,
-    DOMAIN,
-    ENTRY_TYPE_HYDRO,
-    SENSOR_TYPES
-)
-from .hydro_sensor import async_setup_hydro_entities
 from datetime import datetime
+
+from homeassistant.components.sensor import SensorEntity
+
+from .const import CONF_ENTRY_TYPE, ENTRY_TYPE_HYDRO, SENSOR_TYPES
+from .entity import ArpavWeatherEntity
+from .hydro_sensor import async_setup_hydro_entities
 
 # the coordinator fetches the data: entities never update in parallel
 PARALLEL_UPDATES = 0
@@ -30,14 +25,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         sensors.append(ArpaVenetoSensor(coordinator, config_entry, sensor_type))
     async_add_entities(sensors)
 
-class ArpaVenetoSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
+class ArpaVenetoSensor(ArpavWeatherEntity, SensorEntity):
     """Representation of an ARPA Veneto sensor."""
 
     def __init__(self, coordinator, config_entry, sensor_type):
         """Initialize the sensor."""
-        super().__init__(coordinator)  # Initialize the CoordinatorEntity
-        self.coordinator = coordinator
-        self._config_entry = config_entry
+        super().__init__(coordinator, config_entry)
         self.station_id = config_entry.data.get("station_id")
         self.station_name = config_entry.data.get("station_name")
         self.sensor_type = sensor_type
@@ -48,18 +41,8 @@ class ArpaVenetoSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
 
         self._attr_unique_id = f"arpav_{sensor_type}_{self.station_id}"
 
-        self._attr_has_entity_name = True
         self._attr_translation_key = sensor_type
         self._attr_translation_placeholders = {"station_name": self.station_name}
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return the device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._config_entry.entry_id)},
-            name="Arpa Veneto Weather",
-            entry_type=DeviceEntryType.SERVICE
-        )
 
     @property
     def state(self):

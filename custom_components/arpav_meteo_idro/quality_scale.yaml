@@ -8,13 +8,9 @@ rules:
   action-setup: done
   appropriate-polling: done
   brands: done
-  common-modules:
-    status: todo
-    comment: coordinators are in coordinator.py and hydro_coordinator.py; no shared entity.py yet
+  common-modules: done
   config-flow: done
-  config-flow-test-coverage:
-    status: todo
-    comment: hydrometric steps covered; weather steps to be covered
+  config-flow-test-coverage: done
   dependency-transparency: done
   docs-actions: done
   docs-high-level-description: done
@@ -62,7 +58,7 @@ rules:
     status: exempt
     comment: cloud service, nothing to discover
   docs-data-update: done
-  docs-examples: todo
+  docs-examples: done
   docs-known-limitations: done
   docs-supported-devices:
     status: exempt

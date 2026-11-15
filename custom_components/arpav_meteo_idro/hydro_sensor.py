@@ -17,12 +17,11 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory, UnitOfLength
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import hydro
-from .const import DOMAIN, HYDRO_ATTRIBUTION
+from .const import DOMAIN
+from .entity import ArpavHydroEntity
 from .hydro_coordinator import HydroCoordinator, HydroStationState
 
 
@@ -97,28 +96,18 @@ async def async_setup_hydro_entities(
     )
 
 
-class HydroSensor(CoordinatorEntity[HydroCoordinator], SensorEntity):
+class HydroSensor(ArpavHydroEntity, SensorEntity):
     """A sensor of a hydrometric station."""
 
     entity_description: HydroSensorDescription
-    _attr_has_entity_name = True
-    _attr_attribution = HYDRO_ATTRIBUTION
+    coordinator: HydroCoordinator
 
     def __init__(self, coordinator: HydroCoordinator, meta: dict,
                  description: HydroSensorDescription) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, meta)
         self.entity_description = description
-        self._station_id = meta["id"]
         self._attr_unique_id = f"{DOMAIN}_hydro_{self._station_id}_{description.key}"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, f"hydro_{self._station_id}")},
-            name=meta.get("name") or f"ARPAV {self._station_id}",
-            manufacturer="ARPAV",
-            model="Hydrometric station",
-            entry_type=DeviceEntryType.SERVICE,
-            configuration_url=f"{hydro.XML_BASE}/{meta.get('link') or ''}",
-        )
 
     @property
     def _state(self) -> HydroStationState | None:

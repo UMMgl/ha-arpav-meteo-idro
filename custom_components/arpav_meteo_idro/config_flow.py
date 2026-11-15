@@ -143,6 +143,15 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
 
     async def async_step_weather(self, user_input=None):
         """Handle the first step of a weather location: comune selection."""
+        try:
+            return await self._async_step_weather(user_input)
+        except (aiohttp.ClientError, TimeoutError, KeyError, ValueError) as err:
+            # ARPAV unreachable or an unexpected answer: abort cleanly, nothing is created
+            _LOGGER.warning("Unable to read the ARPAV lists: %s", err)
+            return self.async_abort(reason="cannot_connect")
+
+    async def _async_step_weather(self, user_input=None):
+        """Handle the first step of a weather location: comune selection."""
         if user_input is not None:
             # Save the selected comune ID and move to zone selection
             self.selected_comune_id = user_input["comune_id"]
@@ -160,6 +169,15 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
         return self.async_show_form(step_id="weather", data_schema=schema)
 
     async def async_step_zone(self, user_input=None):
+        """Handle the zone selection step."""
+        try:
+            return await self._async_step_zone(user_input)
+        except (aiohttp.ClientError, TimeoutError, KeyError, ValueError) as err:
+            # ARPAV unreachable or an unexpected answer: abort cleanly, nothing is created
+            _LOGGER.warning("Unable to read the ARPAV lists: %s", err)
+            return self.async_abort(reason="cannot_connect")
+
+    async def _async_step_zone(self, user_input=None):
         """Handle the zone selection step."""
         if user_input is not None:
             # Save the selected zone
@@ -197,6 +215,15 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
         )
 
     async def async_step_station(self, user_input=None):
+        """Handle the station selection step."""
+        try:
+            return await self._async_step_station(user_input)
+        except (aiohttp.ClientError, TimeoutError, KeyError, ValueError) as err:
+            # ARPAV unreachable or an unexpected answer: abort cleanly, nothing is created
+            _LOGGER.warning("Unable to read the ARPAV lists: %s", err)
+            return self.async_abort(reason="cannot_connect")
+
+    async def _async_step_station(self, user_input=None):
         """Handle the station selection step."""
         if user_input is not None:
             # Save the selected station
@@ -252,6 +279,15 @@ class ArpaVenetoWeatherOptionsFlowHandler(config_entries.OptionsFlow):
         return self.hass.config_entries.async_get_entry(self.handler)
 
     async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        try:
+            return await self._async_step_init(user_input)
+        except (aiohttp.ClientError, TimeoutError, KeyError, ValueError) as err:
+            # ARPAV unreachable or an unexpected answer: abort cleanly, nothing is created
+            _LOGGER.warning("Unable to read the ARPAV lists: %s", err)
+            return self.async_abort(reason="cannot_connect")
+
+    async def _async_step_init(self, user_input=None):
         """Manage the options."""
 
         if user_input is not None:

@@ -3,3 +3,5 @@ pytest-homeassistant-custom-component
 defusedxml>=0.7.1
 astral
 pytz
+pytest-cov
+pyyaml
