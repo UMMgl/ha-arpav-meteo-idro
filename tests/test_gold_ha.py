@@ -50,6 +50,14 @@ def arpav(aioclient_mock):
     return aioclient_mock
 
 
+def _device(hass, entry, station_id):
+    """Return the device of a station among the devices of the entry, if any."""
+    for device in dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id):
+        if (DOMAIN, f"hydro_{station_id}") in device.identifiers:
+            return device
+    return None
+
+
 async def _setup(hass, freezer, **options):
     freezer.move_to(NOW)
     entry = _entry(**options)
@@ -135,16 +143,15 @@ async def test_weather_diagnostics_are_redacted(enable_custom_integrations, hass
 async def test_deselected_station_loses_its_device(enable_custom_integrations, hass, arpav, freezer):
     """Removing a station in the options removes its device, not the others."""
     entry = await _setup(hass, freezer)
-    registry = dr.async_get(hass)
-    assert {registry.async_get_device({(DOMAIN, f"hydro_{i}")}) is not None for i in ("333", "334", "287")} == {True}
+    assert all(_device(hass, entry, i) is not None for i in ("333", "334", "287"))
 
     hass.config_entries.async_update_entry(
         entry, options={**entry.options, CONF_HYDRO_STATIONS: STATIONS[:2]})
     await hass.async_block_till_done()
 
-    assert registry.async_get_device({(DOMAIN, "hydro_287")}) is None
-    assert registry.async_get_device({(DOMAIN, "hydro_333")}) is not None
-    assert registry.async_get_device({(DOMAIN, "hydro_334")}) is not None
+    assert _device(hass, entry, "287") is None
+    assert _device(hass, entry, "333") is not None
+    assert _device(hass, entry, "334") is not None
     # the entities of the removed device are gone with it
     assert er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_level") is None
 
@@ -153,7 +160,7 @@ async def test_user_can_delete_only_a_stale_device(enable_custom_integrations, h
     """The device of a selected station cannot be deleted by hand, a stale one can."""
     entry = await _setup(hass, freezer)
     registry = dr.async_get(hass)
-    selected = registry.async_get_device({(DOMAIN, "hydro_287")})
+    selected = _device(hass, entry, "287")
     assert not await async_remove_config_entry_device(hass, entry, selected)
 
     stale = registry.async_get_or_create(
