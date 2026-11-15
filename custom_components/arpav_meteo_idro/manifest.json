@@ -1,13 +1,6 @@
 {
     "domain": "arpav_meteo_idro",
     "name": "ARPAV Meteo e Idro",
-    "version": "0.0.0",
-    "iot_class": "cloud_polling",
-    "requirements": [
-        "aiohttp",
-        "defusedxml>=0.7.1"
-    ],
-    "dependencies": [],
     "after_dependencies": [
         "recorder"
     ],
@@ -16,6 +9,12 @@
         "@UMMgl"
     ],
     "config_flow": true,
+    "dependencies": [],
     "documentation": "https://github.com/UMMgl/ha-arpav-meteo-idro",
-    "issue_tracker": "https://github.com/UMMgl/ha-arpav-meteo-idro/issues"
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/UMMgl/ha-arpav-meteo-idro/issues",
+    "requirements": [
+        "defusedxml>=0.7.1"
+    ],
+    "version": "0.0.0"
 }

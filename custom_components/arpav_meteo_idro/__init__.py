@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.event import async_track_time_change
+from homeassistant.helpers import config_validation as cv
 
 from .brightness_statistics import async_archive_brightness
 from .coordinator import ArpaVenetoDataUpdateCoordinator
@@ -24,6 +25,9 @@ from .hydro_coordinator import HydroCoordinator
 from .hydro_statistics import async_import_hydro_history
 
 _LOGGER = logging.getLogger(__name__)
+
+# set up from the UI only: no YAML configuration
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 # Store the configuration in a dict for easy access
 PLATFORMS = ["weather", "sensor"]
