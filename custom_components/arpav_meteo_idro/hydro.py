@@ -39,6 +39,9 @@ REGISTRY_URL = f"{XML_BASE}/stazioni_idro.xml"
 # integration request arbitrary paths
 STATION_FILE = re.compile(r"^[0-9]{1,6}\.xml$")
 STATION_ID = re.compile(r"^[0-9]{1,6}$")
+# ARPAV instants are always 12 ASCII digits: strptime alone would also accept
+# truncated or unpadded values ("20261115080" -> 08:00) and mis-date them
+INSTANT = re.compile(r"[0-9]{12}")
 
 
 def station_file(link: str | None, station_id: str) -> str:
@@ -221,7 +224,7 @@ def parse_number(raw: str | None) -> float | None:
 
 def parse_instant(raw: str | None) -> datetime | None:
     """Return a YYYYMMDDHHMM solar-time instant as an aware UTC datetime."""
-    if not raw:
+    if not raw or not INSTANT.fullmatch(raw.strip()):
         return None
     try:
         local = datetime.strptime(raw.strip(), "%Y%m%d%H%M")

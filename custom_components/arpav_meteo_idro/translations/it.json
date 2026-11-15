@@ -248,6 +248,12 @@
             }
         }
     },
+    "issues": {
+        "hydro_manual_order_deprecated": {
+            "title": "L’ordine manuale delle stazioni è deprecato",
+            "description": "La configurazione idrometrica **{entry_title}** usa un ordine salvato. L’ordine manuale è deprecato in ARPAV Meteo e Idro 0.15.5 e verrà rimosso nella 0.16.0. Apri le opzioni dell’integrazione, svuota il campo **Ordine manuale (ID stazioni)** e salva per usare il profilo verificato dove disponibile. Le stazioni fuori profilo mantengono l’ordine di selezione."
+        }
+    },
     "exceptions": {
         "archive_failed": {
             "message": "Impossibile archiviare i dati: {error}"

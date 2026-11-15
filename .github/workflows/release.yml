@@ -75,7 +75,7 @@ jobs:
           print("\n".join(json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"]))
           PY
           "$RUNNER_TEMP/runtime/bin/pip" install --quiet -r "$RUNNER_TEMP/requirements_runtime.txt"
-          python3 -m pip install --quiet cyclonedx-bom
+          python3 -m pip install --quiet --require-hashes -r requirements_release.txt
           python3 -m cyclonedx_py environment "$RUNNER_TEMP/runtime/bin/python" \
             --pyproject pyproject.toml --of JSON -o "$RUNNER_TEMP/ha-arpav-meteo-idro.cdx.json"
 
@@ -87,9 +87,16 @@ jobs:
           cat SHA256SUMS
 
       - name: "Build provenance attestation of the ZIP"
+        id: attest
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-path: ${{ runner.temp }}/ha-arpav-meteo-idro.zip
+
+      - name: "Name the attestation bundle for the release"
+        shell: "bash"
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: cp "$BUNDLE_PATH" "$RUNNER_TEMP/ha-arpav-meteo-idro.intoto.jsonl"
 
       - name: "Upload the release assets"
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3  # v3
@@ -99,6 +106,7 @@ jobs:
             ${{ runner.temp }}/ha-arpav-meteo-idro.zip
             ${{ runner.temp }}/ha-arpav-meteo-idro.cdx.json
             ${{ runner.temp }}/SHA256SUMS
+            ${{ runner.temp }}/ha-arpav-meteo-idro.intoto.jsonl
 
       # main is protected (changes only through pull requests): the changelog of each
       # version is published in the release notes, not committed back to main
