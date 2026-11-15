@@ -4,6 +4,9 @@
 - **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
 - **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
 
+### :warning: Deprecations
+- **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).
+
 ### :white_check_mark: Tests
 - **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
 

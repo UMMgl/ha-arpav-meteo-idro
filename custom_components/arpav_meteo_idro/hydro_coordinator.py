@@ -20,6 +20,7 @@ from homeassistant.util import dt as dt_util
 from . import hydro
 from .const import (
     CONF_HYDRO_AXIS_CEILING,
+    CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STATIONS,
@@ -28,6 +29,7 @@ from .const import (
     CONF_HYDRO_UPDATE_MINUTES,
     DOMAIN,
 )
+from .hydro_topology import ordered_selection, station_key
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,10 +87,20 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
         """Initialize the coordinator."""
         self.entry = entry
         self.river = entry.data.get(CONF_HYDRO_RIVER)
-        self.stations: list[dict] = list(entry.options.get(CONF_HYDRO_STATIONS, []))
+        self.order_text: str | None = entry.options.get(CONF_HYDRO_ORDER)
+        stations = entry.options.get(CONF_HYDRO_STATIONS, [])
+        stations_by_id = {meta["id"]: meta for meta in stations}
+        ordered = ordered_selection(list(stations_by_id), self.order_text, self.river)
+        if ordered is None:
+            # An invalid stored override must not prevent station acquisition.
+            ordered = list(stations_by_id)
+        self.stations = [stations_by_id[station_id] for station_id in ordered]
         self.trend_threshold = (entry.options.get(
             CONF_HYDRO_TREND_THRESHOLD, CONF_HYDRO_TREND_THRESHOLD_DEFAULT)) / 100
-        self.axis_ceilings: dict[str, float] = dict(entry.options.get(CONF_HYDRO_AXIS_CEILING) or {})
+        # keyed like the station IDs are matched elsewhere (padded or not)
+        self.axis_ceilings: dict[str, float] = {
+            station_key(station_id): value
+            for station_id, value in (entry.options.get(CONF_HYDRO_AXIS_CEILING) or {}).items()}
         self.stale_minutes = entry.options.get(CONF_HYDRO_STALE_MINUTES) or 0
         self._session = async_get_clientsession(hass)
         self._station_requests = asyncio.Semaphore(MAX_CONCURRENT_STATIONS)

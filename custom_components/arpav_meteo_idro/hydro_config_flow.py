@@ -27,39 +27,28 @@ from .const import (
     ENTRY_TYPE_HYDRO,
 )
 from .hydro_coordinator import async_fetch_registry, station_meta
+from .hydro_topology import ordered_selection, station_key
 
 _LOGGER = logging.getLogger(__name__)
 
 STEP_STATIONS = "stations"
 
 
-def ordered_selection(selected: list[str], order_text: str | None) -> list[str] | None:
-    """Return the selected IDs in the order typed by the user.
-
-    The order is a comma separated list of station IDs, upstream first. Empty
-    means "as selected"; IDs that were not selected are ignored and selected
-    IDs missing from the order are appended. Unknown tokens make it invalid.
-    """
-    if not order_text or not order_text.strip():
-        return list(selected)
-    tokens = [t.strip() for t in order_text.replace(";", ",").split(",") if t.strip()]
-    if any(not t.isdigit() for t in tokens):
-        return None
-    ordered = [t for t in dict.fromkeys(tokens) if t in selected]
-    return ordered + [s for s in selected if s not in ordered]
-
-
 def parse_ceilings(text: str | None, station_ids: list[str]) -> dict[str, float] | None:
     """Return the axis ceilings typed by the user, or None when they are invalid.
 
     The format is ``station_id=metres`` separated by commas; every station must
-    be one of ``station_ids`` (the stations of the entry) and every value in
-    (0, 100] metres.
+    be one of ``station_ids`` (the stations of the entry, matched like the order
+    field, so ``0334`` and ``334`` are the same station) and every value in
+    (0, 100] metres. The result is keyed by the ID saved in the entry.
     """
     ceilings = hydro.parse_axis_ceilings(text)
-    if ceilings is None or any(station_id not in station_ids for station_id in ceilings):
+    if ceilings is None:
         return None
-    return ceilings
+    by_key = {station_key(station_id): station_id for station_id in station_ids}
+    if any(station_key(station_id) not in by_key for station_id in ceilings):
+        return None
+    return {by_key[station_key(station_id)]: value for station_id, value in ceilings.items()}
 
 
 def _station_options(stations: list[hydro.HydroStation]) -> list[selector.SelectOptionDict]:
@@ -73,7 +62,7 @@ def _stations_schema(stations, selected, order_text, extra=None) -> vol.Schema:
             selector.SelectSelectorConfig(options=_station_options(stations), multiple=True,
                                           mode=selector.SelectSelectorMode.LIST)
         ),
-        vol.Optional(CONF_HYDRO_ORDER, default=order_text): selector.TextSelector(),
+        vol.Optional(CONF_HYDRO_ORDER, description={"suggested_value": order_text}): selector.TextSelector(),
     }
     schema.update(extra or {})
     return vol.Schema(schema)
@@ -120,7 +109,8 @@ class HydroConfigFlowMixin:
         stations = [s for s in self._hydro_registry if s.river == self._hydro_river]
         errors = {}
         if user_input is not None:
-            ordered = ordered_selection(user_input[STEP_STATIONS], user_input.get(CONF_HYDRO_ORDER))
+            order_text = user_input.get(CONF_HYDRO_ORDER, "").strip()
+            ordered = ordered_selection(user_input[STEP_STATIONS], order_text, self._hydro_river)
             if not user_input[STEP_STATIONS]:
                 errors["base"] = "no_stations"
             elif ordered is None:
@@ -132,6 +122,7 @@ class HydroConfigFlowMixin:
                     data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: self._hydro_river},
                     options={
                         CONF_HYDRO_STATIONS: [station_meta(by_id[i]) for i in ordered],
+                        CONF_HYDRO_ORDER: order_text,
                         CONF_HYDRO_TREND_THRESHOLD: CONF_HYDRO_TREND_THRESHOLD_DEFAULT,
                         CONF_HYDRO_STALE_MINUTES: CONF_HYDRO_STALE_MINUTES_DEFAULT,
                         CONF_HYDRO_ARCHIVE: True,
@@ -156,7 +147,10 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_hydro_options(self, user_input=None):
         """Manage stations, order, trend threshold, staleness and archive."""
         river = self.config_entry.data.get(CONF_HYDRO_RIVER)
-        current = self.config_entry.options.get(CONF_HYDRO_STATIONS, [])
+        options = self.config_entry.options
+        current = options.get(CONF_HYDRO_STATIONS, [])
+        # Existing entries only saved the resulting order. Pre-fill it as an override.
+        saved_order = options.get(CONF_HYDRO_ORDER, ", ".join(m["id"] for m in current))
         try:
             registry = await async_fetch_registry(self.hass)
             stations = [s for s in registry if s.river == river]
@@ -166,7 +160,8 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
 
         errors = {}
         if user_input is not None:
-            ordered = ordered_selection(user_input[STEP_STATIONS], user_input.get(CONF_HYDRO_ORDER))
+            order_text = user_input.get(CONF_HYDRO_ORDER, "").strip()
+            ordered = ordered_selection(user_input[STEP_STATIONS], order_text, river)
             if not user_input[STEP_STATIONS]:
                 errors["base"] = "no_stations"
             elif ordered is None:
@@ -179,12 +174,12 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 return self.async_create_entry(data={
                     CONF_HYDRO_STATIONS: [station_meta(by_id[i]) if i in by_id else known[i] for i in ordered],
                     CONF_HYDRO_AXIS_CEILING: ceilings,
+                    CONF_HYDRO_ORDER: order_text,
                     CONF_HYDRO_TREND_THRESHOLD: user_input[CONF_HYDRO_TREND_THRESHOLD],
                     CONF_HYDRO_STALE_MINUTES: user_input[CONF_HYDRO_STALE_MINUTES],
                     CONF_HYDRO_ARCHIVE: user_input[CONF_HYDRO_ARCHIVE],
                 })
 
-        options = self.config_entry.options
         extra = {
             vol.Optional(CONF_HYDRO_TREND_THRESHOLD,
                          default=options.get(CONF_HYDRO_TREND_THRESHOLD, CONF_HYDRO_TREND_THRESHOLD_DEFAULT)):
@@ -204,8 +199,7 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
         }
         return self.async_show_form(
             step_id="hydro_options",
-            data_schema=_stations_schema(stations, [m["id"] for m in current],
-                                         ", ".join(m["id"] for m in current), extra),
+            data_schema=_stations_schema(stations, [m["id"] for m in current], saved_order, extra),
             errors=errors,
             description_placeholders={"river": river, "stations": _order_hint(stations)},
         )

@@ -23,6 +23,7 @@ from . import hydro
 from .const import DOMAIN
 from .entity import ArpavHydroEntity
 from .hydro_coordinator import HydroCoordinator, HydroStationState
+from .hydro_topology import station_key, topology_evidence
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -146,7 +147,15 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
             g1, g2, g3 = reading.thresholds if reading else (None, None, None)
             axis = hydro.chart_axis((g1, g2, g3))
             # ARPAV thresholds always win; the user ceiling only fills the gap
-            ceiling = None if axis else self.coordinator.axis_ceilings.get(self._station_id)
+            ceiling = None if axis else self.coordinator.axis_ceilings.get(station_key(self._station_id))
+            evidence = topology_evidence(self.coordinator.river, self._station_id)
+            order_text = self.coordinator.order_text
+            if order_text is None:
+                order_source = "legacy"
+            elif order_text.strip():
+                order_source = "manual"
+            else:
+                order_source = "topology" if evidence else "selection"
             attributes.update({
                 # normalized chart scale: G1 at 60% and G3 at 90% of the height
                 "chart_min_m": axis[0] if axis else None,
@@ -164,7 +173,8 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
                 "age_minutes": reading.age_minutes if reading else None,
                 "last_sample_valid": reading.last_sample_valid if reading else None,
                 "display_order": state.order,
-                "topology_status": "candidate",
+                "display_order_source": order_source,
+                "topology_status": "verified" if evidence else "candidate",
                 "latitude": state.meta.get("latitude"),
                 "longitude": state.meta.get("longitude"),
                 "fetch_error": state.error,
@@ -172,4 +182,11 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
                 "last_successful_acquisition": state.fetched_at.isoformat() if state.fetched_at else None,
                 "next_retry_at": state.next_retry_at.isoformat() if state.next_retry_at else None,
             })
+            if evidence:
+                attributes.update({
+                    "topology_source_url": evidence.source_url,
+                    "topology_source_reference": evidence.source_reference,
+                    "topology_verified_on": evidence.verified_on,
+                    "topology_confidence": evidence.confidence,
+                })
         return attributes

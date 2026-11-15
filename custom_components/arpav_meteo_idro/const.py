@@ -198,6 +198,7 @@ ENTRY_TYPE_HYDRO = "hydro"
 CONF_HYDRO_RIVER = "river"
 # selected stations, in display order (upstream first), with their metadata
 CONF_HYDRO_STATIONS = "stations"
+# Optional manual order. Empty enables a verified profile, when available.
 CONF_HYDRO_ORDER = "display_order"
 # {station_id: metres}: axis ceiling for stations without published thresholds
 CONF_HYDRO_AXIS_CEILING = "axis_ceiling"
