@@ -257,6 +257,12 @@
         }
     },
     "exceptions": {
+        "fetch_failed": {
+            "message": "Unable to fetch the ARPAV data (HTTP status {status})."
+        },
+        "no_station_readable": {
+            "message": "No ARPAV hydrometric station could be read."
+        },
         "archive_failed": {
             "message": "Unable to archive the data: {error}"
         },

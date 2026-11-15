@@ -38,13 +38,15 @@ parallel-updates. ➖ reauthentication-flow (public open data, no credentials).
 
 ## Gold
 
-✅ devices, docs-data-update, docs-examples (`examples/`), docs-known-limitations,
-docs-supported-functions, entity-category, entity-device-class, entity-translations,
-icon-translations. ➖ discovery, discovery-update-info, docs-supported-devices, dynamic-devices.
-To do: diagnostics, docs-troubleshooting (basics present), docs-use-cases,
-entity-disabled-by-default, exception-translations (complete them),
-reconfiguration-flow, repair-issues (e.g. a station that stops publishing),
-stale-devices (remove the devices of deselected stations).
+✅ devices, diagnostics (config entry diagnostics for both entry types, coordinates and
+municipality redacted), docs-data-update, docs-examples (`examples/`),
+docs-known-limitations, docs-supported-functions, docs-troubleshooting, docs-use-cases,
+entity-category, entity-device-class, entity-disabled-by-default (Observed at and Level
+change, new installations only), entity-translations, exception-translations,
+icon-translations, stale-devices (devices of deselected stations are removed when the entry
+reloads, and can be deleted by hand). ➖ discovery, discovery-update-info,
+docs-supported-devices, dynamic-devices.
+To do: reconfiguration-flow, repair-issues (e.g. a station that stops publishing).
 
 ## Platinum
 

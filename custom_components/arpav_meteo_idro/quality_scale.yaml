@@ -50,7 +50,7 @@ rules:
 
   # Gold
   devices: done
-  diagnostics: todo
+  diagnostics: done
   discovery:
     status: exempt
     comment: cloud service, nothing to discover
@@ -64,20 +64,20 @@ rules:
     status: exempt
     comment: no devices, ARPAV stations are selected from the registry
   docs-supported-functions: done
-  docs-troubleshooting: todo
-  docs-use-cases: todo
+  docs-troubleshooting: done
+  docs-use-cases: done
   dynamic-devices:
     status: exempt
     comment: stations are chosen by the user in the options
   entity-category: done
   entity-device-class: done
-  entity-disabled-by-default: todo
+  entity-disabled-by-default: done
   entity-translations: done
-  exception-translations: todo
+  exception-translations: done
   icon-translations: done
   reconfiguration-flow: todo
   repair-issues: todo
-  stale-devices: todo
+  stale-devices: done
 
   # Platinum
   async-dependency: done

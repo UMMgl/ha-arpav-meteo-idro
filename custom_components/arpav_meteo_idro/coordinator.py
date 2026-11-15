@@ -188,7 +188,9 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         url = f"{API_BASE}/meteo_meteogrammi_tabella?codseqst={station_id}"
         async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status != 200:
-                raise UpdateFailed(f"Error fetching data: {response.status}")
+                raise UpdateFailed(
+                    translation_domain=DOMAIN, translation_key="fetch_failed",
+                    translation_placeholders={"status": str(response.status)})
             data = await response.json()
 
         # Dictionary to store the max-time item per type
@@ -307,7 +309,9 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         url = f"{API_BASE}/aria_valori_orari?codseqst={station_id}"
         async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status != 200:
-                raise UpdateFailed(f"Error fetching data: {response.status}")
+                raise UpdateFailed(
+                    translation_domain=DOMAIN, translation_key="fetch_failed",
+                    translation_placeholders={"status": str(response.status)})
             data = await response.json()
 
         latest = {}
@@ -596,7 +600,9 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         url = f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMIBRI&coordcd=20067&orario=0"
         async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status != 200:
-                raise UpdateFailed(f"Error fetching data: {response.status}")
+                raise UpdateFailed(
+                    translation_domain=DOMAIN, translation_key="fetch_failed",
+                    translation_placeholders={"status": str(response.status)})
             data = await response.json()
 
         # the closest station may have no readings at all
@@ -620,7 +626,9 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         url = f"{API_BASE}/meteo_brillanza_tabella?codseqst={codseqst}"
         async with aiohttp.ClientSession() as session, session.get(url) as response:
             if response.status != 200:
-                raise UpdateFailed(f"Error fetching data: {response.status}")
+                raise UpdateFailed(
+                    translation_domain=DOMAIN, translation_key="fetch_failed",
+                    translation_placeholders={"status": str(response.status)})
             data = await response.json()
 
         latest = {}
@@ -905,7 +913,9 @@ async def _fetch_forecast_data(zone_id):
     url = f"{API_BASE}/bollettini_meteo_simboli_en?zona={zone_id}"
     async with aiohttp.ClientSession() as session, session.get(url) as response:
         if response.status != 200:
-            raise UpdateFailed(f"Error fetching data: {response.status}")
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="fetch_failed",
+                translation_placeholders={"status": str(response.status)})
         data = await response.json()
 
     forecasts = [

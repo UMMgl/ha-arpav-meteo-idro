@@ -116,7 +116,7 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
             for index, meta in enumerate(self.stations)
         ))
         if states and all(state.acquisition_status == "fetch_error" for state in states) and not previous:
-            raise UpdateFailed("no ARPAV hydrometric station could be read")
+            raise UpdateFailed(translation_domain=DOMAIN, translation_key="no_station_readable")
         return {state.meta["id"]: state for state in states}
 
     async def _async_update_station(
