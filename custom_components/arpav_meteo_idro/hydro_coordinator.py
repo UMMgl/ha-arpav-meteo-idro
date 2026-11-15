@@ -19,6 +19,7 @@ from homeassistant.util import dt as dt_util
 
 from . import hydro
 from .const import (
+    CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STATIONS,
@@ -27,6 +28,7 @@ from .const import (
     CONF_HYDRO_UPDATE_MINUTES,
     DOMAIN,
 )
+from .hydro_topology import ordered_selection
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -84,7 +86,14 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
         """Initialize the coordinator."""
         self.entry = entry
         self.river = entry.data.get(CONF_HYDRO_RIVER)
-        self.stations: list[dict] = list(entry.options.get(CONF_HYDRO_STATIONS, []))
+        self.order_text: str | None = entry.options.get(CONF_HYDRO_ORDER)
+        stations = entry.options.get(CONF_HYDRO_STATIONS, [])
+        stations_by_id = {meta["id"]: meta for meta in stations}
+        ordered = ordered_selection(list(stations_by_id), self.order_text, self.river)
+        if ordered is None:
+            # An invalid stored override must not prevent station acquisition.
+            ordered = list(stations_by_id)
+        self.stations = [stations_by_id[station_id] for station_id in ordered]
         self.trend_threshold = (entry.options.get(
             CONF_HYDRO_TREND_THRESHOLD, CONF_HYDRO_TREND_THRESHOLD_DEFAULT)) / 100
         self.stale_minutes = entry.options.get(CONF_HYDRO_STALE_MINUTES) or 0
