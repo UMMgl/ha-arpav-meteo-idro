@@ -29,6 +29,25 @@ the Home Assistant validations (hassfest, HACS). Dependabot updates the
 workflows and the Python requirements; GitHub secret scanning with push
 protection is enabled on the repository.
 
+## Pinned tools and dependency audit
+
+The tools that the workflows install (bandit, pip-audit, zizmor, cyclonedx-bom,
+Ruff and the other lint tools) come from `requirements_security.txt`,
+`requirements_release.txt` and `requirements_ci.txt`: exact versions with
+SHA-256 hashes for Linux and CPython 3.14, installed with `pip install
+--require-hashes`. They are generated from the matching `.in` files:
+
+```bash
+uv pip compile --generate-hashes --python-version 3.14 --python-platform linux   requirements_security.in -o requirements_security.txt
+```
+
+Dependabot (daily, one grouped pull request) updates the `.in` and `.txt` files.
+pip-audit runs on every `requirements*.txt` file and on the `requirements` of
+`manifest.json` in each CI run and every Monday; a finding fails the check and is
+either fixed by upgrading or listed here with the reason.
+
+Accepted findings: none.
+
 ## Verifying a release
 
 Every release from 0.15.4 on carries, next to `ha-arpav-meteo-idro.zip`:
@@ -36,11 +55,15 @@ Every release from 0.15.4 on carries, next to `ha-arpav-meteo-idro.zip`:
 * `ha-arpav-meteo-idro.cdx.json`: software bill of materials (OWASP CycloneDX)
   of the runtime requirements;
 * `SHA256SUMS`: SHA-256 checksums of the ZIP and of the SBOM;
-* a build provenance attestation of the ZIP, signed by GitHub Actions.
+* a build provenance attestation of the ZIP, signed by GitHub Actions, also
+  published as `ha-arpav-meteo-idro.intoto.jsonl` (Sigstore bundle, in-toto
+  provenance) so it can be checked offline.
 
 ```bash
 sha256sum -c SHA256SUMS
 gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro
+# offline, with the bundle downloaded from the same release
+gh attestation verify ha-arpav-meteo-idro.zip --repo UMMgl/ha-arpav-meteo-idro   --bundle ha-arpav-meteo-idro.intoto.jsonl
 ```
 
 Workflows are checked by zizmor; OpenSSF Scorecard results are published in code scanning.
