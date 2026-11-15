@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 from graphlib import TopologicalSorter
+from unicodedata import normalize
 
 _ARPAV_MAPS = (
     "https://www.arpa.veneto.it/api/temi-ambientali/idrologia/file-e-allegati/rapporti-e-documenti/"
@@ -49,16 +50,131 @@ _STATION_NODES = {
 }
 
 
-def _bacchiglione_profile() -> dict[str, Reach]:
+_RIVER_GRAPH_URL = "https://gaia.arpa.veneto.it/layers/idrografia:geonode:v_idrografia_rete"
+
+# Derived from ARPAV, Grafo Idrografia (elemento idrico), CC BY 3.0.
+# Each row records the upstream/downstream IDs and the first/last HYDROID
+# of the directed path in geonode:v_idrografia_rete (2026-11-15).
+# Intermediate vertices were checked in the WFS network, then collapsed.
+_VENETO_PATHS = {
+    "adige": (
+        ("270", "301", 60063, 60316),
+        ("332", "270", 843, 60063),
+        ("281", "284", 36517, 60085),
+        ("301", "281", 60316, 36517),
+        ("284", "293", 60085, 31421),
+        ("607", "332", 115204, 843),
+    ),
+    "agno": (
+        ("278", "315", 10672, 15698),
+    ),
+    "alpone": (
+        ("273", "322", 28560, 1152),
+    ),
+    "astico": (
+        ("404", "305", 36017, 137800),
+    ),
+    "biois": (
+        ("597", "402", 137218, 40208),
+    ),
+    "boite": (
+        ("214", "682", 18223, 45144),
+        ("682", "403", 45144, 18375),
+    ),
+    "brenta": (
+        ("283", "302", 34371, 26633),
+        ("374", "283", 14126, 34371),
+        ("302", "629", 26633, 10139),
+        ("629", "329", 10139, 137775),
+        ("329", "646", 137775, 37684),
+    ),
+    "canal bianco": (
+        ("666", "664", 55827, 43843),
+        ("665", "666", 40541, 55827),
+        ("693", "665", 138295, 40541),
+    ),
+    "chiampo": (
+        ("679", "377", 23292, 138363),
+    ),
+    "cordevole": (
+        ("6", "684", 17368, 41512),
+        ("277", "634", 35735, 21187),
+        ("649", "277", 24461, 35735),
+        ("684", "649", 41512, 24461),
+    ),
+    "frassine": (
+        ("286", "288", 31419, 8105),
+    ),
+    "fratta": (
+        ("325", "330", 9121, 7370),
+    ),
+    "gorzone": (
+        ("291", "328", 60135, 122965),
+    ),
+    "guà": (
+        ("304", "295", 10049, 43456),
+        ("555", "304", 8058, 10049),
+        ("313", "317", 14026, 35866),
+        ("317", "555", 35866, 8058),
+    ),
+    "livenza": (
+        ("294", "300", 138360, 8380),
+        ("401", "294", 42051, 138360),
+        ("400", "306", 35386, 36837),
+        ("306", "401", 36837, 42051),
+    ),
+    "meschio": (
+        ("462", "296", 115241, 42097),
+        ("463", "462", 5594, 115241),
+    ),
+    "monticano": (
+        ("298", "310", 6669, 33763),
+        ("331", "298", 6940, 6669),
+        ("310", "299", 33763, 7468),
+    ),
+    "muson dei sassi": (
+        ("554", "292", 43517, 138298),
+        ("292", "645", 138298, 37103),
+    ),
+    "piave": (
+        ("271", "628", 20196, 48144),
+        ("651", "271", 38285, 20196),
+        ("323", "297", 138362, 37414),
+        ("309", "316", 32594, 26615),
+        ("327", "309", 138299, 32594),
+        ("316", "323", 26615, 138362),
+        ("661", "327", 19583, 138299),
+        ("406", "652", 40466, 25480),
+        ("628", "661", 48144, 19583),
+        ("652", "651", 25480, 38285),
+    ),
+    # The delta is a branching network. The three terminal gauges keep
+    # selection order until each gauge's link to a branch is confirmed.
+    "po": (
+        ("399", "562", 60245, 42269),
+        ("562", "560", 42269, 115189),
+        ("560", "pila_tolle_junction", 115189, 115196),
+        ("pila_tolle_junction", "po_di_pila", 114007, 114007),
+        ("pila_tolle_junction", "po_delle_tolle", 7637, 7637),
+    ),
+    "posina": (
+        ("194", "407", 31597, 115229),
+    ),
+    "retrone": (
+        ("635", "321", 16678, 55642),
+    ),
+}
+
+
+def _station_profile(reaches: tuple[Reach, ...], station_nodes: dict[str, str]) -> dict[str, Reach]:
     """List covered stations in topological order with their evidence."""
     graph = TopologicalSorter()
-    evidence = {}
-    for reach in BACCHIGLIONE_REACHES:
+    for reach in reaches:
         graph.add(reach.downstream, reach.upstream)
-        evidence.setdefault(reach.downstream, reach)
-    head = BACCHIGLIONE_REACHES[0]
-    evidence[head.upstream] = head
-    station_by_node = {node: station for station, node in _STATION_NODES.items()}
+
+    evidence = {reach.upstream: reach for reach in reversed(reaches)}
+    evidence.update({reach.downstream: reach for reach in reversed(reaches)})
+    station_by_node = {node: station for station, node in station_nodes.items()}
     return {
         station_by_node[node]: evidence[node]
         for node in graph.static_order()
@@ -66,7 +182,24 @@ def _bacchiglione_profile() -> dict[str, Reach]:
     }
 
 
-_PROFILES = {"bacchiglione": _bacchiglione_profile()}
+def _cartographic_profile(river: str, paths: tuple[tuple[str, str, int, int], ...]) -> dict[str, Reach]:
+    """Build a profile from station-scale paths with traceable WFS endpoints."""
+    # The regulated Canal Bianco path establishes order for display; its
+    # cartographic direction does not establish the direction of actual flow.
+    confidence = "medium" if river == "canal bianco" else "high"
+    reaches = tuple(
+        Reach(upstream, downstream, _RIVER_GRAPH_URL, f"WFS v_idrografia_rete, HYDROID {first} to {last}",
+              confidence=confidence)
+        for upstream, downstream, first, last in paths
+    )
+    station_nodes = {
+        node: node for reach in reaches for node in (reach.upstream, reach.downstream) if node.isdecimal()
+    }
+    return _station_profile(reaches, station_nodes)
+
+
+_PROFILES = {river: _cartographic_profile(river, paths) for river, paths in _VENETO_PATHS.items()}
+_PROFILES["bacchiglione"] = _station_profile(BACCHIGLIONE_REACHES, _STATION_NODES)
 
 
 def _station_key(station_id: str) -> str:
@@ -79,7 +212,10 @@ station_key = _station_key
 
 
 def _profile(river: str | None) -> dict[str, Reach]:
-    return _PROFILES.get((river or "").strip().casefold(), {})
+    key = normalize("NFC", (river or "").strip()).casefold()
+    if key in {"gua'", "gua’"}:
+        key = "guà"
+    return _PROFILES.get(key, {})
 
 
 def ordered_selection(

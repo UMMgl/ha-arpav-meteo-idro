@@ -200,11 +200,11 @@ once every 10 minutes, since a METAR is issued every 30.
 
 *Fork addition.* Besides weather locations, the integration can add the ARPAV
 **hydrometric stations** of a river. Add the integration again and choose
-**Hydrometric stations**, then the river and its stations. For Bacchiglione,
-new configurations automatically order covered stations from upstream to
-downstream. The profile covers Ponte Marchese, Vicenza, Longare, Montegalda,
-Voltabarozzo, Ponte San Nicolò and Bovolenta. Other selected stations follow in
-their selected order. Rivers without a profile use the selected order throughout.
+**Hydrometric stations**, then the river and its stations. Automatic order
+covers 86 stations across the 23 ARPAV water bodies with multiple gauges in
+the 15 November 2026 registry. See the [profile coverage and sources](docs/hydro_topology.md).
+Other selected stations follow in their selected order. Rivers without a profile
+use the selected order throughout.
 
 Manual station order is deprecated in 0.15.5 and scheduled for removal in
 0.16.0. In 0.15.5, existing entries retain their saved order and station IDs
@@ -437,7 +437,7 @@ rejected with an error.
   or be invalidated by ARPAV.
 * Water levels are relative to the local hydrometric zero of each station: they
   are not altitudes and cannot be compared between stations.
-* The verified display order currently covers seven Bacchiglione stations.
+* The verified display order covers the documented station paths in each profile.
   The graph describes connections at the scale of the named reaches and junctions.
   The display order gives no information about gate settings, travel times or backwater.
 * Home Assistant cannot back-date states: the history of the days before the

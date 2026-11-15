@@ -263,10 +263,11 @@ def normalize_name(name: str) -> str:
 
 
 def split_name(name: str) -> tuple[str | None, str | None]:
-    """Split an ARPAV station name "<river> a <place>" into its parts."""
-    river, sep, place = name.partition(" a ")
-    if not sep:
+    """Split an ARPAV station name into its river and place."""
+    parts = re.split(r" ad? ", name, maxsplit=1)
+    if len(parts) != 2:
         return None, None
+    river, place = parts
     return river.strip() or None, place.strip() or None
 
 
