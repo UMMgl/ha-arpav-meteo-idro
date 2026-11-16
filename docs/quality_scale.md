@@ -8,18 +8,44 @@ part inherited from the original project. Rule status per rule:
 [`custom_components/arpav_meteo_idro/quality_scale.yaml`](../custom_components/arpav_meteo_idro/quality_scale.yaml).
 Open items are listed in [ROADMAP.md](../ROADMAP.md).
 
-## Release gate (Gold)
+## Release gates
 
-The Release workflow runs the test suite and requires Gold on the candidate
-commit before building or publishing. Gold includes all Bronze and Silver
-rules. The workflow checks the rule declarations and requires measured
-coverage above 95% in every integration module. To preflight a candidate
-branch, run the Release workflow on that branch. Branch runs perform
-verification only. Release assets are published by tag runs.
+Every release (stable and pre-release) passes two gates in the Release workflow
+before anything is built or published:
 
-Beta and release candidate tags (e.g. `0.15.5b1`, `0.15.5rc1`) are published as
-pre-releases without the Gold gate, so they can be tested through HACS before
+1. **Security gate**: the Security workflow (gitleaks, bandit, pip-audit,
+   zizmor, CodeQL) runs on the tagged commit. The `release` job starts only if
+   it succeeded. Beta and release candidate tags do not skip it.
+2. **Quality gate** (stable tags only): the Tests workflow runs the test suite and
+   requires the tier declared in `pyproject.toml` (`release_tier` under
+   `[tool.arpav_meteo_idro]`) on the candidate commit. Each tier includes all
+   the lower ones. The workflow checks the rule declarations and requires
+   measured coverage above 95% in every integration module.
+
+Beta and release candidate tags (e.g. `0.16.0b1`, `0.16.0rc1`) are published as
+pre-releases without the quality gate, so they can be tested through HACS before
 the stable release.
+
+To preflight a candidate branch, run the Release workflow on that branch. Branch
+runs perform verification only. Release assets are published by tag runs.
+
+### Tier plan and ratchet
+
+| Release | Minimum tier |
+|---|---|
+| 0.16.0 | Silver |
+| 0.17.0 | Gold |
+
+The minimum tier is a ratchet: it may rise, never fall. `release_tier` is
+validated by `python scripts/check_quality_scale.py --ratchet`, which fails when
+it is lower than the highest tier in `[tool.arpav_meteo_idro.released]`, the
+list of tiers of the stable releases already published. Both values are
+versioned in `pyproject.toml`, so the check needs no network access and runs in
+the same Release workflow job that passes the tier to the Tests workflow.
+
+After each stable release, the first pull request adds the entry for that version
+(for example `"0.16.0" = "silver"`). Raising `release_tier` to `gold` is part
+of the 0.17.0 preparation; lowering it is rejected by the check.
 
 ## Bronze (enforced in pull request CI)
 

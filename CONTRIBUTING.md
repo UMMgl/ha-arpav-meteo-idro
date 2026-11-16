@@ -31,6 +31,10 @@ A pull request is merged only when:
   (`python scripts/check_quality_scale.py bronze`; rule status in
   `custom_components/arpav_meteo_idro/quality_scale.yaml`, see
   [docs/quality_scale.md](docs/quality_scale.md));
+- releases follow a ratchet on the quality tier: 0.16.0 Silver, 0.17.0 Gold. The
+  minimum is `release_tier` in `pyproject.toml` and may only rise
+  (`python scripts/check_quality_scale.py --ratchet`); every tag, pre-releases
+  included, also needs the Security workflow to pass on the tagged commit;
 - new GitHub Actions are pinned to a full commit SHA, and tools installed by the
   workflows come from the hashed requirements files (see [SECURITY.md](SECURITY.md));
 - the code follows the style below and the documentation is updated.

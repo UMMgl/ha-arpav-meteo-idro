@@ -27,7 +27,8 @@
 - **weather**: all requests of the weather part (forecast, stations, air quality, brightness, METAR, config flow) use the shared Home Assistant session with a 30 s timeout instead of opening their own; quality scale rule `inject-websession` is done (#7)
 - **ci**: test requirements are hash-pinned (`requirements_test.in` → `requirements_test.txt`, installed with `--require-hashes`), closing the Scorecard Pinned-Dependencies alerts
 - **dev**: the unused development container and its setup scripts (`.devcontainer*.json`, `scripts/setup|upgrade|bootstrap|develop|specific-version|dev-branch`, `.vscode/`, `config/configuration.yaml`) are removed
-- **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
+- **release**: stable releases require the Home Assistant Quality Scale tier declared in `pyproject.toml` (`release_tier`), including measured per-module coverage: 0.16.0 Silver, 0.17.0 Gold. The tier is a ratchet that may only rise, checked by `scripts/check_quality_scale.py --ratchet` against the tiers of the published stable releases.
+- **release**: every tag, beta and release candidate included, needs the Security workflow (gitleaks, bandit, pip-audit, zizmor, CodeQL) to pass on the tagged commit before anything is published; `security.yml` is now also callable (`workflow_call`).
 
 ### :warning: Deprecations
 - **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).
