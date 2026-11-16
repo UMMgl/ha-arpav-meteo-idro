@@ -14,18 +14,13 @@ from custom_components.arpav_meteo_idro.hydro_topology import (
 
 
 def test_bacchiglione_order_uses_the_documented_profile():
-    """Exercise the verified order, partial coverage, fallback and overrides."""
+    """Exercise the verified order, partial coverage and the selection-order fallback."""
     selected = ["0287", "999", "0595", "308", "334", "303", "888", "333", "276"]
-    assert ordered_selection(selected, "", "Bacchiglione") == [
+    assert ordered_selection(selected, "Bacchiglione") == [
         "276", "333", "303", "308", "334", "0595", "0287", "999", "888",
     ]
-    assert ordered_selection(["287", "303"], "", "bacchiglione") == ["303", "287"]
-    assert ordered_selection(selected, "", "An unprofiled river") == selected
-    assert ordered_selection(selected, None, "Bacchiglione") == selected
-    assert ordered_selection(selected, "287; 0308, 287, 12", "Bacchiglione") == [
-        "0287", "308", "999", "0595", "334", "303", "888", "333", "276",
-    ]
-    assert ordered_selection(selected, "south", "Bacchiglione") is None
+    assert ordered_selection(["287", "303"], "bacchiglione") == ["303", "287"]
+    assert ordered_selection(selected, "An unprofiled river") == selected
 
 
 def test_bacchiglione_keeps_diversion_and_confluence_as_reaches():
@@ -74,20 +69,17 @@ def test_veneto_profiles_follow_reaches_and_keep_po_delta_branches():
     }
     for river, sequence in cases.items():
         expected = sequence.split()
-        assert ordered_selection(expected[::-1], "", river) == expected
+        assert ordered_selection(expected[::-1], river) == expected
     selected = ["552", "562", "561", "560", "399", "319"]
-    assert ordered_selection(selected, "", "Po") == ["399", "562", "560", "561", "552", "319"]
-    assert ordered_selection(["0561", "560"], "", "Po") == ["560", "0561"]
-    assert ordered_selection(["0552", "560"], "", "Po") == ["560", "0552"]
+    assert ordered_selection(selected, "Po") == ["399", "562", "560", "561", "552", "319"]
+    assert ordered_selection(["0561", "560"], "Po") == ["560", "0561"]
+    assert ordered_selection(["0552", "560"], "Po") == ["560", "0552"]
     p = topology_evidence("Po", "0561")
     b = topology_evidence("Po", "0552")
     assert (p.upstream, p.downstream) == ("po_di_pila", "561")
     assert (b.upstream, b.downstream) == ("po_delle_tolle", "552")
     assert p.source_reference.endswith("114007 to 2242")
     assert b.source_reference.endswith("7637 to 10042")
-    assert ordered_selection(selected, "0561, 0399", "Po") == [
-        "561", "399", "552", "562", "560", "319",
-    ]
     assert topology_evidence("Piave", "406").source_reference == "WFS v_idrografia_rete, HYDROID 40466 to 25480"
 
 
@@ -95,7 +87,7 @@ def test_gua_profile_accepts_registry_and_accented_names():
     """Both ARPAV spelling and accented river labels identify the Guà profile."""
     expected = ["313", "317", "555", "304", "295"]
     for river in ("Gua'", "Guà", " GUA’ ", "Gua\u0300"):
-        assert ordered_selection(expected[::-1], "", river) == expected
+        assert ordered_selection(expected[::-1], river) == expected
         assert topology_evidence(river, "0313") == topology_evidence("Guà", "313")
 
 
@@ -112,5 +104,11 @@ def test_porto_levante_has_its_own_regulated_route():
     assert (evidence.upstream, evidence.downstream) == ("canal_bianco_volta_grimana", "319")
     assert evidence.confidence == "medium"
     assert "agenziapo.it" in evidence.source_url
-    assert ordered_selection(["999", "0319", "0560"], "", "Po") == ["0560", "0319", "999"]
-    assert ordered_selection(["0560", "0319"], "319", "Po") == ["0319", "0560"]
+    assert ordered_selection(["999", "0319", "0560"], "Po") == ["0560", "0319", "999"]
+
+
+def test_stations_outside_a_profile_follow_in_selection_order():
+    """Unprofiled stations go after the profiled ones, in the order they were selected."""
+    assert ordered_selection(["888", "333", "999", "276"], "Bacchiglione") == ["276", "333", "888", "999"]
+    assert ordered_selection(["999", "888"], "Bacchiglione") == ["999", "888"]
+    assert ordered_selection(["888", "333"], None) == ["888", "333"]

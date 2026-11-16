@@ -135,6 +135,9 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
     """Handle a config flow for ARPA Veneto Weather."""
 
     VERSION = 1
+    # 1.2 (0.16.0): the manual station order was dropped. Only the minor version
+    # moves, so Home Assistant still loads the entry after a downgrade to 0.15.5.
+    MINOR_VERSION = 2
 
     @staticmethod
     @callback

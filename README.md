@@ -207,15 +207,14 @@ the 15 November 2026 registry. See the [profile coverage and sources](docs/hydro
 Other selected stations follow in their selected order. Rivers without a profile
 use the selected order throughout.
 
-Manual station order is deprecated in 0.15.5 and scheduled for removal in
-0.16.0. In 0.15.5, existing entries retain their saved order and station IDs
-separated by commas still override the display order. Home Assistant Repairs
-shows a warning for entries using the saved order. To switch to automatic
-ordering, clear **Manual order (station IDs)** in the integration options and save.
+Since 0.16.0 the display order cannot be set by hand: the manual order field
+of 0.15.x was removed and entries that had one are migrated to the verified
+profile (see the changelog). Stations not covered by a profile follow the
+profiled ones in the order they were selected.
 
-The status sensor exposes `display_order_source` (`topology`, `manual`,
-`selection` or `legacy`). `topology_status: verified` means the station is
-covered by the documented profile, even when a manual display order is in use.
+The status sensor exposes `display_order_source`: `topology` for a station
+covered by the documented profile, `selection` for any other station.
+`topology_status: verified` means the same thing as `topology`.
 The source URL, document reference, verification date and confidence are
 available in the status attributes of covered stations. The [Bacchiglione
 profile](custom_components/arpav_meteo_idro/hydro_topology.py) represents the

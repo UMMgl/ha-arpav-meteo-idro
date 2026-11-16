@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :boom: Breaking Changes
+- **hydro**: the manual station order is removed (deprecated in 0.15.5, #38). The **Manual order (station IDs)** field is gone from the setup and options forms, and the `legacy` and `manual` values of `display_order_source` no longer exist (it is now `topology` or `selection`). Existing hydrometric entries are migrated (config entry version 1.2: only the minor version changes, so a rollback to 0.15.5 still loads the entries): the saved order is dropped and the stations are shown in the verified river profile order, with the stations the profile does not cover after them in selection order. Dashboards that sorted on the `display_order` attribute keep working; a dashboard that relied on a manual order must be adjusted, or the river's profile reported as an issue. The `hydro_manual_order_deprecated` Repairs issue is deleted by the migration.
+
 ### :sparkles: New Features
 - **hydro**: the water level sensor exposes the last 24 hours of samples (10 minutes apart) as `samples_24h`, a compact `[[iso_utc, value], ...]` list of at most 288 points, excluded from the Recorder; the example dashboards draw their 24-hour charts from it with the ApexCharts `data_generator`
 - **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
