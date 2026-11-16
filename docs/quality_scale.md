@@ -63,8 +63,8 @@ To do: reconfiguration-flow, repair-issues (e.g. a station that stops publishing
 
 ## Platinum
 
-✅ async-dependency. To do: inject-websession (the weather part still opens its own
-aiohttp sessions), strict-typing (mypy strict).
+✅ async-dependency, inject-websession (every request goes through the Home Assistant
+shared session, with a 30 s timeout). To do: strict-typing (mypy strict).
 
 ## Testing
 

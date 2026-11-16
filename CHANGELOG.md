@@ -9,12 +9,14 @@
 - **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
 
 ### :white_check_mark: Tests
+- **config flow**: `aioclient_mock` tests for the weather helpers, flow and options flow, raising `config_flow.py` coverage above 95 % (#5)
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
 ### :memo: Documentation
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores
+- **weather**: all requests of the weather part (forecast, stations, air quality, brightness, METAR, config flow) use the shared Home Assistant session with a 30 s timeout instead of opening their own; quality scale rule `inject-websession` is done (#7)
 - **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
 
 ### :warning: Deprecations

@@ -82,6 +82,6 @@ rules:
   # Platinum
   async-dependency: done
   inject-websession:
-    status: todo
-    comment: hydrometric part uses the Home Assistant session; weather part still opens its own
+    status: done
+    comment: every request (hydrometric, weather, METAR, brightness archive) uses the shared Home Assistant session, with a 30 s timeout
   strict-typing: todo
