@@ -39,6 +39,9 @@
 - **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
 
 ### :bug: Bug Fixes
+- **examples**: ApexCharts cards no longer carry their own `visibility`: a card hidden when the view loaded never drew when shown later (endless spinner after a period change on a phone). The conditions are now on the `vertical-stack` / `horizontal-stack` that group the charts
+- **examples**: charts follow the width of their card instead of staying 300 px wide and clipping the newest data. **The example views now also require [card-mod](https://github.com/thomasloven/lovelace-card-mod)**
+- **examples**: the last hour is drawn from `samples_24h` (a station whose level did not change still shows a line); two decimals in the chart header, time axis without seconds, subtle solid grid
 - **hydro**: `parse_instant` accepts only 12 ASCII digits; truncated or unpadded instants such as `20261115080` were silently read as a wrong time (#29)
 
 
