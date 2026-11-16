@@ -41,14 +41,21 @@ jobs:
         id: tier
         # release_tier in pyproject.toml, validated against the tier of the last
         # stable release: it fails when the tier was lowered
-        run: echo "quality_tier=$(python3 scripts/check_quality_scale.py --ratchet)" >> "$GITHUB_OUTPUT"
+        run: |
+          # assigned on its own line: a failing ratchet fails the step (bash -e)
+          tier="$(python3 scripts/check_quality_scale.py --ratchet)"
+          if [ -z "$tier" ]; then
+            echo "::error::the ratchet returned no tier"
+            exit 1
+          fi
+          echo "quality_tier=$tier" >> "$GITHUB_OUTPUT"
 
   quality:
     name: "Release quality"
     needs: tier
     # stable releases need the tier declared in pyproject.toml; beta and release
     # candidate tags (pre-releases, e.g. 0.15.5b1, 0.15.5rc1) skip only this gate
-    if: ${{ !(github.ref_type == 'tag' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc'))) }}
+    if: ${{ needs.tier.outputs.quality_tier != '' && !(github.ref_type == 'tag' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc'))) }}
     permissions:
       contents: read
     uses: $/.github/workflows/tests.yml
@@ -63,6 +70,7 @@ jobs:
     if: >-
       ${{ always() && github.ref_type == 'tag' &&
       needs.security.result == 'success' && needs.tier.result == 'success' &&
+      needs.tier.outputs.quality_tier != '' &&
       (needs.quality.result == 'success' ||
       (needs.quality.result == 'skipped' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc')))) }}
     runs-on: "ubuntu-latest"
