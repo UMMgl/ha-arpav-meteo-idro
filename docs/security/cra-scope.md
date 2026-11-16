@@ -5,8 +5,7 @@ Tracking issue: [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18).
 Evidence register: [evidence.md](evidence.md).
 
 **Status: the scope decision below is the maintainer's; the factual
-statements are marked to be validated by the maintainer before this page is
-treated as final. This page is the project's own assessment, not legal
+statements in section 2 were confirmed by the maintainer on 2026-11-16. This page is the project's own assessment, not legal
 advice, and it does not claim that the project, the integration or any release
 conforms to Regulation (EU) 2024/2847. There is no CE marking, no EU
 declaration of conformity and no support-period commitment.**
@@ -28,16 +27,16 @@ On **2026-11-16** the maintainer set the vulnerability-handling targets in
 [SECURITY.md](../../SECURITY.md): acknowledgement within 7 days, triage within
 2 weeks, as internal targets and not as service-level agreements.
 
-## 2. Factual basis (to be validated by the maintainer)
+## 2. Factual basis (confirmed by the maintainer on 2026-11-16)
 
 | Fact | Status |
 |---|---|
 | The integration "ARPAV Meteo e Idro" (`arpav_meteo_idro`) is free and open-source software under Apache-2.0 and BSD-3-Clause ([LICENSE](../../LICENSE), [LICENSE-BSD-3-Clause](../../LICENSE-BSD-3-Clause), [NOTICE](../../NOTICE)). | Checked against the repository |
 | It is published on GitHub and installed through HACS; releases are built by [release.yml](../../.github/workflows/release.yml). | Checked against the repository |
 | It reads public ARPAV open data (CC BY 4.0) and the public METAR service; no credentials, no personal data ([SECURITY.md](../../SECURITY.md)). | Checked against the repository |
-| It is developed by a private individual, the maintainer (`@UMMgl`), outside any commercial activity of that person, and is not offered for a price. | **Maintainer to confirm** |
-| No paid support, no sale, no sponsorship or donation arrangement is tied to the project, and no organisation steadily supports it for commercial use. | **Maintainer to confirm** |
-| The software is not part of a product that the maintainer or an employer sells. | **Maintainer to confirm** |
+| It is developed by a private individual, the maintainer (`@UMMgl`), outside any commercial activity of that person, and is not offered for a price. | Confirmed by the maintainer |
+| No paid support, no sale, no sponsorship or donation arrangement is tied to the project, and no organisation steadily supports it for commercial use. | Confirmed by the maintainer |
+| The software is not part of a product that the maintainer or an employer sells. | Confirmed by the maintainer |
 
 ## 3. Role assessment
 
@@ -107,7 +106,7 @@ exercise (0.16.x), S4 the security gate in the release workflow (0.16.0).
 
 | Item | Disposition | Reason and evidence |
 |---|---|---|
-| Assess whether the integration is made available in the course of a commercial activity; record outcome in `SECURITY.md` | Adopted | Sections 1–3 above; summary in [SECURITY.md](../../SECURITY.md) ("Scope and the Cyber Resilience Act"). Awaiting maintainer confirmation of the facts in section 2. |
+| Assess whether the integration is made available in the course of a commercial activity; record outcome in `SECURITY.md` | Adopted | Sections 1–3 above; summary in [SECURITY.md](../../SECURITY.md) ("Scope and the Cyber Resilience Act"). Facts in section 2 confirmed by the maintainer. |
 | Classify the product (default category, self-assessment) | Adopted (for planning) | Section 4. No assessment is run while the project is out of scope. |
 
 ### 6.2 Essential requirements – product (Annex I, part I)
@@ -117,7 +116,7 @@ exercise (0.16.x), S4 the security gate in the release workflow (0.16.0).
 | Documented risk assessment (data sources, network exposure, untrusted XML, Recorder writes) | Open | Summary in [SECURITY.md](../../SECURITY.md) ("What the integration does"). The full analysis is S3 (0.16.x). |
 | No known exploitable vulnerabilities at release (bandit, CodeQL, pip-audit, gitleaks) | Open | The checks run on every pull request and on `main` ([security.yml](../../.github/workflows/security.yml), [run](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005671)), but they are not a gate on the tagged release commit yet. S4, 0.16.0; it needs the maintainer's authorisation as a workflow change. A green scanner is not proof of absence of vulnerabilities. |
 | Secure by default; minimal attack surface (HTTPS only, no listening ports, no credentials) | Adopted | The integration only makes outbound HTTPS requests to fixed ARPAV and METAR endpoints ([const.py](../../custom_components/arpav_meteo_idro/const.py), [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py), [metar.py](../../custom_components/arpav_meteo_idro/metar.py)), opens no port and needs no credentials. |
-| Integrity and confidentiality of data in transit (TLS verification on, no custom certificates) | Adopted for the hydrometric part; Open for the weather part | The hydrometric part uses the Home Assistant session ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py)). The weather part still creates its own `aiohttp` sessions with default TLS verification; moving it to the Home Assistant session is tracked in [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7). No code disables certificate verification. |
+| Integrity and confidentiality of data in transit (TLS verification on, no custom certificates) | Adopted for the hydrometric part; Open for the weather part | The hydrometric part uses the Home Assistant session ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py)). The weather part still creates its own `aiohttp` sessions with default TLS verification; moving it to the Home Assistant session is tracked in [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7) (pull request [#60](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/60), open at the time of writing). No code disables certificate verification. |
 | Limit the impact of incidents (bounded requests, timeouts, size limits, back-off) | Adopted for the hydrometric part; Open for the weather part | 30 s request timeout, at most 5 concurrent stations and back-off in [hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py); 5 MiB document limit and HTML rejection in [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py), tested in [test_hydro.py](../../tests/test_hydro.py) and fuzzed in [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py). Equivalent timeouts for the weather part are part of [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7). |
 | Security information logging without personal data | Adopted | The integration processes no personal data; failures are logged through the Home Assistant logger; diagnostics redact coordinates ([diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py)). Not a security event log in the CRA sense; none is planned. |
 

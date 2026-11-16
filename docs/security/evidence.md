@@ -20,8 +20,8 @@ conformity with the Cyber Resilience Act (see [cra-scope.md](cra-scope.md)).
   identity and never approve or merge (see
   [CONTRIBUTING.md](../../CONTRIBUTING.md)).
 * **Reviewed** is the date the row was last checked against its evidence.
-* **Gap / due** is empty when the evidence covers the criterion. Due dates are
-  proposals until the maintainer confirms them.
+* **Gap / due** is empty when the evidence covers the criterion. Due dates were
+  confirmed by the maintainer on 2026-11-16.
 * Review cadence: after relevant changes (permissions, pipelines, critical
   dependencies, vulnerability handling) and quarterly, limited to changed
   rows and open gaps. First fixed review: **2027-02-16**.
@@ -74,7 +74,7 @@ exists; *N/A* = not applicable with the reason given.
 | Criterion | Status | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
 | repo_public | Met | <https://github.com/UMMgl/ha-arpav-meteo-idro> | @UMMgl | 2026-11-16 | |
-| repo_track | Met | Git history; changes reach `main` through [merged pull requests](https://github.com/UMMgl/ha-arpav-meteo-idro/pulls?q=is%3Apr+is%3Amerged) | @UMMgl | 2026-11-16 | Branch protection settings are not readable by the App token; the maintainer records them (see SAMM table, Configuration Hardening) |
+| repo_track | Met | Git history; changes reach `main` through [merged pull requests](https://github.com/UMMgl/ha-arpav-meteo-idro/pulls?q=is%3Apr+is%3Amerged) | @UMMgl | 2026-11-16 | Branch protection settings are not readable by the App token; maintainer-confirmed on 2026-11-16; the repository has no rulesets (API `rules/branches/main` returned an empty list) |
 | repo_interim | Met | Work happens on branches and pull requests before merge (e.g. [#39](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/39)) | @UMMgl | 2026-11-16 | |
 | repo_distributed | Met | Git | @UMMgl | 2026-11-16 | |
 | version_unique | Met | Unique tags 0.15.0–0.15.5 ([releases](https://github.com/UMMgl/ha-arpav-meteo-idro/releases)); the manifest version is set from the tag in [release.yml](../../.github/workflows/release.yml) | @UMMgl | 2026-11-16 | |
@@ -192,7 +192,7 @@ and its releases (one maintainer, no organisation).
 |---|---|---|---|---|---|
 | Architecture Assessment – Architecture Validation (identify components, review basic security provisioning) | Partial | Component list in [README.md](../../README.md) and [hydro_topology.md](../hydro_topology.md); no security review of it | @UMMgl | 2026-11-16 | Fold into the S3 risk analysis, 0.16.x |
 | Architecture Assessment – Architecture Mitigation (ad-hoc review for unmitigated threats) | Partial | OWASP review in [#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21) produced fixes ([#22](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/22)) | @UMMgl | 2026-11-16 | Repeat after the S3 analysis |
-| Requirements-driven Testing – Control Verification (test for software security controls) | Partial | Parser limits and rejection of HTML/oversized documents are tested ([test_hydro.py](../../tests/test_hydro.py)); the weather part's network handling is not covered | @UMMgl | 2026-11-16 | Weather-part session and error-path tests, 0.16.0 ([#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7), [#5](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/5)) |
+| Requirements-driven Testing – Control Verification (test for software security controls) | Partial | Parser limits and rejection of HTML/oversized documents are tested ([test_hydro.py](../../tests/test_hydro.py)); the weather part's network handling is not covered | @UMMgl | 2026-11-16 | Weather-part session and error-path tests, 0.16.0 (pull request [#60](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/60) open at the time of writing; [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7), [#5](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/5)) |
 | Requirements-driven Testing – Misuse/Abuse Testing (security fuzz testing) | Yes | [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py), [#34](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/34) | @UMMgl | 2026-11-16 | |
 | Security Testing – Scalable Baseline (automated security testing tools) | Yes | [Security run on `main`](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005671): CodeQL, bandit, pip-audit, gitleaks, zizmor | @UMMgl | 2026-11-16 | |
 | Security Testing – Deep Understanding (manual testing of high-risk components) | No | None | @UMMgl | 2026-11-16 | Manual review of `hydro.py` against the S3 threat list, 0.16.x |
@@ -203,7 +203,7 @@ and its releases (one maintainer, no organisation).
 |---|---|---|---|---|---|
 | Incident Management – Incident Detection (best-effort detection from log data) | Partial | Code scanning and Dependabot alerts; the integration logs failed requests ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py)); Home Assistant owns the runtime logs | @UMMgl | 2026-11-16 | No detection in users' installations (outside the project's control) |
 | Incident Management – Incident Response (roles and responsibilities) | Partial | Maintainer is the single contact ([SECURITY.md](../../SECURITY.md)); acknowledgement 7 days, triage 2 weeks as internal targets | @UMMgl | 2026-11-16 | No backup contact; no simulated report: S3 exercise, 0.16.x |
-| Environment Management – Configuration Hardening (best-effort hardening) | Partial | Workflows with least-privilege `permissions:` and zizmor; secret scanning with push protection (maintainer-confirmed) | @UMMgl | 2026-11-16 | Branch protection and required checks are not readable by the App token: the maintainer records the settings at the validation session |
+| Environment Management – Configuration Hardening (best-effort hardening) | Partial | Workflows with least-privilege `permissions:` and zizmor; secret scanning with push protection (maintainer-confirmed) | @UMMgl | 2026-11-16 | Branch protection and required checks are not readable by the App token: maintainer-confirmed on 2026-11-16 (the App token gets HTTP 403 on these endpoints) |
 | Environment Management – Patching and Updating (best-effort patching) | Yes | [dependabot.yml](../../.github/dependabot.yml), weekly pip-audit, lock refresh procedure in [SECURITY.md](../../SECURITY.md) | @UMMgl | 2026-11-16 | |
 | Operational Management – Data Protection (basic data protection practices) | Yes | No personal data processed; diagnostics redact coordinates ([diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py)); [SECURITY.md](../../SECURITY.md) ("What the integration does") | @UMMgl | 2026-11-16 | |
 | Operational Management – System Decommissioning / Legacy Management (decommission unused services; manage upgrades individually) | Partial | Only the latest release is supported ([SECURITY.md](../../SECURITY.md)); deprecation of the manual station order announced a release ahead ([#38](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/38)) | @UMMgl | 2026-11-16 | Upgrade guidance for users of older releases to be written with S3 |
