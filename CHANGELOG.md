@@ -13,6 +13,7 @@
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
 ### :memo: Documentation
+- **security**: evidence register for the OpenSSF Best Practices criteria and a draft OWASP SAMM level-1 baseline (`docs/security/evidence.md`, #28); CRA scope decision, role assessment, reassessment triggers and disposition of the #18 checklist (`docs/security/cra-scope.md`); `SECURITY.md` states the scope and the response targets (acknowledgement within 7 days, triage within 2 weeks; internal targets, not SLAs) (#18)
 - **examples**: map view of the hydrometric stations (`hydro_map_bacchiglione.yaml`, `_it`) built on the `latitude`/`longitude` attributes of the Status sensor, with README section; no integration code change (#20)
 - **README**: `samples_24h` format and size limit; the hydrometric update interval (5 minutes) reviewed against ARPAV's publication batches and documented
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
