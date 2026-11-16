@@ -19,7 +19,7 @@ from .helpers import FakeSession, load_json  # noqa: E402
 
 def _patch_session(routes):
     session = FakeSession(routes)
-    return session, patch.object(metar.aiohttp, "ClientSession", lambda *a, **k: session)
+    return session, patch.object(metar, "async_get_clientsession", lambda hass: session)
 
 
 def _distance(lat, lon):
@@ -31,7 +31,7 @@ async def test_fetch_stations_keeps_metar_sites_nearest_reporting_first():
     reports = [r for r in load_json("metar_reports.json") if r["icaoId"] == "LIPZ"]
     _, patcher = _patch_session({"stationinfo": load_json("metar_stationinfo.json"), "/metar": reports})
     with patcher:
-        stations = await metar.async_fetch_stations(45.4, 11.9, _distance)
+        stations = await metar.async_fetch_stations(None, 45.4, 11.9, _distance)
 
     assert [s.icao for s in stations] == ["LIPZ", "LIPU", "LIPT"]
     assert stations[0].reporting
@@ -47,7 +47,7 @@ async def test_reporting_check_failure_assumes_all_reporting():
     _, patcher = _patch_session({"stationinfo": load_json("metar_stationinfo.json"),
                                  "/metar": aiohttp.ClientError("boom")})
     with patcher:
-        stations = await metar.async_fetch_stations(45.4, 11.9, _distance)
+        stations = await metar.async_fetch_stations(None, 45.4, 11.9, _distance)
     assert stations
     assert all(s.reporting for s in stations)
 
@@ -56,7 +56,7 @@ async def test_reporting_icaos_empty_list_does_no_request():
     """No aerodromes, no request."""
     session, patcher = _patch_session({})
     with patcher:
-        assert await metar._async_reporting_icaos([]) == set()
+        assert await metar._async_reporting_icaos(None, []) == set()
     assert session.requests == []
 
 
@@ -64,7 +64,7 @@ async def test_fetch_observation_decodes_report():
     """A report becomes values converted to the units of Home Assistant."""
     _, patcher = _patch_session({"/metar": load_json("metar_reports.json")[:1]})
     with patcher:
-        observation = await metar.async_fetch_observation("LIPZ")
+        observation = await metar.async_fetch_observation(None, "LIPZ")
 
     assert observation.icao == "LIPZ"
     assert observation.name == "METAR LIPZ"
@@ -83,7 +83,7 @@ async def test_fetch_observation_variable_wind_has_no_bearing():
     """VRB wind direction is not a number: no bearing."""
     _, patcher = _patch_session({"/metar": load_json("metar_reports.json")[1:]})
     with patcher:
-        observation = await metar.async_fetch_observation("LIPU")
+        observation = await metar.async_fetch_observation(None, "LIPU")
     assert "wind_bearing" not in observation.values
     assert observation.values["wind_speed"] == pytest.approx(5.56)
 
@@ -93,7 +93,7 @@ async def test_fetch_observation_failures_return_none(payload):
     """An optional source never raises: no data, no problem."""
     _, patcher = _patch_session({"/metar": payload})
     with patcher:
-        assert await metar.async_fetch_observation("LIPZ") is None
+        assert await metar.async_fetch_observation(None, "LIPZ") is None
 
 
 def test_is_current():

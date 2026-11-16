@@ -7,6 +7,7 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import section
 from homeassistant.helpers import selector
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import (
     DOMAIN,
     API_BASE,
@@ -55,9 +56,12 @@ from .coordinator import haversine
 
 _LOGGER = logging.getLogger(__name__)
 
-async def fetch_zone_names():
+REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=30)
+
+async def fetch_zone_names(hass):
     """Fetch human-readable names for each zonaid."""
-    async with aiohttp.ClientSession() as session, session.get(f"{API_BASE}/bollettini_meteo_simboli_en") as response:
+    session = async_get_clientsession(hass)
+    async with session.get(f"{API_BASE}/bollettini_meteo_simboli_en", timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
         json_data = await response.json()
         data = json_data.get("data", [])
@@ -71,9 +75,10 @@ async def fetch_zone_names():
 
         return dict(sorted(zone_id_to_name.items(), key=lambda item: item[1]))
 
-async def fetch_zones():
+async def fetch_zones(hass):
     """Fetch the list of comuni and their corresponding data."""
-    async with aiohttp.ClientSession() as session, session.get(f"{API_BASE}/meteo_comuni") as response:
+    session = async_get_clientsession(hass)
+    async with session.get(f"{API_BASE}/meteo_comuni", timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
         json_data = await response.json()
         data = json_data.get("data", [])
@@ -89,10 +94,11 @@ async def fetch_zones():
         return comune_id_to_name, comuneid_to_zonaid, zone_id_to_name
 
 
-async def fetch_stations():
+async def fetch_stations(hass):
     """Fetch the list of stations and their codes."""
-    async with aiohttp.ClientSession() as session, session.get(
-        f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMI&coordcd=18&orario=0"
+    session = async_get_clientsession(hass)
+    async with session.get(
+        f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMI&coordcd=18&orario=0", timeout=REQUEST_TIMEOUT
     ) as response:
         response.raise_for_status()
         json_data = await response.json()
@@ -106,10 +112,11 @@ async def fetch_stations():
 
         return id_to_name, stations
 
-async def fetch_stations_air(cod_parametro):
+async def fetch_stations_air(hass, cod_parametro):
     """Fetch the list of Ozone stations and their codes."""
-    async with aiohttp.ClientSession() as session, session.get(
-        f"{API_BASE}/aria_elenco_stazioni?cod_parametro={cod_parametro}"
+    session = async_get_clientsession(hass)
+    async with session.get(
+        f"{API_BASE}/aria_elenco_stazioni?cod_parametro={cod_parametro}", timeout=REQUEST_TIMEOUT
     ) as response:
         response.raise_for_status()
         json_data = await response.json()
@@ -159,11 +166,11 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
             # Save the selected comune ID and move to zone selection
             self.selected_comune_id = user_input["comune_id"]
             self.selected_comune_name = self.comune_id_to_name[self.selected_comune_id]
-            self.zone_id_to_name = await fetch_zone_names()
+            self.zone_id_to_name = await fetch_zone_names(self.hass)
             return await self.async_step_zone()
 
         # Fetch zone data
-        self.comune_id_to_name, _, _ = await fetch_zones()
+        self.comune_id_to_name, _, _ = await fetch_zones(self.hass)
 
         schema = vol.Schema(
             {vol.Required("comune_id"): vol.In(self.comune_id_to_name)}
@@ -192,7 +199,7 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
             return await self.async_step_station()
 
         # Fetch all available zones
-        _, id_to_zonaid, _ = await fetch_zones()
+        _, id_to_zonaid, _ = await fetch_zones(self.hass)
 
         # Map comune_id to preselected zonaid
         preselected_zonaid = id_to_zonaid[self.selected_comune_id]
@@ -254,7 +261,7 @@ class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlo
             )
 
         # Fetch all stations
-        self.station_id_to_name, self.stations = await fetch_stations()
+        self.station_id_to_name, self.stations = await fetch_stations(self.hass)
 
         schema = vol.Schema(
             {
@@ -305,7 +312,7 @@ class ArpaVenetoWeatherOptionsFlowHandler(config_entries.OptionsFlow):
             # backward compatibility: enrich existing config injecting coordinates if missing
             if latitude is None or longitude is None:
                 # Fetch all stations
-                _, stations = await fetch_stations()
+                _, stations = await fetch_stations(self.hass)
                 station_id = self.config_entry.data.get("station_id")
                 new_data = {**self.config_entry.data,
                             "station_latitude": stations.get(station_id).get("latitudine"),
@@ -320,9 +327,9 @@ class ArpaVenetoWeatherOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="Configure options", data=user_input)
 
         # Fetch air quality stations
-        ozone_stations_response = fetch_stations_air("7")  # Ozone parameter code
-        pm10_stations_response = fetch_stations_air("25")  # PM10 parameter code
-        pm25_stations_response = fetch_stations_air("39")  # PM2.5 parameter code
+        ozone_stations_response = fetch_stations_air(self.hass, "7")  # Ozone parameter code
+        pm10_stations_response = fetch_stations_air(self.hass, "25")  # PM10 parameter code
+        pm25_stations_response = fetch_stations_air(self.hass, "39")  # PM2.5 parameter code
         self.ozone_stations, _ = await ozone_stations_response
         self.pm10_stations, _ = await pm10_stations_response
         self.pm25_stations, _ = await pm25_stations_response
@@ -463,7 +470,7 @@ class ArpaVenetoWeatherOptionsFlowHandler(config_entries.OptionsFlow):
             return latitude, longitude
 
         # entries created before the coordinates were stored
-        _, stations = await fetch_stations()
+        _, stations = await fetch_stations(self.hass)
         station = stations.get(self.config_entry.data.get("station_id")) or {}
 
         return station.get("latitudine"), station.get("longitudine")
@@ -479,6 +486,7 @@ class ArpaVenetoWeatherOptionsFlowHandler(config_entries.OptionsFlow):
             latitude = float(latitude)
             longitude = float(longitude)
             stations = await metar.async_fetch_stations(
+                self.hass,
                 latitude,
                 longitude,
                 lambda lat, lon: haversine(lat, lon, latitude, longitude),
