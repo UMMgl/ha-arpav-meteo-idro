@@ -15,6 +15,8 @@
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores
+- **ci**: test requirements are hash-pinned (`requirements_test.in` → `requirements_test.txt`, installed with `--require-hashes`), closing the Scorecard Pinned-Dependencies alerts
+- **dev**: the unused development container and its setup scripts (`.devcontainer*.json`, `scripts/setup|upgrade|bootstrap|develop|specific-version|dev-branch`, `.vscode/`, `config/configuration.yaml`) are removed
 - **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
 
 ### :warning: Deprecations

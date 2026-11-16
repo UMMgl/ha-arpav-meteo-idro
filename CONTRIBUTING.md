@@ -65,9 +65,11 @@ not merged.
   live ARPAV services from tests.
 - Coverage is measured in CI and raised release by release (see the roadmap).
 
-The repository also includes a development container (Visual Studio Code) with a
-standalone Home Assistant instance configured by
-[`config/configuration.yaml`](./config/configuration.yaml).
+There is no development container: develop in a local virtual environment
+(`python -m venv .venv`, then install `requirements_test.txt`) and let CI run the
+full suite on Linux. `requirements_test.txt` is a hash-pinned lock compiled from
+`requirements_test.in`; regenerate it with
+`uv pip compile --generate-hashes --python-version 3.14 --python-platform linux requirements_test.in -o requirements_test.txt`.
 
 ## Report bugs using GitHub's [issues](../../issues)
 
