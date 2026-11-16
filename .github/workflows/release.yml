@@ -9,23 +9,60 @@ on:
 permissions: {}
 
 jobs:
+  security:
+    name: "Release security gate"
+    # the security checks run on the tagged commit for every tag, pre-releases
+    # included; they are never skipped
+    permissions:
+      # the called workflow needs at least what its own jobs request (CodeQL uploads results)
+      contents: read
+      security-events: write
+    uses: $/.github/workflows/security.yml
+
+  tier:
+    name: "Release quality tier"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
+    outputs:
+      quality_tier: ${{ steps.tier.outputs.quality_tier }}
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Set up Python"
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: "Read the release tier (ratchet)"
+        id: tier
+        # release_tier in pyproject.toml, validated against the tier of the last
+        # stable release: it fails when the tier was lowered
+        run: echo "quality_tier=$(python3 scripts/check_quality_scale.py --ratchet)" >> "$GITHUB_OUTPUT"
+
   quality:
-    name: "Release quality (Gold)"
-    # stable releases need Gold; beta and release candidate tags (pre-releases,
-    # e.g. 0.15.5b1, 0.15.5rc1) skip this gate
+    name: "Release quality"
+    needs: tier
+    # stable releases need the tier declared in pyproject.toml; beta and release
+    # candidate tags (pre-releases, e.g. 0.15.5b1, 0.15.5rc1) skip only this gate
     if: ${{ !(github.ref_type == 'tag' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc'))) }}
     permissions:
       contents: read
     uses: $/.github/workflows/tests.yml
     with:
-      quality_tier: "gold"
+      quality_tier: ${{ needs.tier.outputs.quality_tier }}
 
   release:
     name: "Release"
-    needs: quality
-    # publish when the gate passed, or when it was skipped for a pre-release tag
+    needs: [security, tier, quality]
+    # publish only for a tag, when the security gate and the tier check passed and the
+    # quality gate passed (or was skipped for a pre-release tag)
     if: >-
       ${{ always() && github.ref_type == 'tag' &&
+      needs.security.result == 'success' && needs.tier.result == 'success' &&
       (needs.quality.result == 'success' ||
       (needs.quality.result == 'skipped' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc')))) }}
     runs-on: "ubuntu-latest"

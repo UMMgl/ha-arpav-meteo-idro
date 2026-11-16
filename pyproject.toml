@@ -16,6 +16,19 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["custom_components*"]
+[tool.arpav_meteo_idro]
+# Minimum Home Assistant quality tier that the Release workflow requires for a
+# stable tag (bronze, silver, gold or platinum). It is a ratchet: it may only
+# rise, never fall below the highest tier in [tool.arpav_meteo_idro.released]
+# (checked by scripts/check_quality_scale.py --ratchet). See docs/quality_scale.md.
+release_tier = "silver"
+
+[tool.arpav_meteo_idro.released]
+# Tier of each stable release already published. Add the entry for a version in
+# the first pull request after its tag; that is what the ratchet compares against,
+# so the check needs no network access.
+"0.15.5" = "bronze"
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
