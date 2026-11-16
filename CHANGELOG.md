@@ -10,6 +10,7 @@
 - **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
 
 ### :white_check_mark: Tests
+- **coverage**: tests for the weather request helpers, the JSON encoder and the forecast edge cases of `weather.py`, and for the import guards of `hydro_statistics.py`, raising both modules above 95 % for the Silver tier (#5)
 - **config flow**: `aioclient_mock` tests for the weather helpers, flow and options flow, raising `config_flow.py` coverage above 95 % (#5)
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
