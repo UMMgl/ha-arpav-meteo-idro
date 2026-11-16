@@ -355,3 +355,50 @@ def test_format_axis_ceilings_roundtrip():
 def test_parse_instant_requires_twelve_ascii_digits(raw):
     """Regression (found by fuzzing): strptime accepted truncated/unpadded instants."""
     assert hydro.parse_instant(raw) is None
+
+
+# --- recent samples for charts ----------------------------------------------
+
+def test_recent_samples_real_file_is_24_hours_of_10_minute_points():
+    """A real 10-minute station gives ~144 compact [iso, value] pairs, oldest first."""
+    series = hydro.parse_station(fixture("0287.xml")).level_series()
+    recent = hydro.recent_samples(series)
+    assert 100 <= len(recent) <= 145
+    assert all(len(point) == 2 and isinstance(point[1], float) for point in recent)
+    stamps = [datetime.fromisoformat(point[0]) for point in recent]
+    assert stamps == sorted(stamps)
+    assert stamps[-1] - stamps[0] <= timedelta(hours=24)
+    assert stamps[-1] == series.valid_samples[-1].observed_at
+    assert stamps[1] - stamps[0] == timedelta(minutes=10)
+    assert recent[0][0].endswith("+00:00")
+
+
+def test_recent_samples_skips_sentinels_and_keeps_negative_values():
+    """A sentinel leaves a gap, never a zero; negative levels are real."""
+    series = series_of(["0.5", ">>", "-0.24", "0.6"])
+    assert [p[1] for p in hydro.recent_samples(series)] == [0.5, -0.24, 0.6]
+
+
+def test_recent_samples_window_ends_at_last_valid_sample():
+    """Older points fall out of the window, anchored on the newest valid sample."""
+    series = series_of([str(i / 100) for i in range(200)])  # 200 samples, 10 min apart
+    recent = hydro.recent_samples(series)
+    assert len(recent) == 145  # 24 h inclusive of both ends
+    assert recent[-1][1] == 1.99
+    assert hydro.recent_samples(series, hours=1)[0][1] == 1.93
+
+
+def test_recent_samples_is_bounded():
+    """The size limit keeps the newest points."""
+    series = series_of(["1.0"] * 20)
+    recent = hydro.recent_samples(series, max_points=5)
+    assert len(recent) == 5
+    assert datetime.fromisoformat(recent[-1][0]) == series.samples[-1].observed_at
+    assert len(hydro.recent_samples(series_of(["1"] * 400, step=1))) == hydro.MAX_RECENT_SAMPLES
+
+
+def test_recent_samples_empty_cases():
+    """No series, no valid sample or a zero limit give an empty list."""
+    assert hydro.recent_samples(None) == []
+    assert hydro.recent_samples(series_of([">>", "-"])) == []
+    assert hydro.recent_samples(series_of(["1.0"]), max_points=0) == []

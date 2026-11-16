@@ -4,7 +4,8 @@
 
 Usage: python generate_hydro_dashboard.py [--lang en|it] [--full] [--chart-max ID=m,...] > view.yaml
 
-* basic: table, 24-hour charts and 72-hour hourly Recorder means
+* basic: table, 24-hour charts (every 10-minute sample, from the ``samples_24h``
+  attribute of the level sensor) and 72-hour hourly Recorder means
 * --full: also legend, alert badges and a period selector (last hour / day /
   week / month), which needs the helper of ``helpers_bacchiglione.yaml``
 * --lang: entity IDs as created by Home Assistant in that language
@@ -46,13 +47,16 @@ SUFFIXES = {
 }
 LEVEL_SUFFIX = SUFFIXES["en"]["level"]
 COLORS = {"below": "#1e88e5", "g1": "#fbc02d", "g2": "#ef6c00", "g3": "#c62828"}
+# marker for "draw the 10-minute samples of the level sensor": the attribute is not
+# recorded, so it feeds the last 24 hours only; longer periods use the Recorder
+SAMPLES = "samples_24h"
 PERIOD_HELPER = "input_select.bacchiglione_periodo_grafici"
 # label, graph span, grouping of the states, hourly Recorder means
 PERIODS = [
     # a grouping is needed in the last hour too: a level that did not change
     # may return no point at all, and ApexCharts fails drawing the thresholds
     ("Ultima ora", "1h", {"func": "last", "duration": "5min", "fill": "last"}, False),
-    ("Ultimo giorno", "24h", {"func": "last", "duration": "10min", "fill": "null"}, False),
+    ("Ultimo giorno", "24h", SAMPLES, False),
     ("Ultima settimana", "7d", {"func": "avg", "duration": "30min", "fill": "null"}, False),
     ("Ultimo mese", "30d", None, True),
 ]
@@ -70,15 +74,21 @@ def chart(station_id, name, thresholds, span="24h", height=260, hourly=False, gr
     """Return an ApexCharts card for a station."""
     entity = f"sensor.{slug(name)}_{LEVEL_SUFFIX}"
 
-    def series(label, color, opacity, transform=None, main=False):
+    def series(label, color, opacity, transform=None, main=False, threshold=None):
         s = {"entity": entity, "name": label, "type": "area", "color": color, "opacity": opacity,
              "stroke_width": 2 if main else 0, "curve": "stepline", "fill_raw": "null"}
         if hourly:
             s["statistics"] = {"type": "mean", "period": "hour", "align": "start"}
+        elif group_by == SAMPLES:
+            # [[iso_ts, value], ...] -> [[ms, value], ...]; a missing attribute draws nothing
+            value = f"p[1] >= {threshold} ? p[1] : null" if threshold is not None else "p[1]"
+            s["data_generator"] = (f"return (entity.attributes.{SAMPLES} || [])"
+                                   f".map((p) => [new Date(p[0]).getTime(), {value}]);")
         elif group_by:
             s["group_by"] = group_by
         if transform:
-            s["transform"] = transform
+            if group_by != SAMPLES:  # the generator already applies the threshold
+                s["transform"] = transform
             s["show"] = {"in_header": False, "in_legend": False}
         return s
 
@@ -92,7 +102,8 @@ def chart(station_id, name, thresholds, span="24h", height=260, hourly=False, gr
         if not hourly:
             for value, key in zip(thresholds, ("g1", "g2", "g3"), strict=True):
                 all_series.append(series(f">= {value}", COLORS[key], 0.55,
-                                         transform=f"return x !== null && x >= {value} ? x : null;"))
+                                         transform=f"return x !== null && x >= {value} ? x : null;",
+                                         threshold=value))
         apex["annotations"] = {"yaxis": [
             {"y": v, "borderColor": COLORS[k], "strokeDashArray": 4,
              "label": {"text": k.upper(), "style": {"background": COLORS[k], "color": "#fff"}}}

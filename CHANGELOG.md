@@ -1,5 +1,6 @@
 ## [Unreleased]
 ### :sparkles: New Features
+- **hydro**: the water level sensor exposes the last 24 hours of samples (10 minutes apart) as `samples_24h`, a compact `[[iso_utc, value], ...]` list of at most 288 points, excluded from the Recorder; the example dashboards draw their 24-hour charts from it with the ApexCharts `data_generator`
 - **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
 - **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
 - **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
@@ -12,6 +13,7 @@
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
 ### :memo: Documentation
+- **README**: `samples_24h` format and size limit; the hydrometric update interval (5 minutes) reviewed against ARPAV's publication batches and documented
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores
