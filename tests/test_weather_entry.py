@@ -24,6 +24,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed  # noqa: E402
 from homeassistant.setup import async_setup_component  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
+from custom_components.arpav_meteo_idro import brightness_statistics as bs  # noqa: E402
 from custom_components.arpav_meteo_idro import coordinator as coord  # noqa: E402
 from custom_components.arpav_meteo_idro import const, metar  # noqa: E402
 from custom_components.arpav_meteo_idro.const import DOMAIN  # noqa: E402
@@ -104,7 +105,11 @@ def _routes():
 def api():
     """Serve the recorded ARPAV and METAR payloads to every aiohttp session."""
     session = FakeSession(_routes())
-    with patch.object(aiohttp, "ClientSession", lambda *a, **k: session):
+    with (
+        patch.object(coord, "async_get_clientsession", lambda hass: session),
+        patch.object(metar, "async_get_clientsession", lambda hass: session),
+        patch.object(bs, "async_get_clientsession", lambda hass: session),
+    ):
         yield session
 
 
@@ -271,7 +276,7 @@ async def test_failed_station_fetch_is_an_update_failure(enable_custom_integrati
     for key, call in (
         ("meteo_meteogrammi_tabella", lambda: coordinator.fetch_station_data(STATION)),
         ("aria_valori_orari", lambda: coordinator.fetch_air_quality_data("1", "PM10")),
-        ("bollettini_meteo_simboli_en", lambda: coord._fetch_forecast_data(13)),
+        ("bollettini_meteo_simboli_en", lambda: coord._fetch_forecast_data(hass, 13)),
         ("meteo_meteogrammi?rete=MGRAMMIBRI", lambda: coordinator.get_night_sky_brightness(45.3, 11.9)),
         ("meteo_brillanza_tabella?codseqst=902", lambda: coordinator._fetch_station_brightness("902")),
     ):
