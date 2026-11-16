@@ -58,10 +58,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: &id001
-          func: last
-          duration: 10min
-          fill: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       - entity: sensor.bacchiglione_a_ponte_marchese_water_level
         name: '>= 1.0'
         type: area
@@ -70,8 +67,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 1.0 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 1.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -83,8 +79,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 2.2 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 2.2 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -96,8 +91,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.2 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.2 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -155,7 +149,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       - entity: sensor.bacchiglione_a_vicenza_water_level
         name: '>= 3.0'
         type: area
@@ -164,8 +158,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -177,8 +170,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 4.6 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 4.6 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -190,8 +182,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.4 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.4 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -249,7 +240,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       - entity: sensor.bacchiglione_a_longare_water_level
         name: '>= 3.8'
         type: area
@@ -258,8 +249,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.8 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.8 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -271,8 +261,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.0 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -284,8 +273,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.3 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.3 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -343,7 +331,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       - entity: sensor.bacchiglione_a_montegalda_water_level
         name: '>= 3.0'
         type: area
@@ -352,8 +340,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -365,8 +352,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -378,8 +364,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -437,7 +422,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       yaxis:
       - decimals: 2
         show: false
@@ -466,7 +451,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       yaxis:
       - decimals: 2
         show: false
@@ -495,7 +480,7 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
       - entity: sensor.bacchiglione_a_bovolenta_water_level
         name: '>= 5.5'
         type: area
@@ -504,8 +489,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -517,8 +501,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -530,8 +513,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 7.0 ? x : null;'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 7.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -589,7 +571,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     - entity: sensor.bacchiglione_a_ponte_marchese_water_level
       name: '>= 1.0'
       type: area
@@ -598,8 +580,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 1.0 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 1.0 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -611,8 +592,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 2.2 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 2.2 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -624,8 +604,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.2 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.2 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -671,7 +650,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - &id002
+    - &id001
       condition: screen
       media_query: '(max-width: 767px)'
   - type: custom:apexcharts-card
@@ -689,7 +668,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     - entity: sensor.bacchiglione_a_vicenza_water_level
       name: '>= 3.0'
       type: area
@@ -698,8 +677,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -711,8 +689,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 4.6 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 4.6 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -724,8 +701,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.4 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.4 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -771,7 +747,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -787,7 +763,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     - entity: sensor.bacchiglione_a_longare_water_level
       name: '>= 3.8'
       type: area
@@ -796,8 +772,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.8 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.8 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -809,8 +784,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.0 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.0 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -822,8 +796,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.3 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.3 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -869,7 +842,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -885,7 +858,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     - entity: sensor.bacchiglione_a_montegalda_water_level
       name: '>= 3.0'
       type: area
@@ -894,8 +867,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -907,8 +879,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -920,8 +891,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -967,7 +937,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -983,7 +953,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     yaxis:
     - decimals: 2
       show: false
@@ -1000,7 +970,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -1016,7 +986,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     yaxis:
     - decimals: 2
       show: false
@@ -1033,7 +1003,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
   - type: custom:apexcharts-card
     graph_span: 24h
     header:
@@ -1049,7 +1019,7 @@ sections:
       stroke_width: 2
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
+      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
     - entity: sensor.bacchiglione_a_bovolenta_water_level
       name: '>= 5.5'
       type: area
@@ -1058,8 +1028,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -1071,8 +1040,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -1084,8 +1052,7 @@ sections:
       stroke_width: 0
       curve: stepline
       fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 7.0 ? x : null;'
+      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 7.0 ? p[1] : null]);'
       show:
         in_header: false
         in_legend: false
@@ -1131,7 +1098,7 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - *id002
+    - *id001
 - type: grid
   column_span: 4
   cards:

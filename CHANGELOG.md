@@ -1,5 +1,6 @@
 ## [Unreleased]
 ### :sparkles: New Features
+- **hydro**: the water level sensor exposes the last 24 hours of samples (10 minutes apart) as `samples_24h`, a compact `[[iso_utc, value], ...]` list of at most 288 points, excluded from the Recorder; the example dashboards draw their 24-hour charts from it with the ApexCharts `data_generator`
 - **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
 - **hydro**: station names show the accent (`Ponte San Nicolò` instead of `Ponte San Nicolo'`); entity IDs unchanged
 - **examples**: the dashboard generator takes the axis maximum of stations without thresholds from `chart_max_m` (`--chart-max`)
@@ -13,9 +14,13 @@
 
 ### :memo: Documentation
 - **security**: evidence register for the OpenSSF Best Practices criteria and a draft OWASP SAMM level-1 baseline (`docs/security/evidence.md`, #28); CRA scope decision, role assessment, reassessment triggers and disposition of the #18 checklist (`docs/security/cra-scope.md`); `SECURITY.md` states the scope and the response targets (acknowledgement within 7 days, triage within 2 weeks; internal targets, not SLAs) (#18)
+- **examples**: map view of the hydrometric stations (`hydro_map_bacchiglione.yaml`, `_it`) built on the `latitude`/`longitude` attributes of the Status sensor, with README section; no integration code change (#20)
+- **README**: `samples_24h` format and size limit; the hydrometric update interval (5 minutes) reviewed against ARPAV's publication batches and documented
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores
+- **ci**: test requirements are hash-pinned (`requirements_test.in` → `requirements_test.txt`, installed with `--require-hashes`), closing the Scorecard Pinned-Dependencies alerts
+- **dev**: the unused development container and its setup scripts (`.devcontainer*.json`, `scripts/setup|upgrade|bootstrap|develop|specific-version|dev-branch`, `.vscode/`, `config/configuration.yaml`) are removed
 - **release**: require Home Assistant Quality Scale Gold, including measured per-module coverage, before building or publishing.
 
 ### :warning: Deprecations

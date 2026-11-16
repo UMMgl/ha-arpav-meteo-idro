@@ -12,8 +12,15 @@ Planned work, one pull request each. Quality items refer to
   in the 15 November 2026 registry. See [coverage and sources](docs/hydro_topology.md).
 - [x] Attach Pila and Porto Barricata to their separate Po delta branches.
 - [x] Model Porto Levante on the regulated Canal Bianco / Po di Levante route.
-- [ ] Per-station axis ceiling option for stations without published thresholds
+- [x] Per-station axis ceiling option for stations without published thresholds
   (e.g. Voltabarozzo, interim 10 m in the example dashboard).
+- [ ] **Full sample resolution in charts.** ARPAV station files carry a sample
+  every 10 minutes for about two days (`FREQ` 10), but the level sensor only
+  exposes the latest one and the imported history is hourly, so charts show
+  steps instead of the ARPAV curve. Expose the recent samples (e.g. the last
+  24 hours) as an attribute of the level sensor, draw them in the example
+  dashboards with ApexCharts `data_generator`, and review the update interval
+  against ARPAV's publication blocks.
 
 ## Quality – Bronze
 
