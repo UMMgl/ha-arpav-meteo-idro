@@ -206,20 +206,22 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate an entry to the current version.
 
-    Version 2 (0.16.0) removes the manual station order: the saved order is
+    Version 1.2 (0.16.0) removes the manual station order: the saved order is
     dropped, so a hydrometric entry shows its stations in the verified river
     order, with the stations outside a profile after them in selection order.
-    The Repairs issue of the deprecation is deleted from the registry.
+    The Repairs issue of the deprecation is deleted from the registry. Only the
+    minor version changes: 0.15.5 loads an entry without the order, so a
+    downgrade stays possible.
     """
-    if entry.version > 2:
+    if entry.version > 1:
         # saved by a newer release: do not touch it
         return False
 
-    if entry.version == 1:
+    if entry.minor_version < 2:
         options = {k: v for k, v in entry.options.items() if k != LEGACY_ORDER_OPTION}
         ir.async_delete_issue(hass, DOMAIN, f"{LEGACY_ORDER_REPAIR}_{entry.entry_id}")
-        hass.config_entries.async_update_entry(entry, options=options, version=2)
-        _LOGGER.debug("Migrated the entry %s to version 2", entry.entry_id)
+        hass.config_entries.async_update_entry(entry, options=options, minor_version=2)
+        _LOGGER.debug("Migrated the entry %s to version 1.2", entry.entry_id)
     return True
 
 

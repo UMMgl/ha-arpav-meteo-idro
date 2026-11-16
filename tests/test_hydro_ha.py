@@ -68,7 +68,7 @@ def arpav(aioclient_mock):
 
 
 def _entry(**options):
-    # an entry saved by 0.15.x is at version 1; the migration tests start from it
+    # an entry saved by 0.15.x is at version 1.1; the migration tests start from it
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id="hydro_bacchiglione",
@@ -102,7 +102,7 @@ async def test_config_flow_orders_the_stations_by_the_river_profile(enable_custo
     assert result["data"] == {CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: "Bacchiglione"}
     assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["276", "333", "287"]
     assert LEGACY_ORDER_OPTION not in result["options"]
-    assert result["result"].version == 2
+    assert (result["result"].version, result["result"].minor_version) == (1, 2)
 
 
 async def test_config_flow_uses_automatic_profile_for_brenta(enable_custom_integrations, hass, arpav):
@@ -132,7 +132,7 @@ async def test_migration_drops_the_manual_order(
     freezer.move_to(NOW)
     entry = _entry(stations=list(reversed(STATIONS)), **order_options)
     entry.add_to_hass(hass)
-    assert entry.version == 1
+    assert (entry.version, entry.minor_version) == (1, 1)
     # the issue the 0.15.5 setup created
     issue_id = f"{LEGACY_ORDER_REPAIR}_{entry.entry_id}"
     ir.async_create_issue(hass, DOMAIN, issue_id, is_fixable=False, severity=ir.IssueSeverity.WARNING,
@@ -143,7 +143,7 @@ async def test_migration_drops_the_manual_order(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert entry.version == 2
+    assert (entry.version, entry.minor_version) == (1, 2)
     assert LEGACY_ORDER_OPTION not in entry.options
     # everything else is kept
     assert entry.options[CONF_HYDRO_TREND_THRESHOLD] == 5
@@ -167,7 +167,7 @@ async def test_migration_of_an_entry_without_a_saved_order(enable_custom_integra
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert entry.version == 2
+    assert (entry.version, entry.minor_version) == (1, 2)
     assert LEGACY_ORDER_OPTION not in entry.options
     assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["333", "334", "287"]
     assert (await _status_attributes(hass, "287"))["display_order_source"] == "topology"
@@ -188,7 +188,7 @@ async def test_migration_keeps_stations_outside_the_profile_after_the_profiled_o
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert entry.version == 2
+    assert (entry.version, entry.minor_version) == (1, 2)
     assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["333", "287", "999", "998"]
     profiled = await _status_attributes(hass, "287")
     assert (profiled["display_order"], profiled["display_order_source"]) == (20, "topology")
@@ -215,17 +215,27 @@ async def test_migration_of_a_weather_entry_only_bumps_the_version(enable_custom
                             options={"update_interval": 5})
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
-    assert entry.version == 2
+    assert (entry.version, entry.minor_version) == (1, 2)
     assert entry.options == {"update_interval": 5}
 
 
 async def test_migration_refuses_an_entry_of_a_newer_version(enable_custom_integrations, hass):
     """A downgrade must not rewrite an entry saved by a newer release."""
-    entry = MockConfigEntry(domain=DOMAIN, version=3, data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO},
+    entry = MockConfigEntry(domain=DOMAIN, version=2, data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO},
                             options={LEGACY_ORDER_OPTION: "1"})
     entry.add_to_hass(hass)
     assert not await async_migrate_entry(hass, entry)
-    assert entry.version == 3
+    assert entry.version == 2
+    assert entry.options == {LEGACY_ORDER_OPTION: "1"}
+
+
+async def test_an_entry_already_at_1_2_is_left_untouched(enable_custom_integrations, hass):
+    """The migration runs once: a migrated entry keeps whatever it holds."""
+    entry = MockConfigEntry(domain=DOMAIN, version=1, minor_version=2, data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO},
+                            options={LEGACY_ORDER_OPTION: "1"})
+    entry.add_to_hass(hass)
+    assert await async_migrate_entry(hass, entry)
+    assert (entry.version, entry.minor_version) == (1, 2)
     assert entry.options == {LEGACY_ORDER_OPTION: "1"}
 
 
