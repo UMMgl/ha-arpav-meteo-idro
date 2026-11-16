@@ -73,7 +73,7 @@ when a Bronze rule is open; higher tiers are reported.
 ✅ action-exceptions (translated errors), config-entry-unloading, docs-configuration-parameters,
 docs-installation-parameters, entity-unavailable, integration-owner, log-when-unavailable,
 parallel-updates. ➖ reauthentication-flow (public open data, no credentials).
-⚠️ test-coverage > 95%: the weather modules are not covered yet.
+✅ test-coverage (above 95% in every integration module, checked per module by `scripts/check_quality_scale.py`).
 
 ## Gold
 
