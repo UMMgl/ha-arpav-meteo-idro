@@ -200,6 +200,30 @@ async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, 
     assert hass.states.get(trend).state in hydro.TRENDS
 
 
+async def test_level_sensor_exposes_unrecorded_samples(enable_custom_integrations, hass, arpav, freezer):
+    """Only the level sensor carries the 24 h samples, and the Recorder must skip them."""
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    level_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_level")
+    samples = hass.states.get(level_id).attributes["samples_24h"]
+    assert 100 <= len(samples) <= hydro.MAX_RECENT_SAMPLES
+    assert samples[-1][1] == pytest.approx(1.46)
+    assert datetime.fromisoformat(samples[-1][0]) == datetime(2026, 11, 15, 7, 0, tzinfo=UTC)
+
+    for key in ("status", "trend", "level_change", "observed_at"):
+        entity_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_{key}")
+        if entity_id and hass.states.get(entity_id):
+            assert "samples_24h" not in hass.states.get(entity_id).attributes
+
+    from custom_components.arpav_meteo_idro.hydro_sensor import HydroSensor  # noqa: PLC0415
+    assert "samples_24h" in HydroSensor._unrecorded_attributes  # noqa: SLF001
+
+
 async def test_old_reading_is_stale(enable_custom_integrations, hass, arpav, freezer):
     """A reading older than the limit is reported as stale, without a trend."""
     freezer.move_to(NOW + timedelta(hours=5))
