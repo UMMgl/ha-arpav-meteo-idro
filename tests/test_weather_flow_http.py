@@ -19,6 +19,7 @@ from homeassistant import config_entries  # noqa: E402
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers.aiohttp_client import async_get_clientsession  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
+from yarl import URL  # noqa: E402
 from custom_components.arpav_meteo_idro import config_flow as flow  # noqa: E402
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     API_BASE,
@@ -98,7 +99,7 @@ async def test_helpers_parse_the_arpav_lists(hass, arpav):
     names, stations = await flow.fetch_stations_air(hass, "25")
     assert names == {"a1": "Arcella - Urbana", "a2": "Mandria - Urbana"}
     assert set(stations) == {"a1", "a2"}
-    assert any("cod_parametro=25" in str(call[1]) for call in arpav.mock_calls)
+    assert any(URL(str(call[1])).query.get("cod_parametro") == "25" for call in arpav.mock_calls)
 
 
 async def test_helpers_leave_the_shared_session_open(hass, arpav):
@@ -218,8 +219,8 @@ async def test_options_list_air_and_metar_stations(enable_custom_integrations, h
     assert result["type"] is FlowResultType.FORM and result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(result["flow_id"], ANSWERS)
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert any("aviationweather.gov" in str(call[1]) for call in arpav.mock_calls)
-    assert sum("aria_elenco_stazioni" in str(call[1]) for call in arpav.mock_calls) == 3
+    assert any(URL(str(call[1])).host == "aviationweather.gov" for call in arpav.mock_calls)
+    assert sum(URL(str(call[1])).path.endswith("/aria_elenco_stazioni") for call in arpav.mock_calls) == 3
 
 
 async def test_options_keep_a_configured_aerodrome_selectable(enable_custom_integrations, hass, arpav):
@@ -260,7 +261,7 @@ async def test_options_without_usable_coordinates_skip_metar(enable_custom_integ
     entry.add_to_hass(hass)
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] is FlowResultType.FORM
-    assert not any("stationinfo" in str(call[1]) for call in arpav.mock_calls)
+    assert not any(URL(str(call[1])).path.endswith("/stationinfo") for call in arpav.mock_calls)
 
 
 async def test_options_fill_in_missing_coordinates(enable_custom_integrations, hass, arpav):
