@@ -55,7 +55,7 @@ async def test_archive_imports_nearest_usable_stations():
     })
     add = MagicMock()
     with (
-        patch.object(bs.aiohttp, "ClientSession", lambda *a, **k: session),
+        patch.object(bs, "async_get_clientsession", lambda hass: session),
         patch.object(bs, "async_add_external_statistics", add),
     ):
         imported = await bs.async_archive_brightness(hass, 45.4, 11.9, stations=2)

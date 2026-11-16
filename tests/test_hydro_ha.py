@@ -8,6 +8,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+import aiohttp
 import pytest
 
 pytest.importorskip("fcntl")  # Home Assistant tests need a POSIX system
@@ -19,12 +20,18 @@ from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er, issue_registry as ir  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
-from custom_components.arpav_meteo_idro import hydro, hydro_coordinator, hydro_statistics  # noqa: E402
+from custom_components.arpav_meteo_idro import (  # noqa: E402
+    LEGACY_ORDER_OPTION,
+    LEGACY_ORDER_REPAIR,
+    async_migrate_entry,
+    hydro,
+    hydro_coordinator,
+    hydro_statistics,
+)
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
     CONF_HYDRO_AXIS_CEILING,
-    CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STATIONS,
@@ -61,6 +68,7 @@ def arpav(aioclient_mock):
 
 
 def _entry(**options):
+    # an entry saved by 0.15.x is at version 1.1; the migration tests start from it
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id="hydro_bacchiglione",
@@ -71,8 +79,8 @@ def _entry(**options):
     )
 
 
-async def test_config_flow_creates_ordered_entry(enable_custom_integrations, hass, arpav):
-    """Menu → river → stations with an explicit upstream-first order."""
+async def test_config_flow_orders_the_stations_by_the_river_profile(enable_custom_integrations, hass, arpav):
+    """Menu → river → stations: no order field, the verified profile orders the entry."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result["type"] is FlowResultType.MENU
     assert set(result["menu_options"]) == {"weather", "hydro"}
@@ -82,21 +90,23 @@ async def test_config_flow_creates_ordered_entry(enable_custom_integrations, has
 
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Bacchiglione"})
     assert result["step_id"] == "hydro_stations"
+    assert [field.schema for field in result["data_schema"].schema] == ["stations"]
 
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"stations": ["287", "333"], "display_order": "x, 1"})
-    assert result["errors"] == {"display_order": "invalid_order"}
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"stations": []})
+    assert result["errors"] == {"base": "no_stations"}
 
     with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], {"stations": ["287", "333", "276"], "display_order": "276, 333"})
+            result["flow_id"], {"stations": ["287", "333", "276"]})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: "Bacchiglione"}
     assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["276", "333", "287"]
-    assert result["options"][CONF_HYDRO_ORDER] == "276, 333"
+    assert LEGACY_ORDER_OPTION not in result["options"]
+    assert (result["result"].version, result["result"].minor_version) == (1, 2)
 
 
 async def test_config_flow_uses_automatic_profile_for_brenta(enable_custom_integrations, hass, arpav):
-    """Apply the Brenta profile on first setup when the order field is omitted."""
+    """Apply the Brenta profile on first setup."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "hydro"})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Brenta"})
@@ -104,67 +114,139 @@ async def test_config_flow_uses_automatic_profile_for_brenta(enable_custom_integ
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {CONF_HYDRO_STATIONS: ["646", "374", "329", "629"]})
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["options"][CONF_HYDRO_ORDER] == ""
+    assert LEGACY_ORDER_OPTION not in result["options"]
     assert [s["id"] for s in result["options"][CONF_HYDRO_STATIONS]] == ["374", "629", "329", "646"]
 
 
-@pytest.mark.parametrize("order_options", [{}, {CONF_HYDRO_ORDER: "287, 334, 333"}], ids=["legacy", "manual"])
-async def test_saved_order_can_be_cleared_and_removes_repair(
+async def _status_attributes(hass, station_id):
+    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_{station_id}_status")
+    return hass.states.get(entity_id).attributes
+
+
+@pytest.mark.parametrize("order_options", [{LEGACY_ORDER_OPTION: "287, 334, 333"}, {LEGACY_ORDER_OPTION: ""}],
+                         ids=["manual-order", "cleared-order"])
+async def test_migration_drops_the_manual_order(
     enable_custom_integrations, hass, arpav, freezer, order_options,
 ):
-    """Both saved order modes advertise the deprecation until the field is cleared."""
+    """An entry with a saved order switches to the verified profile and loses its Repairs issue."""
     freezer.move_to(NOW)
     entry = _entry(stations=list(reversed(STATIONS)), **order_options)
     entry.add_to_hass(hass)
+    assert (entry.version, entry.minor_version) == (1, 1)
+    # the issue the 0.15.5 setup created
+    issue_id = f"{LEGACY_ORDER_REPAIR}_{entry.entry_id}"
+    ir.async_create_issue(hass, DOMAIN, issue_id, is_fixable=False, severity=ir.IssueSeverity.WARNING,
+                          translation_key=LEGACY_ORDER_REPAIR)
+    issue_registry = ir.async_get(hass)
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is not None
+
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_status")
-    before = hass.states.get(entity_id)
-    assert before.attributes["display_order"] == 10
-    assert before.attributes["display_order_source"] == ("manual" if order_options else "legacy")
-    issue_registry = ir.async_get(hass)
-    issue_id = f"hydro_manual_order_deprecated_{entry.entry_id}"
-    issue = issue_registry.async_get_issue(DOMAIN, issue_id)
-    assert issue is not None
-    assert issue.severity == ir.IssueSeverity.WARNING
-    assert issue.translation_key == "hydro_manual_order_deprecated"
-
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["step_id"] == "hydro_options"
-    order_field = next(field for field in result["data_schema"].schema if field.schema == CONF_HYDRO_ORDER)
-    assert order_field.description["suggested_value"] == "287, 334, 333"
-    assert CONF_HYDRO_ORDER not in result["data_schema"]({})
-    result = await hass.config_entries.options.async_configure(result["flow_id"], {
-        CONF_HYDRO_STATIONS: ["287", "334", "333"],
-        CONF_HYDRO_TREND_THRESHOLD: 5,
-        CONF_HYDRO_STALE_MINUTES: 0,
-        CONF_HYDRO_ARCHIVE: False,
-    })
-    assert result["type"] is FlowResultType.CREATE_ENTRY
-    await hass.async_block_till_done()
-    assert entry.options[CONF_HYDRO_ORDER] == ""
+    assert (entry.version, entry.minor_version) == (1, 2)
+    assert LEGACY_ORDER_OPTION not in entry.options
+    # everything else is kept
+    assert entry.options[CONF_HYDRO_TREND_THRESHOLD] == 5
     assert issue_registry.async_get_issue(DOMAIN, issue_id) is None
-    assert [s["id"] for s in entry.options[CONF_HYDRO_STATIONS]] == ["333", "334", "287"]
-    after = hass.states.get(entity_id)
-    assert after.attributes["display_order"] == 30
-    assert after.attributes["display_order_source"] == "topology"
-    assert after.attributes["topology_status"] == "verified"
-    assert after.attributes["topology_source_reference"] == "Tavola 05"
-    assert after.attributes["topology_confidence"] == "high"
+    # Vicenza, Voltabarozzo, Bovolenta: the profile order, not the saved one
+    assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["333", "334", "287"]
+    attributes = await _status_attributes(hass, "287")
+    assert attributes["display_order"] == 30
+    assert attributes["display_order_source"] == "topology"
+    assert attributes["topology_status"] == "verified"
+    assert attributes["topology_source_reference"] == "Tavola 05"
+    assert attributes["topology_confidence"] == "high"
 
 
-async def test_removing_entry_clears_manual_order_repair(enable_custom_integrations, hass, arpav, freezer):
-    """Deleting a manual entry clears its warning from the issue registry."""
+async def test_migration_of_an_entry_without_a_saved_order(enable_custom_integrations, hass, arpav, freezer):
+    """An entry of 0.15.4 or older (no order option at all) also moves to the profile."""
     freezer.move_to(NOW)
-    entry = _entry(display_order="287, 334, 333")
+    entry = _entry(stations=list(reversed(STATIONS)))
+    assert LEGACY_ORDER_OPTION not in entry.options
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
-    issue_registry = ir.async_get(hass)
-    issue_id = f"hydro_manual_order_deprecated_{entry.entry_id}"
-    assert issue_registry.async_get_issue(DOMAIN, issue_id) is not None
-    await hass.config_entries.async_remove(entry.entry_id)
-    assert issue_registry.async_get_issue(DOMAIN, issue_id) is None
+    await hass.async_block_till_done()
+
+    assert (entry.version, entry.minor_version) == (1, 2)
+    assert LEGACY_ORDER_OPTION not in entry.options
+    assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["333", "334", "287"]
+    assert (await _status_attributes(hass, "287"))["display_order_source"] == "topology"
+
+
+async def test_migration_keeps_stations_outside_the_profile_after_the_profiled_ones(
+    enable_custom_integrations, hass, arpav, freezer,
+):
+    """Unprofiled stations follow the profiled ones, in the order they were selected."""
+    freezer.move_to(NOW)
+    extra = [_meta("999", "Bacchiglione new gauge", "New", 45.1, 11.7),
+             _meta("998", "Bacchiglione other gauge", "Other", 45.0, 11.6)]
+    for station in extra:
+        arpav.get(f"{hydro.XML_BASE}/{station['link']}", exc=aiohttp.ClientError)
+    entry = _entry(stations=[extra[0], STATIONS[2], extra[1], STATIONS[0]],
+                   **{LEGACY_ORDER_OPTION: "998, 999, 287"})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert (entry.version, entry.minor_version) == (1, 2)
+    assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["333", "287", "999", "998"]
+    profiled = await _status_attributes(hass, "287")
+    assert (profiled["display_order"], profiled["display_order_source"]) == (20, "topology")
+    outside = await _status_attributes(hass, "998")
+    assert (outside["display_order"], outside["display_order_source"]) == (40, "selection")
+    assert outside["topology_status"] == "candidate"
+
+
+async def test_a_river_without_a_profile_uses_the_selection_order(enable_custom_integrations, hass, arpav, freezer):
+    """No profile: the whole entry is shown in the order of selection."""
+    freezer.move_to(NOW)
+    entry = _entry(stations=list(reversed(STATIONS)))
+    entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_HYDRO_RIVER: "An unprofiled river"})
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["287", "334", "333"]
+    assert (await _status_attributes(hass, "333"))["display_order_source"] == "selection"
+
+
+async def test_migration_of_a_weather_entry_only_bumps_the_version(enable_custom_integrations, hass):
+    """The weather entries have nothing to drop."""
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="z1_s1", data={"station_id": "s1"},
+                            options={"update_interval": 5})
+    entry.add_to_hass(hass)
+    assert await async_migrate_entry(hass, entry)
+    assert (entry.version, entry.minor_version) == (1, 2)
+    assert entry.options == {"update_interval": 5}
+
+
+async def test_migration_refuses_an_entry_of_a_newer_version(enable_custom_integrations, hass):
+    """A downgrade must not rewrite an entry saved by a newer release."""
+    entry = MockConfigEntry(domain=DOMAIN, version=2, data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO},
+                            options={LEGACY_ORDER_OPTION: "1"})
+    entry.add_to_hass(hass)
+    assert not await async_migrate_entry(hass, entry)
+    assert entry.version == 2
+    assert entry.options == {LEGACY_ORDER_OPTION: "1"}
+
+
+async def test_an_entry_already_at_1_2_is_left_untouched(enable_custom_integrations, hass):
+    """The migration runs once: a migrated entry keeps whatever it holds."""
+    entry = MockConfigEntry(domain=DOMAIN, version=1, minor_version=2, data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO},
+                            options={LEGACY_ORDER_OPTION: "1"})
+    entry.add_to_hass(hass)
+    assert await async_migrate_entry(hass, entry)
+    assert (entry.version, entry.minor_version) == (1, 2)
+    assert entry.options == {LEGACY_ORDER_OPTION: "1"}
+
+
+async def test_options_flow_has_no_order_field(enable_custom_integrations, hass, arpav, freezer):
+    """The options form offers the stations and the other options, not the order."""
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["step_id"] == "hydro_options"
+    assert LEGACY_ORDER_OPTION not in [field.schema for field in result["data_schema"].schema]
 
 
 async def test_sensors_from_real_files(enable_custom_integrations, hass, arpav, freezer):
@@ -440,7 +522,7 @@ async def test_entity_ids_and_names_with_apostrophe_station(enable_custom_integr
 async def _options_flow(hass, entry, **user_input):
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] is FlowResultType.FORM and result["step_id"] == "hydro_options"
-    base = {"stations": ["333", "334", "287"], "display_order": "", "trend_threshold_cm": 5,
+    base = {"stations": ["333", "334", "287"], "trend_threshold_cm": 5,
             "stale_minutes": 0, "archive_history": False}
     return await hass.config_entries.options.async_configure(result["flow_id"], {**base, **user_input})
 

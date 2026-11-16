@@ -3,7 +3,8 @@
 The ARPAV registry checked on 2026-11-15 lists 115 stations in 49 water bodies.
 Of these, 23 water bodies have multiple stations (89 gauges), and 26 have one.
 The profiles cover all 89 gauges. Single-station entries keep selection
-order. Newly listed or unverified gauges can also be ordered manually.
+order. Newly listed or unverified gauges follow the profiled ones in selection order
+(there is no manual order since 0.16.0).
 
 | Profile | Covered gauges | Profile | Covered gauges |
 | --- | ---: | --- | ---: |

@@ -230,23 +230,15 @@ def _profile(river: str | None) -> dict[str, Reach]:
     return _PROFILES.get(key, {})
 
 
-def ordered_selection(
-    selected: list[str], order_text: str | None, river: str | None,
-) -> list[str] | None:
-    """Apply explicit order, preserved legacy order or verified river order."""
-    if order_text is None:
-        return list(selected)
+def ordered_selection(selected: list[str], river: str | None) -> list[str]:
+    """Order the stations: those the verified river profile covers first.
 
+    The profiled stations follow the profile (upstream first); the others keep
+    their selection order after them, so a river without a profile is shown in
+    the order the stations were selected.
+    """
     selected_by_key = {_station_key(station_id): station_id for station_id in selected}
-    if order_text.strip():
-        order = [token.strip() for token in order_text.replace(";", ",").split(",") if token.strip()]
-        if any(not token.isdecimal() for token in order):
-            return None
-        keys = dict.fromkeys(_station_key(token) for token in order)
-    else:
-        keys = _profile(river)
-
-    ordered = [selected_by_key[key] for key in keys if key in selected_by_key]
+    ordered = [selected_by_key[key] for key in _profile(river) if key in selected_by_key]
     return ordered + [station_id for station_id in selected if station_id not in ordered]
 
 

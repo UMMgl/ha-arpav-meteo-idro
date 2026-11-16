@@ -161,13 +161,7 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
             # ARPAV thresholds always win; the user ceiling only fills the gap
             ceiling = None if axis else self.coordinator.axis_ceilings.get(station_key(self._station_id))
             evidence = topology_evidence(self.coordinator.river, self._station_id)
-            order_text = self.coordinator.order_text
-            if order_text is None:
-                order_source = "legacy"
-            elif order_text.strip():
-                order_source = "manual"
-            else:
-                order_source = "topology" if evidence else "selection"
+            order_source = "topology" if evidence else "selection"
             attributes.update({
                 # normalized chart scale: G1 at 60% and G3 at 90% of the height
                 "chart_min_m": axis[0] if axis else None,

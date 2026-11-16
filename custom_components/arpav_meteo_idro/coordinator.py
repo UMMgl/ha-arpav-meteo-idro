@@ -21,6 +21,7 @@ from datetime import datetime, timezone, timedelta, UTC
 from math import radians, cos, sin, asin, sqrt
 
 
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed
@@ -28,6 +29,8 @@ from homeassistant.helpers.update_coordinator import (
 
 
 _LOGGER = logging.getLogger(__name__)
+
+REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 # how many brightness stations to try, ordered by distance
 BRIGHTNESS_MAX_STATIONS = 5
@@ -83,7 +86,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch the latest data from the API."""
         _LOGGER.warning("Fetching data")
         sensor_response = self.fetch_station_data(self.station_id)
-        forecast_response = _fetch_forecast_data(self.zone_id)
+        forecast_response = _fetch_forecast_data(self.hass, self.zone_id)
         ozone_response = self.fetch_air_quality_data(
             self.ozone_station_id, 'O3') if self.ozone_station_id and self.ozone_station_id != "None" else None
         pm10_response = self.fetch_air_quality_data(
@@ -171,7 +174,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         now = datetime.now(UTC)
         if (self._metar_fetched_at is None
                 or now - self._metar_fetched_at >= metar.MIN_FETCH_INTERVAL):
-            observation = await metar.async_fetch_observation(self.metar_station)
+            observation = await metar.async_fetch_observation(self.hass, self.metar_station)
             self._metar_fetched_at = now
             if observation is not None:
                 self._metar_observation = observation
@@ -186,7 +189,8 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
     async def fetch_station_data(self, station_id):
         """Fetch data from the station."""
         url = f"{API_BASE}/meteo_meteogrammi_tabella?codseqst={station_id}"
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             if response.status != 200:
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
@@ -307,7 +311,8 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch air quality data from the station."""
         # get all data as the "parametro" is not stable across stations (PM10 vs PM102)
         url = f"{API_BASE}/aria_valori_orari?codseqst={station_id}"
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             if response.status != 200:
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
@@ -598,7 +603,8 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         """Return the nearest usable night sky brightness reading, or None."""
 
         url = f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMIBRI&coordcd=20067&orario=0"
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             if response.status != 200:
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
@@ -624,7 +630,8 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
             return None
 
         url = f"{API_BASE}/meteo_brillanza_tabella?codseqst={codseqst}"
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             if response.status != 200:
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
@@ -908,10 +915,11 @@ def _get_forecast_datetime(scadenza, intervallo):
     datetime_str = f"{date} {time_str}"
     return datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
 
-async def _fetch_forecast_data(zone_id):
+async def _fetch_forecast_data(hass, zone_id):
     """Fetch data from the station."""
     url = f"{API_BASE}/bollettini_meteo_simboli_en?zona={zone_id}"
-    async with aiohttp.ClientSession() as session, session.get(url) as response:
+    session = async_get_clientsession(hass)
+    async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         if response.status != 200:
             raise UpdateFailed(
                 translation_domain=DOMAIN, translation_key="fetch_failed",

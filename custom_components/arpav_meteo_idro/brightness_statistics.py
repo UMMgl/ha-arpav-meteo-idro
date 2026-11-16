@@ -24,12 +24,15 @@ import aiohttp
 
 from homeassistant.components.recorder.models import StatisticMeanType, StatisticMetaData
 from homeassistant.components.recorder.statistics import async_add_external_statistics
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import slugify
 
 from .const import API_BASE, DOMAIN
 from .coordinator import sort_locations_by_distance
 
 _LOGGER = logging.getLogger(__name__)
+
+REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 # ARPAV timestamps carry no offset and are on a fixed +0100 all year round
 ARPAV_TZ = timezone(timedelta(hours=1))
@@ -59,27 +62,27 @@ async def async_archive_brightness(hass, latitude, longitude, stations=DEFAULT_S
 
     imported = 0
     archived = 0
-    async with aiohttp.ClientSession() as session:
-        network = await _fetch(session, f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMIBRI&coordcd=20067&orario=0")
-        nearest = sort_locations_by_distance(network.get("data", []), latitude, longitude)
+    session = async_get_clientsession(hass)
+    network = await _fetch(session, f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMIBRI&coordcd=20067&orario=0")
+    nearest = sort_locations_by_distance(network.get("data", []), latitude, longitude)
 
-        for station in nearest[:MAX_STATIONS_TRIED]:
-            if archived >= stations:
-                break
+    for station in nearest[:MAX_STATIONS_TRIED]:
+        if archived >= stations:
+            break
 
-            codseqst = station.get("codseqst")
-            if codseqst is None:
-                continue
+        codseqst = station.get("codseqst")
+        if codseqst is None:
+            continue
 
-            readings = await _fetch(session, f"{API_BASE}/meteo_brillanza_tabella?codseqst={codseqst}")
-            hourly = _hourly_statistics(readings.get("data", []))
-            if not hourly:
-                _LOGGER.debug("No usable brightness reading from station %s", codseqst)
-                continue
+        readings = await _fetch(session, f"{API_BASE}/meteo_brillanza_tabella?codseqst={codseqst}")
+        hourly = _hourly_statistics(readings.get("data", []))
+        if not hourly:
+            _LOGGER.debug("No usable brightness reading from station %s", codseqst)
+            continue
 
-            async_add_external_statistics(hass, _metadata(station), hourly)
-            imported += len(hourly)
-            archived += 1
+        async_add_external_statistics(hass, _metadata(station), hourly)
+        imported += len(hourly)
+        archived += 1
 
     return imported
 
@@ -87,7 +90,7 @@ async def async_archive_brightness(hass, latitude, longitude, stations=DEFAULT_S
 async def _fetch(session, url):
     """Return the JSON payload of an endpoint."""
 
-    async with session.get(url) as response:
+    async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
         return await response.json()
 

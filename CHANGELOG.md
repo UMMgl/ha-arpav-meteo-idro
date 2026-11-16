@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :boom: Breaking Changes
+- **hydro**: the manual station order is removed (deprecated in 0.15.5, #38). The **Manual order (station IDs)** field is gone from the setup and options forms, and the `legacy` and `manual` values of `display_order_source` no longer exist (it is now `topology` or `selection`). Existing hydrometric entries are migrated (config entry version 1.2: only the minor version changes, so a rollback to 0.15.5 still loads the entries): the saved order is dropped and the stations are shown in the verified river profile order, with the stations the profile does not cover after them in selection order. Dashboards that sorted on the `display_order` attribute keep working; a dashboard that relied on a manual order must be adjusted, or the river's profile reported as an issue. The `hydro_manual_order_deprecated` Repairs issue is deleted by the migration.
+
 ### :sparkles: New Features
 - **hydro**: the water level sensor exposes the last 24 hours of samples (10 minutes apart) as `samples_24h`, a compact `[[iso_utc, value], ...]` list of at most 288 points, excluded from the Recorder; the example dashboards draw their 24-hour charts from it with the ApexCharts `data_generator`
 - **hydro**: axis ceiling option (`station_id=metres`) for stations without GUARDIA thresholds: `chart_max_m` = ceiling, `chart_min_m` null, `axis_ceiling_source: user`; stations with thresholds ignore it (#2)
@@ -10,14 +13,18 @@
 - **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
 
 ### :white_check_mark: Tests
+- **coverage**: tests for the weather request helpers, the JSON encoder and the forecast edge cases of `weather.py`, and for the import guards of `hydro_statistics.py`, raising both modules above 95 % for the Silver tier (#5)
+- **config flow**: `aioclient_mock` tests for the weather helpers, flow and options flow, raising `config_flow.py` coverage above 95 % (#5)
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
 ### :memo: Documentation
+- **security**: evidence register for the OpenSSF Best Practices criteria and a draft OWASP SAMM level-1 baseline (`docs/security/evidence.md`, #28); CRA scope decision, role assessment, reassessment triggers and disposition of the #18 checklist (`docs/security/cra-scope.md`); `SECURITY.md` states the scope and the response targets (acknowledgement within 7 days, triage within 2 weeks; internal targets, not SLAs) (#18)
 - **examples**: map view of the hydrometric stations (`hydro_map_bacchiglione.yaml`, `_it`) built on the `latitude`/`longitude` attributes of the Status sensor, with README section; no integration code change (#20)
 - **README**: `samples_24h` format and size limit; the hydrometric update interval (5 minutes) reviewed against ARPAV's publication batches and documented
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores
+- **weather**: all requests of the weather part (forecast, stations, air quality, brightness, METAR, config flow) use the shared Home Assistant session with a 30 s timeout instead of opening their own; quality scale rule `inject-websession` is done (#7)
 - **ci**: test requirements are hash-pinned (`requirements_test.in` → `requirements_test.txt`, installed with `--require-hashes`), closing the Scorecard Pinned-Dependencies alerts
 - **dev**: the unused development container and its setup scripts (`.devcontainer*.json`, `scripts/setup|upgrade|bootstrap|develop|specific-version|dev-branch`, `.vscode/`, `config/configuration.yaml`) are removed
 - **release**: stable releases require the Home Assistant Quality Scale tier declared in `pyproject.toml` (`release_tier`), including measured per-module coverage: 0.16.0 Silver, 0.17.0 Gold. The tier is a ratchet that may only rise, checked by `scripts/check_quality_scale.py --ratchet` against the tiers of the published stable releases.

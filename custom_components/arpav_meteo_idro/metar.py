@@ -20,10 +20,13 @@ from datetime import UTC, datetime, timedelta
 from math import exp
 
 import aiohttp
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CARDINAL_DIRECTIONS
 
 _LOGGER = logging.getLogger(__name__)
+
+REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 API_BASE = "https://aviationweather.gov/api/data"
 
@@ -118,7 +121,7 @@ class MetarObservation:
         return datetime.now(UTC) - observed_at <= MAX_OBSERVATION_AGE
 
 
-async def async_fetch_stations(latitude, longitude, distance_of):
+async def async_fetch_stations(hass, latitude, longitude, distance_of):
     """Return the aerodromes issuing METAR around a location, nearest first.
 
     Some aerodromes are registered as METAR sites but publish nothing, and
@@ -132,7 +135,8 @@ async def async_fetch_stations(latitude, longitude, distance_of):
     bbox = f"{latitude - span},{longitude - span},{latitude + span},{longitude + span}"
     url = f"{API_BASE}/stationinfo?bbox={bbox}&format=json"
 
-    async with aiohttp.ClientSession() as session, session.get(url) as response:
+    session = async_get_clientsession(hass)
+    async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
         data = await response.json()
 
@@ -155,7 +159,7 @@ async def async_fetch_stations(latitude, longitude, distance_of):
             distance_km=distance_of(latitudine, longitudine),
         ))
 
-    reporting = await _async_reporting_icaos([station.icao for station in stations])
+    reporting = await _async_reporting_icaos(hass, [station.icao for station in stations])
     for station in stations:
         station.reporting = station.icao in reporting
 
@@ -163,7 +167,7 @@ async def async_fetch_stations(latitude, longitude, distance_of):
     return sorted(stations, key=lambda station: (not station.reporting, station.distance_km))
 
 
-async def _async_reporting_icaos(icaos):
+async def _async_reporting_icaos(hass, icaos):
     """Return which of the given aerodromes have a report available right now."""
 
     if not icaos:
@@ -172,7 +176,8 @@ async def _async_reporting_icaos(icaos):
     url = f"{API_BASE}/metar?ids={','.join(icaos)}&format=json"
 
     try:
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             response.raise_for_status()
             data = await response.json()
     except (aiohttp.ClientError, TimeoutError) as err:
@@ -183,13 +188,14 @@ async def _async_reporting_icaos(icaos):
     return {report.get("icaoId") for report in data}
 
 
-async def async_fetch_observation(icao):
+async def async_fetch_observation(hass, icao):
     """Return the latest METAR observation of an aerodrome, or None."""
 
     url = f"{API_BASE}/metar?ids={icao}&format=json"
 
     try:
-        async with aiohttp.ClientSession() as session, session.get(url) as response:
+        session = async_get_clientsession(hass)
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             response.raise_for_status()
             data = await response.json()
     except (aiohttp.ClientError, TimeoutError) as err:

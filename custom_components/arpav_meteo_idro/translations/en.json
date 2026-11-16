@@ -42,10 +42,9 @@
             },
             "hydro_stations": {
                 "title": "Stations of {river}",
-                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
+                "description": "Select the stations. They are shown in the verified order of the river where a profile covers them; the other stations follow in the order you selected them.\n\nStations: {stations}",
                 "data": {
-                    "stations": "Stations",
-                    "display_order": "Manual order (station IDs)"
+                    "stations": "Stations"
                 }
             }
         },
@@ -53,7 +52,6 @@
             "cannot_connect": "Unable to connect to the API. Check your settings.",
             "invalid_comune": "The selected municipality is invalid.",
             "no_stations": "Select at least one station.",
-            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287.",
             "invalid_axis_ceiling": "Use station_id=metres for selected stations, between 0 and 100 m, e.g. 334=10."
         },
         "abort": {
@@ -112,10 +110,9 @@
             },
             "hydro_options": {
                 "title": "Stations of {river}",
-                "description": "Select the stations. Leave the manual order empty to use the river profile where available. For rivers without a profile, the selected order is used. Enter comma-separated station IDs to override the display order.\n\nStations: {stations}",
+                "description": "Select the stations. They are shown in the verified order of the river where a profile covers them; the other stations follow in the order you selected them.\n\nStations: {stations}",
                 "data": {
                     "stations": "Stations",
-                    "display_order": "Manual order (station IDs)",
                     "trend_threshold_cm": "Trend threshold",
                     "stale_minutes": "Stale after (0 = automatic)",
                     "archive_history": "Complete the level statistics every day",
@@ -130,8 +127,7 @@
             }
         },
         "error": {
-            "no_stations": "Select at least one station.",
-            "invalid_order": "Use station IDs separated by commas, e.g. 276, 333, 287."
+            "no_stations": "Select at least one station."
         },
         "abort": {
             "cannot_connect": "Unable to read the ARPAV station registry. Try again later."
@@ -251,12 +247,6 @@
             "arpav": {
                 "name": "Conditions in {station_name} - forecast for {comune_name}"
             }
-        }
-    },
-    "issues": {
-        "hydro_manual_order_deprecated": {
-            "title": "Manual station order is deprecated",
-            "description": "The hydrometric entry **{entry_title}** uses a saved station order. Manual ordering is deprecated in ARPAV Meteo e Idro 0.15.5 and will be removed in 0.16.0. Open the integration options, clear the **Manual order (station IDs)** field and save to use the verified river profile where available. Stations outside a profile keep their selection order."
         }
     },
     "exceptions": {
