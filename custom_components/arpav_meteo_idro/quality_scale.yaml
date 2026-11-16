@@ -44,9 +44,7 @@ rules:
   reauthentication-flow:
     status: exempt
     comment: public open data, no credentials
-  test-coverage:
-    status: todo
-    comment: hydrometric modules covered; weather modules not yet
+  test-coverage: done
 
   # Gold
   devices: done

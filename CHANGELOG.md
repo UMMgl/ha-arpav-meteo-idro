@@ -13,6 +13,7 @@
 - **i18n**: user-facing errors (failed ARPAV requests, no readable station) are translated (en, it) (#6)
 
 ### :white_check_mark: Tests
+- **coverage**: tests for the archive schedules, the service entry-type check, the hydrometric flow errors and the unavailable hydrometric sensor close the Silver tier: every module is above 95 % and `test-coverage` is done in `quality_scale.yaml` (#5)
 - **coverage**: tests for the weather request helpers, the JSON encoder and the forecast edge cases of `weather.py`, and for the import guards of `hydro_statistics.py`, raising both modules above 95 % for the Silver tier (#5)
 - **config flow**: `aioclient_mock` tests for the weather helpers, flow and options flow, raising `config_flow.py` coverage above 95 % (#5)
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
@@ -33,6 +34,7 @@
 - **hydro**: manual station order is deprecated in 0.15.5. Home Assistant Repairs explains how to switch to automatic ordering before removal in 0.16.0 (#38).
 
 ### :white_check_mark: Tests
+- **coverage**: tests for the archive schedules, the service entry-type check, the hydrometric flow errors and the unavailable hydrometric sensor close the Silver tier: every module is above 95 % and `test-coverage` is done in `quality_scale.yaml` (#5)
 - **hydro**: property-based fuzz tests (Hypothesis) for the ARPAV XML parser (#29)
 
 ### :bug: Bug Fixes
