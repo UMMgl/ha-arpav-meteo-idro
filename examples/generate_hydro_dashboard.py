@@ -50,12 +50,13 @@ COLORS = {"below": "#1e88e5", "g1": "#fbc02d", "g2": "#ef6c00", "g3": "#c62828"}
 # marker for "draw the 10-minute samples of the level sensor": the attribute is not
 # recorded, so it feeds the last 24 hours only; longer periods use the Recorder
 SAMPLES = "samples_24h"
+SAMPLES_WINDOW = "samples_24h_window"  # same samples, cut to the graph span
 PERIOD_HELPER = "input_select.bacchiglione_periodo_grafici"
 # label, graph span, grouping of the states, hourly Recorder means
 PERIODS = [
-    # a grouping is needed in the last hour too: a level that did not change
-    # may return no point at all, and ApexCharts fails drawing the thresholds
-    ("Ultima ora", "1h", {"func": "last", "duration": "5min", "fill": "last"}, False),
+    # the last hour is drawn from the samples too: a level that did not change
+    # has no state change in the hour and would return no point at all
+    ("Ultima ora", "1h", SAMPLES_WINDOW, False),
     ("Ultimo giorno", "24h", SAMPLES, False),
     ("Ultima settimana", "7d", {"func": "avg", "duration": "30min", "fill": "null"}, False),
     ("Ultimo mese", "30d", None, True),
@@ -84,17 +85,39 @@ def chart(station_id, name, thresholds, span="24h", height=260, hourly=False, gr
             value = f"p[1] >= {threshold} ? p[1] : null" if threshold is not None else "p[1]"
             s["data_generator"] = (f"return (entity.attributes.{SAMPLES} || [])"
                                    f".map((p) => [new Date(p[0]).getTime(), {value}]);")
+        elif group_by == SAMPLES_WINDOW:
+            # the value valid at the start of the window, the samples inside it and
+            # the last value carried to the end: a station that did not change still
+            # draws a line
+            cut = (f"out.map((p) => [p[0], p[1] !== null && p[1] >= {threshold} ? p[1] : null])"
+                   if threshold is not None else "out")
+            s["data_generator"] = (
+                f"const s = (entity.attributes.{SAMPLES} || []).map((p) => [new Date(p[0]).getTime(), p[1]]); "
+                "if (!s.length) return []; const from = start.getTime(); "
+                "const before = s.filter((p) => p[0] < from); "
+                "const prev = before.length ? before[before.length - 1] : null; "
+                "const win = s.filter((p) => p[0] >= from); "
+                "const last = win.length ? win[win.length - 1] : prev; "
+                "const out = []; if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); "
+                f"if (last) out.push([end.getTime(), last[1]]); return {cut};")
         elif group_by:
             s["group_by"] = group_by
+        if main:
+            s["float_precision"] = 2  # the table shows two decimals too
         if transform:
-            if group_by != SAMPLES:  # the generator already applies the threshold
+            if group_by not in (SAMPLES, SAMPLES_WINDOW):  # the generator already applies the threshold
                 s["transform"] = transform
             s["show"] = {"in_header": False, "in_legend": False}
         return s
 
     all_series = [series("Media oraria" if hourly else "Livello", COLORS["below"], 0.35, main=True)]
     axis = {"decimals": 2, "show": False}
-    apex = {"legend": {"show": False}, "plotOptions": {"area": {"fillTo": "end"}}, "chart": {"height": height}}
+    apex = {"legend": {"show": False}, "plotOptions": {"area": {"fillTo": "end"}}, "chart": {"height": height},
+            # time labels without seconds; subtle continuous grid instead of the dashed white one
+            "xaxis": {"labels": {"datetimeFormatter": {
+                "year": "yyyy", "month": "MMM yy", "day": "dd MMM", "hour": "HH:mm", "minute": "HH:mm",
+                "second": "HH:mm"}}},
+            "grid": {"strokeDashArray": 0, "borderColor": "rgba(127, 127, 127, 0.25)"}}
     normalized = hydro.chart_axis(thresholds) if thresholds else None
     if normalized:
         # soft bounds: the scale grows only if the level leaves it
@@ -117,7 +140,7 @@ def chart(station_id, name, thresholds, span="24h", height=260, hourly=False, gr
     # it the card loads at once and refreshes on every new state of the sensor
     return {"type": "custom:apexcharts-card", "graph_span": span,
             "header": {"show": True, "title": hydro.normalize_name(name.split(" a ", 1)[-1]), "show_states": not hourly},
-            "series": all_series, "yaxis": [axis], "apex_config": apex}
+            "series": all_series, "yaxis": [axis], "apex_config": apex, "card_mod": {"style": CARD_MOD}}
 
 
 TABLE = """{%- set dot = {'below_g1':'#2e7d32','g1_g2':'#fbc02d','g2_g3':'#ef6c00','above_g3':'#c62828'} -%}
@@ -143,16 +166,24 @@ LEGEND = (
     "_Fonte: ARPAV, dati automatici non validati, CC BY 4.0. Non è un servizio di allerta._</small>"
 )
 WIDE = {"condition": "screen", "media_query": "(min-width: 768px)"}
+# apexcharts-card keeps the chart as wide as it was first drawn (300 px) inside a narrower
+# card and clips the newest data; with min-width 0 the chart follows the card (card-mod)
+CARD_MOD = "#graph-wrapper { min-width: 0; }"
 NARROW = {"condition": "screen", "media_query": "(max-width: 767px)"}
 
 
 def chart_rows(span="24h", group_by=PERIODS[1][2], hourly=False, extra=()):
-    """Charts side by side on wide screens, stacked on phones."""
+    """Charts side by side on wide screens, stacked on phones.
+
+    The conditions sit on the two containers, never on the ApexCharts cards: a
+    card with its own ``visibility`` that is hidden when the view loads starts
+    its first load, is detached and never draws when it is shown later.
+    """
     return [
         {"type": "horizontal-stack", "grid_options": {"columns": "full"}, "visibility": [*extra, WIDE],
          "cards": [chart(i, n, t, span, 260, hourly, group_by) for i, n, t in STATIONS]},
-        *[dict(chart(i, n, t, span, 170, hourly, group_by), grid_options={"columns": "full"},
-               visibility=[*extra, NARROW]) for i, n, t in STATIONS],
+        {"type": "vertical-stack", "grid_options": {"columns": "full"}, "visibility": [*extra, NARROW],
+         "cards": [chart(i, n, t, span, 170, hourly, group_by) for i, n, t in STATIONS]},
     ]
 
 

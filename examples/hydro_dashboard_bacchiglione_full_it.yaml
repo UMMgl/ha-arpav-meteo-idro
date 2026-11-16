@@ -225,11 +225,11 @@ sections:
     grid_options:
       columns: full
     visibility:
-    - &id002
+    - &id001
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultima ora
-    - &id004
+    - &id002
       condition: screen
       media_query: '(min-width: 768px)'
     cards:
@@ -248,10 +248,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: &id001
-          func: last
-          duration: 5min
-          fill: last
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -260,8 +260,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 1.0 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 1.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -273,8 +274,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 2.2 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 2.2 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -286,8 +288,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.2 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.2 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -304,6 +307,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 1.0
@@ -330,6 +345,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -345,7 +362,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -354,8 +374,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -367,8 +388,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 4.6 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 4.6 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -380,8 +402,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.4 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.4 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -398,6 +421,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -424,6 +459,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -439,7 +476,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -448,8 +488,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.8 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.8 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -461,8 +502,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.0 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -474,8 +516,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.3 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.3 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -492,6 +535,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.8
@@ -518,6 +573,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -533,7 +590,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -542,8 +602,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -555,8 +616,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -568,8 +630,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -586,6 +649,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -612,6 +687,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -627,7 +704,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -641,6 +721,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -656,7 +750,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -670,6 +767,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 1h
       header:
@@ -685,7 +796,10 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -694,8 +808,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -707,8 +822,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.5 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -720,8 +836,9 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id001
-        transform: 'return x !== null && x >= 7.0 ? x : null;'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 7.0 ? p[1] : null]);'
         show:
           in_header: false
           in_legend: false
@@ -738,6 +855,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 5.5
@@ -764,580 +893,688 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Ponte Marchese
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 1.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 1.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 2.2'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 2.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 3.2'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-3.4
-      max: ~3.93
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 1.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 2.2
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 3.2
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+  - type: vertical-stack
     grid_options:
       columns: full
     visibility:
-    - *id002
-    - &id003
+    - *id001
+    - &id004
       condition: screen
       media_query: '(max-width: 767px)'
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Vicenza
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 4.6'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 4.6 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 5.4'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.4 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.8
-      max: ~6.2
-    apex_config:
-      legend:
+    cards:
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Ponte Marchese
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 1.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 1.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 2.2'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 2.2 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 3.2'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.2 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 4.6
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 5.4
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Longare
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 3.8'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.8 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 5.0'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 6.3'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.3 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.2
-      max: ~7.13
-    apex_config:
-      legend:
+        min: ~-3.4
+        max: ~3.93
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 1.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 2.2
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 3.2
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Vicenza
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 4.6'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 4.6 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 5.4'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.4 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.8
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.0
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.3
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Montegalda
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-4.0
-      max: ~7.67
-    apex_config:
-      legend:
+        min: ~-1.8
+        max: ~6.2
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 4.6
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 5.4
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Longare
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 3.8'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.8 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 5.0'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 6.3'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.3 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Padova Voltabarozzo
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: ~10
-    apex_config:
-      legend:
+        min: ~-1.2
+        max: ~7.13
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.8
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.0
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.3
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Montegalda
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 3.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Ponte San Nicolò
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: '|+0.5|'
-    apex_config:
-      legend:
+        min: ~-4.0
+        max: ~7.67
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Padova Voltabarozzo
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 1h
-    header:
-      show: true
-      title: Bovolenta
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 7.0'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id001
-      transform: 'return x !== null && x >= 7.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~2.5
-      max: ~7.5
-    apex_config:
-      legend:
+        min: '|-0.5|'
+        max: ~10
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Ponte San Nicolò
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 5.5
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 7.0
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id002
-    - *id003
+        min: '|-0.5|'
+        max: '|+0.5|'
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 1h
+      header:
+        show: true
+        title: Bovolenta
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out;'
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 5.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 6.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 7.0'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'const s = (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]); if (!s.length) return []; const from = start.getTime(); const before = s.filter((p)
+          => p[0] < from); const prev = before.length ? before[before.length - 1] : null; const win = s.filter((p) => p[0] >= from); const last = win.length ? win[win.length - 1] : prev; const out = [];
+          if (prev) out.push([from, prev[1]]); win.forEach((p) => out.push(p)); if (last) out.push([end.getTime(), last[1]]); return out.map((p) => [p[0], p[1] !== null && p[1] >= 7.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~2.5
+        max: ~7.5
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 5.5
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 7.0
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id005
+    - &id003
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultimo giorno
-    - *id004
+    - *id002
     cards:
     - type: custom:apexcharts-card
       graph_span: 24h
@@ -1355,6 +1592,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -1404,6 +1642,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 1.0
@@ -1430,6 +1680,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1446,6 +1698,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -1495,6 +1748,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -1521,6 +1786,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1537,6 +1804,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -1586,6 +1854,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.8
@@ -1612,6 +1892,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1628,6 +1910,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -1677,6 +1960,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -1703,6 +1998,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1719,6 +2016,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -1732,6 +2030,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1748,6 +2060,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -1761,6 +2074,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 24h
       header:
@@ -1777,6 +2104,7 @@ sections:
         curve: stepline
         fill_raw: 'null'
         data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -1826,6 +2154,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 5.5
@@ -1852,563 +2192,642 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Ponte Marchese
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 1.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 1.0 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 2.2'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 2.2 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 3.2'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.2 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-3.4
-      max: ~3.93
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 1.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 2.2
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 3.2
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+  - type: vertical-stack
     grid_options:
       columns: full
     visibility:
-    - *id005
     - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Vicenza
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 4.6'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 4.6 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 5.4'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.4 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.8
-      max: ~6.2
-    apex_config:
-      legend:
+    - *id004
+    cards:
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Ponte Marchese
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 1.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 1.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 2.2'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 2.2 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 3.2'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.2 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 4.6
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 5.4
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Longare
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 3.8'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.8 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 5.0'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.0 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 6.3'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.3 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.2
-      max: ~7.13
-    apex_config:
-      legend:
+        min: ~-3.4
+        max: ~3.93
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 1.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 2.2
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 3.2
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Vicenza
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 4.6'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 4.6 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 5.4'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.4 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.8
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.0
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.3
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Montegalda
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-4.0
-      max: ~7.67
-    apex_config:
-      legend:
+        min: ~-1.8
+        max: ~6.2
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 4.6
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 5.4
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Longare
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 3.8'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.8 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 5.0'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 6.3'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.3 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Padova Voltabarozzo
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: ~10
-    apex_config:
-      legend:
+        min: ~-1.2
+        max: ~7.13
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.8
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.0
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.3
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Montegalda
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 3.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Ponte San Nicolò
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: '|+0.5|'
-    apex_config:
-      legend:
+        min: ~-4.0
+        max: ~7.67
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Padova Voltabarozzo
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 24h
-    header:
-      show: true
-      title: Bovolenta
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 7.0'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 7.0 ? p[1] : null]);'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~2.5
-      max: ~7.5
-    apex_config:
-      legend:
+        min: '|-0.5|'
+        max: ~10
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Ponte San Nicolò
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 5.5
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 7.0
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id005
-    - *id003
+        min: '|-0.5|'
+        max: '|+0.5|'
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 24h
+      header:
+        show: true
+        title: Bovolenta
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1]]);
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 5.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 6.5 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 7.0'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        data_generator: 'return (entity.attributes.samples_24h || []).map((p) => [new Date(p[0]).getTime(), p[1] >= 7.0 ? p[1] : null]);'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~2.5
+        max: ~7.5
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 5.5
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 7.0
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id007
+    - &id006
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultima settimana
-    - *id004
+    - *id002
     cards:
     - type: custom:apexcharts-card
       graph_span: 7d
@@ -2425,10 +2844,11 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: &id006
+        group_by: &id005
           func: avg
           duration: 30min
           fill: 'null'
+        float_precision: 2
       - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
         name: '>= 1.0'
         type: area
@@ -2437,7 +2857,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 1.0 ? x : null;'
         show:
           in_header: false
@@ -2450,7 +2870,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 2.2 ? x : null;'
         show:
           in_header: false
@@ -2463,7 +2883,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 3.2 ? x : null;'
         show:
           in_header: false
@@ -2481,6 +2901,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 1.0
@@ -2507,6 +2939,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2522,7 +2956,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -2531,7 +2966,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -2544,7 +2979,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 4.6 ? x : null;'
         show:
           in_header: false
@@ -2557,7 +2992,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 5.4 ? x : null;'
         show:
           in_header: false
@@ -2575,6 +3010,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -2601,6 +3048,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2616,7 +3065,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       - entity: sensor.bacchiglione_a_longare_livello_idrometrico
         name: '>= 3.8'
         type: area
@@ -2625,7 +3075,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 3.8 ? x : null;'
         show:
           in_header: false
@@ -2638,7 +3088,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 5.0 ? x : null;'
         show:
           in_header: false
@@ -2651,7 +3101,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 6.3 ? x : null;'
         show:
           in_header: false
@@ -2669,6 +3119,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.8
@@ -2695,6 +3157,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2710,7 +3174,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
         name: '>= 3.0'
         type: area
@@ -2719,7 +3184,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 3.0 ? x : null;'
         show:
           in_header: false
@@ -2732,7 +3197,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -2745,7 +3210,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -2763,6 +3228,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -2789,6 +3266,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2804,7 +3283,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -2818,6 +3298,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2833,7 +3327,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -2847,6 +3342,20 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 7d
       header:
@@ -2862,7 +3371,8 @@ sections:
         stroke_width: 2
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
+        float_precision: 2
       - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
         name: '>= 5.5'
         type: area
@@ -2871,7 +3381,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 5.5 ? x : null;'
         show:
           in_header: false
@@ -2884,7 +3394,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 6.5 ? x : null;'
         show:
           in_header: false
@@ -2897,7 +3407,7 @@ sections:
         stroke_width: 0
         curve: stepline
         fill_raw: 'null'
-        group_by: *id006
+        group_by: *id005
         transform: 'return x !== null && x >= 7.0 ? x : null;'
         show:
           in_header: false
@@ -2915,6 +3425,18 @@ sections:
             fillTo: end
         chart:
           height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 5.5
@@ -2941,577 +3463,1122 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Ponte Marchese
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 1.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 1.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 2.2'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 2.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: '>= 3.2'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 3.2 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-3.4
-      max: ~3.93
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 1.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 2.2
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 3.2
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+  - type: vertical-stack
     grid_options:
       columns: full
     visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Vicenza
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 4.6'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 4.6 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: '>= 5.4'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 5.4 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.8
-      max: ~6.2
-    apex_config:
-      legend:
+    - *id006
+    - *id004
+    cards:
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Ponte Marchese
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 1.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 1.0 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 2.2'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 2.2 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: '>= 3.2'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 3.2 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 4.6
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 5.4
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Longare
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 3.8'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 3.8 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 5.0'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 5.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: '>= 6.3'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 6.3 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.2
-      max: ~7.13
-    apex_config:
-      legend:
+        min: ~-3.4
+        max: ~3.93
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 1.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 2.2
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 3.2
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Vicenza
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 4.6'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 4.6 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: '>= 5.4'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 5.4 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.8
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.0
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.3
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Montegalda
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 3.0'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 3.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-4.0
-      max: ~7.67
-    apex_config:
-      legend:
+        min: ~-1.8
+        max: ~6.2
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 4.6
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 5.4
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Longare
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 3.8'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 3.8 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 5.0'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 5.0 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: '>= 6.3'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 6.3 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Padova Voltabarozzo
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: ~10
-    apex_config:
-      legend:
+        min: ~-1.2
+        max: ~7.13
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.8
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.0
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.3
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Montegalda
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 3.0'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 3.0 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Ponte San Nicolò
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: '|+0.5|'
-    apex_config:
-      legend:
+        min: ~-4.0
+        max: ~7.67
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Padova Voltabarozzo
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 7d
-    header:
-      show: true
-      title: Bovolenta
-      show_states: true
-    series:
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: Livello
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 5.5'
-      type: area
-      color: '#fbc02d'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 5.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 6.5'
-      type: area
-      color: '#ef6c00'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 6.5 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: '>= 7.0'
-      type: area
-      color: '#c62828'
-      opacity: 0.55
-      stroke_width: 0
-      curve: stepline
-      fill_raw: 'null'
-      group_by: *id006
-      transform: 'return x !== null && x >= 7.0 ? x : null;'
-      show:
-        in_header: false
-        in_legend: false
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~2.5
-      max: ~7.5
-    apex_config:
-      legend:
+        min: '|-0.5|'
+        max: ~10
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Ponte San Nicolò
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      yaxis:
+      - decimals: 2
         show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 5.5
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 7.0
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id007
-    - *id003
+        min: '|-0.5|'
+        max: '|+0.5|'
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 7d
+      header:
+        show: true
+        title: Bovolenta
+        show_states: true
+      series:
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: Livello
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        float_precision: 2
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 5.5'
+        type: area
+        color: '#fbc02d'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 5.5 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 6.5'
+        type: area
+        color: '#ef6c00'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 6.5 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: '>= 7.0'
+        type: area
+        color: '#c62828'
+        opacity: 0.55
+        stroke_width: 0
+        curve: stepline
+        fill_raw: 'null'
+        group_by: *id005
+        transform: 'return x !== null && x >= 7.0 ? x : null;'
+        show:
+          in_header: false
+          in_legend: false
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~2.5
+        max: ~7.5
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 5.5
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 7.0
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
   - type: horizontal-stack
     grid_options:
       columns: full
     visibility:
-    - &id008
+    - &id007
       condition: state
       entity: input_select.bacchiglione_periodo_grafici
       state: Ultimo mese
+    - *id002
+    cards:
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Ponte Marchese
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~-3.4
+        max: ~3.93
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 1.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 2.2
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 3.2
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Vicenza
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~-1.8
+        max: ~6.2
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 4.6
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 5.4
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Longare
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_longare_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~-1.2
+        max: ~7.13
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.8
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.0
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.3
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Montegalda
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~-4.0
+        max: ~7.67
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 3.0
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 5.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Padova Voltabarozzo
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: '|-0.5|'
+        max: ~10
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Ponte San Nicolò
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: '|-0.5|'
+        max: '|+0.5|'
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+    - type: custom:apexcharts-card
+      graph_span: 30d
+      header:
+        show: true
+        title: Bovolenta
+        show_states: false
+      series:
+      - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
+        name: Media oraria
+        type: area
+        color: '#1e88e5'
+        opacity: 0.35
+        stroke_width: 2
+        curve: stepline
+        fill_raw: 'null'
+        statistics:
+          type: mean
+          period: hour
+          align: start
+        float_precision: 2
+      yaxis:
+      - decimals: 2
+        show: false
+        min: ~2.5
+        max: ~7.5
+      apex_config:
+        legend:
+          show: false
+        plotOptions:
+          area:
+            fillTo: end
+        chart:
+          height: 260
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+        annotations:
+          yaxis:
+          - y: 5.5
+            borderColor: '#fbc02d'
+            strokeDashArray: 4
+            label:
+              text: G1
+              style:
+                background: '#fbc02d'
+                color: '#fff'
+          - y: 6.5
+            borderColor: '#ef6c00'
+            strokeDashArray: 4
+            label:
+              text: G2
+              style:
+                background: '#ef6c00'
+                color: '#fff'
+          - y: 7.0
+            borderColor: '#c62828'
+            strokeDashArray: 4
+            label:
+              text: G3
+              style:
+                background: '#c62828'
+                color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
+  - type: vertical-stack
+    grid_options:
+      columns: full
+    visibility:
+    - *id007
     - *id004
     cards:
     - type: custom:apexcharts-card
@@ -3533,6 +4600,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3545,7 +4613,19 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 1.0
@@ -3572,6 +4652,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3591,6 +4673,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3603,7 +4686,19 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -3630,6 +4725,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3649,6 +4746,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3661,7 +4759,19 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.8
@@ -3688,6 +4798,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3707,6 +4819,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3719,7 +4832,19 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 3.0
@@ -3746,6 +4871,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3765,6 +4892,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3777,7 +4905,21 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3797,6 +4939,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3809,7 +4952,21 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
     - type: custom:apexcharts-card
       graph_span: 30d
       header:
@@ -3829,6 +4986,7 @@ sections:
           type: mean
           period: hour
           align: start
+        float_precision: 2
       yaxis:
       - decimals: 2
         show: false
@@ -3841,7 +4999,19 @@ sections:
           area:
             fillTo: end
         chart:
-          height: 260
+          height: 170
+        xaxis:
+          labels:
+            datetimeFormatter:
+              year: yyyy
+              month: MMM yy
+              day: dd MMM
+              hour: HH:mm
+              minute: HH:mm
+              second: HH:mm
+        grid:
+          strokeDashArray: 0
+          borderColor: rgba(127, 127, 127, 0.25)
         annotations:
           yaxis:
           - y: 5.5
@@ -3868,395 +5038,8 @@ sections:
               style:
                 background: '#c62828'
                 color: '#fff'
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Ponte Marchese
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_ponte_marchese_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-3.4
-      max: ~3.93
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 1.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 2.2
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 3.2
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Vicenza
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_vicenza_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.8
-      max: ~6.2
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 4.6
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 5.4
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Longare
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_longare_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-1.2
-      max: ~7.13
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.8
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.0
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.3
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Montegalda
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_montegalda_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~-4.0
-      max: ~7.67
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 3.0
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 5.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Padova Voltabarozzo
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_padova_voltabarozzo_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: ~10
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Ponte San Nicolò
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_ponte_san_nicolo_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: '|-0.5|'
-      max: '|+0.5|'
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
-  - type: custom:apexcharts-card
-    graph_span: 30d
-    header:
-      show: true
-      title: Bovolenta
-      show_states: false
-    series:
-    - entity: sensor.bacchiglione_a_bovolenta_livello_idrometrico
-      name: Media oraria
-      type: area
-      color: '#1e88e5'
-      opacity: 0.35
-      stroke_width: 2
-      curve: stepline
-      fill_raw: 'null'
-      statistics:
-        type: mean
-        period: hour
-        align: start
-    yaxis:
-    - decimals: 2
-      show: false
-      min: ~2.5
-      max: ~7.5
-    apex_config:
-      legend:
-        show: false
-      plotOptions:
-        area:
-          fillTo: end
-      chart:
-        height: 170
-      annotations:
-        yaxis:
-        - y: 5.5
-          borderColor: '#fbc02d'
-          strokeDashArray: 4
-          label:
-            text: G1
-            style:
-              background: '#fbc02d'
-              color: '#fff'
-        - y: 6.5
-          borderColor: '#ef6c00'
-          strokeDashArray: 4
-          label:
-            text: G2
-            style:
-              background: '#ef6c00'
-              color: '#fff'
-        - y: 7.0
-          borderColor: '#c62828'
-          strokeDashArray: 4
-          label:
-            text: G3
-            style:
-              background: '#c62828'
-              color: '#fff'
-    grid_options:
-      columns: full
-    visibility:
-    - *id008
-    - *id003
+      card_mod:
+        style: '#graph-wrapper { min-width: 0; }'
 - type: grid
   column_span: 4
   cards:
@@ -4281,6 +5064,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4294,6 +5078,18 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
       annotations:
         yaxis:
         - y: 1.0
@@ -4320,6 +5116,8 @@ sections:
             style:
               background: '#c62828'
               color: '#fff'
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4339,6 +5137,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4352,6 +5151,18 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
       annotations:
         yaxis:
         - y: 3.0
@@ -4378,6 +5189,8 @@ sections:
             style:
               background: '#c62828'
               color: '#fff'
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4397,6 +5210,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4410,6 +5224,18 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
       annotations:
         yaxis:
         - y: 3.8
@@ -4436,6 +5262,8 @@ sections:
             style:
               background: '#c62828'
               color: '#fff'
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4455,6 +5283,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4468,6 +5297,18 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
       annotations:
         yaxis:
         - y: 3.0
@@ -4494,6 +5335,8 @@ sections:
             style:
               background: '#c62828'
               color: '#fff'
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4513,6 +5356,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4526,6 +5370,20 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4545,6 +5403,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4558,6 +5417,20 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
   - type: custom:apexcharts-card
     graph_span: 72h
     header:
@@ -4577,6 +5450,7 @@ sections:
         type: mean
         period: hour
         align: start
+      float_precision: 2
     yaxis:
     - decimals: 2
       show: false
@@ -4590,6 +5464,18 @@ sections:
           fillTo: end
       chart:
         height: 190
+      xaxis:
+        labels:
+          datetimeFormatter:
+            year: yyyy
+            month: MMM yy
+            day: dd MMM
+            hour: HH:mm
+            minute: HH:mm
+            second: HH:mm
+      grid:
+        strokeDashArray: 0
+        borderColor: rgba(127, 127, 127, 0.25)
       annotations:
         yaxis:
         - y: 5.5
@@ -4616,3 +5502,5 @@ sections:
             style:
               background: '#c62828'
               color: '#fff'
+    card_mod:
+      style: '#graph-wrapper { min-width: 0; }'
