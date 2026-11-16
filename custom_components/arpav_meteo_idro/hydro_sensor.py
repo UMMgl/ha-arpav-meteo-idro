@@ -26,6 +26,9 @@ from .hydro_coordinator import HydroCoordinator, HydroStationState
 from .hydro_topology import station_key, topology_evidence
 
 
+ATTR_SAMPLES_24H = "samples_24h"
+
+
 @dataclass(frozen=True, kw_only=True)
 class HydroSensorDescription(SensorEntityDescription):
     """Describe a hydrometric sensor."""
@@ -106,6 +109,8 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
 
     entity_description: HydroSensorDescription
     coordinator: HydroCoordinator
+    # up to ~144 points of history: useful to charts, useless (and heavy) in the database
+    _unrecorded_attributes = frozenset({ATTR_SAMPLES_24H})
 
     def __init__(self, coordinator: HydroCoordinator, meta: dict,
                  description: HydroSensorDescription) -> None:
@@ -147,6 +152,9 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
             "source_url": hydro.station_url(state.meta.get("link"), self._station_id),
             "source_observed_at": reading.observed_at.isoformat() if reading and reading.observed_at else None,
         }
+        if self.entity_description.key == "level":
+            # every sample of the last 24 h (10 minutes apart), for ApexCharts
+            attributes[ATTR_SAMPLES_24H] = hydro.recent_samples(state.series)
         if self.entity_description.key == "status":
             g1, g2, g3 = reading.thresholds if reading else (None, None, None)
             axis = hydro.chart_axis((g1, g2, g3))

@@ -72,6 +72,11 @@ DEFAULT_TREND_THRESHOLD_M = 0.05
 # a reading older than this no longer describes the river
 DEFAULT_STALE_MINUTES = 90
 
+# recent samples exposed for charts: the last 24 h, at most 288 points (24 h of a
+# 5-minute series; ARPAV level series are 10 or 30 minutes, i.e. 144 or 48)
+RECENT_SAMPLES_HOURS = 24
+MAX_RECENT_SAMPLES = 288
+
 # states exposed by the integration (translated in the UI)
 BAND_BELOW_G1 = "below_g1"
 BAND_G1_G2 = "g1_g2"
@@ -436,6 +441,30 @@ def evaluate(
         age_minutes=round(age, 1),
         thresholds=series.thresholds,
     )
+
+
+def recent_samples(
+    series: HydroSeries | None,
+    hours: float = RECENT_SAMPLES_HOURS,
+    max_points: int = MAX_RECENT_SAMPLES,
+) -> list[list]:
+    """Return the valid samples of the last ``hours`` as ``[[iso_utc, value], ...]``.
+
+    The window ends at the newest valid sample (not at "now"), so a stale
+    station still shows what it last measured. Sentinels are left out: a gap in
+    the list is a gap in the chart. Oldest first, values rounded to millimetres,
+    never more than ``max_points`` entries (the newest are kept), so the
+    attribute stays small whatever the file holds.
+    """
+    if series is None or max_points <= 0:
+        return []
+    valid = series.valid_samples
+    if not valid:
+        return []
+    since = valid[-1].observed_at - timedelta(hours=hours)
+    window = [s for s in valid if s.observed_at >= since][-max_points:]
+    return [[s.observed_at.isoformat(), round(float(s.value), 3)]  # type: ignore[arg-type]
+            for s in window]
 
 
 # normalized charts: the first and the third threshold always at the same height

@@ -2,14 +2,47 @@
 
 ## Supported versions
 
-Only the latest release of ARPAV Meteo e Idro receives fixes.
+Only the latest release of ARPAV Meteo e Idro receives fixes. No support
+period is promised: this is a volunteer project and fixes are made on a
+best-effort basis.
+
+## Scope and the Cyber Resilience Act
+
+ARPAV Meteo e Idro is free and open-source software, developed and distributed
+by a private maintainer without monetisation, and no commercialisation is
+planned (maintainer decision of 2026-11-15). The project therefore treats
+itself as outside the commercial scope of the EU Cyber Resilience Act
+(Regulation (EU) 2024/2847) and pursues its security practices voluntarily, as
+proportionate due diligence. It does not claim conformity with the Act, carries
+no CE marking, issues no declaration of conformity and makes no support-period
+commitment.
+
+The scope is reviewed if paid support, a sale, an organisation supporting the
+project for commercial use or integration into a commercial product appears.
+The assessment, its factual basis, the reassessment triggers and the treatment
+of each requirement are in [docs/security/cra-scope.md](docs/security/cra-scope.md);
+the evidence for the security practices is in
+[docs/security/evidence.md](docs/security/evidence.md).
 
 ## Reporting a vulnerability
 
 Please report vulnerabilities privately through
 [GitHub private vulnerability reporting](https://github.com/UMMgl/ha-arpav-meteo-idro/security/advisories/new),
 not in public issues. Include the version, what you observed and how to
-reproduce it. You will get an answer as soon as possible.
+reproduce it.
+
+### Response targets
+
+These are internal targets of a volunteer project, not service-level
+agreements, and they promise no fixing time:
+
+* **acknowledgement** of a report within **7 days**;
+* **triage** (is it a vulnerability, how severe, which versions) within
+  **2 weeks**;
+* a vulnerability that is confirmed to be actively exploited is handled with
+  immediate priority;
+* when a vulnerability is confirmed, the fix is released in the latest release
+  and, where appropriate, announced with a GitHub Security Advisory.
 
 ## What the integration does
 
