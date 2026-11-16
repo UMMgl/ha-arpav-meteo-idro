@@ -12,6 +12,7 @@
 - **coverage**: tests with recorded fixtures for the METAR client, the brightness archive, the coordinator, the weather entity, the sensors and the services; the Tests workflow now fails below 70 % coverage (`fail_under` in `pyproject.toml`) (#5)
 
 ### :memo: Documentation
+- **examples**: map view of the hydrometric stations (`hydro_map_bacchiglione.yaml`, `_it`) built on the `latitude`/`longitude` attributes of the Status sensor, with README section; no integration code change (#20)
 - **README**: use cases (dashboard, threshold notifications, history import) and a longer troubleshooting section (#6)
 
 ### :wrench: Chores

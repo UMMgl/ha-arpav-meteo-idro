@@ -313,6 +313,34 @@ To refresh the image after editing the topology, run
 DejaVu Sans font installed. Source references for the reaches are included in
 [the profile](custom_components/arpav_meteo_idro/hydro_topology.py).
 
+### Map of the stations
+
+The Status sensor of each station already exposes the ARPAV `latitude` and
+`longitude` attributes, so the built-in
+[Map card](https://www.home-assistant.io/dashboards/map/) can show one marker
+per station without any change to the integration. Ready views:
+[`hydro_map_bacchiglione.yaml`](examples/hydro_map_bacchiglione.yaml) (English
+entity IDs) and [`hydro_map_bacchiglione_it.yaml`](examples/hydro_map_bacchiglione_it.yaml)
+(Italian entity IDs). To use one:
+
+1. Open a dashboard, switch to edit mode and open the raw configuration editor.
+2. Paste the file as a new view (it contains `title`, `path` and a sections
+   layout like the other examples), or copy only the `type: map` card into an
+   existing view.
+3. Replace the entity IDs if your stations or the entity language differ: use
+   the Status entity of each station (`..._status`, `..._stato` in Italian).
+   The Map card takes a fixed list of entities, so a new station must be added
+   by hand.
+
+Each marker shows the Status of the station (below G1, between thresholds,
+stale, missing...); tapping it opens the entity dialog with level, observation
+time (`source_observed_at`) and `quality` among the attributes. A table below the
+map lists the same stations with level, a status dot (hollow for stale or missing
+readings), observation time and quality, and skips any station whose coordinates
+are not numeric. The map ignores entities without coordinates, so the other
+sensors of such a station are unaffected. Marker colours cannot depend on the
+state with the built-in card: use the table for the colour code.
+
 ## Options
 
 Stations and their order, trend threshold (cm), staleness limit (0 = automatic:
