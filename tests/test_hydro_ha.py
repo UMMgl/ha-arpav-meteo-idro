@@ -201,8 +201,8 @@ async def test_a_river_without_a_profile_uses_the_selection_order(enable_custom_
     """No profile: the whole entry is shown in the order of selection."""
     freezer.move_to(NOW)
     entry = _entry(stations=list(reversed(STATIONS)))
-    entry.data = {**entry.data, CONF_HYDRO_RIVER: "An unprofiled river"}
     entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_HYDRO_RIVER: "An unprofiled river"})
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert [meta["id"] for meta in entry.runtime_data.coordinator.stations] == ["287", "334", "333"]
