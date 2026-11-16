@@ -69,7 +69,7 @@ There is no development container: develop in a local virtual environment
 (`python -m venv .venv`, then install `requirements_test.txt`) and let CI run the
 full suite on Linux. `requirements_test.txt` is a hash-pinned lock compiled from
 `requirements_test.in`; regenerate it with
-`uv pip compile --generate-hashes --python-version 3.14 --python-platform linux requirements_test.in -o requirements_test.txt`.
+`uv pip compile --generate-hashes --python-version 3.14.10 --python-platform linux requirements_test.in -o requirements_test.txt`. Add `--upgrade` to refresh the pinned versions (Python 3.14.2+ is required by current Home Assistant).
 
 ## Report bugs using GitHub's [issues](../../issues)
 
