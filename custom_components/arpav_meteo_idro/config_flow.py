@@ -127,7 +127,7 @@ async def fetch_stations_air(cod_parametro):
 class ArpaVenetoWeatherConfigFlow(HydroConfigFlowMixin, config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for ARPA Veneto Weather."""
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     @callback

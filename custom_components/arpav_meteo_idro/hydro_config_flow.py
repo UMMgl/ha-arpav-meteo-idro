@@ -17,7 +17,6 @@ from .const import (
     CONF_ENTRY_TYPE,
     CONF_HYDRO_AXIS_CEILING,
     CONF_HYDRO_ARCHIVE,
-    CONF_HYDRO_ORDER,
     CONF_HYDRO_RIVER,
     CONF_HYDRO_STALE_MINUTES,
     CONF_HYDRO_STALE_MINUTES_DEFAULT,
@@ -56,13 +55,12 @@ def _station_options(stations: list[hydro.HydroStation]) -> list[selector.Select
             for s in stations]
 
 
-def _stations_schema(stations, selected, order_text, extra=None) -> vol.Schema:
+def _stations_schema(stations, selected, extra=None) -> vol.Schema:
     schema = {
         vol.Required(STEP_STATIONS, default=selected): selector.SelectSelector(
             selector.SelectSelectorConfig(options=_station_options(stations), multiple=True,
                                           mode=selector.SelectSelectorMode.LIST)
         ),
-        vol.Optional(CONF_HYDRO_ORDER, description={"suggested_value": order_text}): selector.TextSelector(),
     }
     schema.update(extra or {})
     return vol.Schema(schema)
@@ -105,24 +103,20 @@ class HydroConfigFlowMixin:
         )
 
     async def async_step_hydro_stations(self, user_input=None):
-        """Choose the stations of the river and their order, upstream first."""
+        """Choose the stations of the river."""
         stations = [s for s in self._hydro_registry if s.river == self._hydro_river]
         errors = {}
         if user_input is not None:
-            order_text = user_input.get(CONF_HYDRO_ORDER, "").strip()
-            ordered = ordered_selection(user_input[STEP_STATIONS], order_text, self._hydro_river)
             if not user_input[STEP_STATIONS]:
                 errors["base"] = "no_stations"
-            elif ordered is None:
-                errors[CONF_HYDRO_ORDER] = "invalid_order"
             else:
+                ordered = ordered_selection(user_input[STEP_STATIONS], self._hydro_river)
                 by_id = {s.station_id: s for s in stations}
                 return self.async_create_entry(
                     title=f"{self._hydro_river} (ARPAV)",
                     data={CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: self._hydro_river},
                     options={
                         CONF_HYDRO_STATIONS: [station_meta(by_id[i]) for i in ordered],
-                        CONF_HYDRO_ORDER: order_text,
                         CONF_HYDRO_TREND_THRESHOLD: CONF_HYDRO_TREND_THRESHOLD_DEFAULT,
                         CONF_HYDRO_STALE_MINUTES: CONF_HYDRO_STALE_MINUTES_DEFAULT,
                         CONF_HYDRO_ARCHIVE: True,
@@ -131,7 +125,7 @@ class HydroConfigFlowMixin:
 
         return self.async_show_form(
             step_id="hydro_stations",
-            data_schema=_stations_schema(stations, [], ""),
+            data_schema=_stations_schema(stations, []),
             errors=errors,
             description_placeholders={"river": self._hydro_river, "stations": _order_hint(stations)},
         )
@@ -145,12 +139,10 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
         return await self.async_step_hydro_options(user_input)
 
     async def async_step_hydro_options(self, user_input=None):
-        """Manage stations, order, trend threshold, staleness and archive."""
+        """Manage stations, trend threshold, staleness, axis ceiling and archive."""
         river = self.config_entry.data.get(CONF_HYDRO_RIVER)
         options = self.config_entry.options
         current = options.get(CONF_HYDRO_STATIONS, [])
-        # Existing entries only saved the resulting order. Pre-fill it as an override.
-        saved_order = options.get(CONF_HYDRO_ORDER, ", ".join(m["id"] for m in current))
         try:
             registry = await async_fetch_registry(self.hass)
             stations = [s for s in registry if s.river == river]
@@ -160,12 +152,9 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
 
         errors = {}
         if user_input is not None:
-            order_text = user_input.get(CONF_HYDRO_ORDER, "").strip()
-            ordered = ordered_selection(user_input[STEP_STATIONS], order_text, river)
+            ordered = ordered_selection(user_input[STEP_STATIONS], river)
             if not user_input[STEP_STATIONS]:
                 errors["base"] = "no_stations"
-            elif ordered is None:
-                errors[CONF_HYDRO_ORDER] = "invalid_order"
             elif (ceilings := parse_ceilings(user_input.get(CONF_HYDRO_AXIS_CEILING), ordered)) is None:
                 errors[CONF_HYDRO_AXIS_CEILING] = "invalid_axis_ceiling"
             else:
@@ -174,7 +163,6 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
                 return self.async_create_entry(data={
                     CONF_HYDRO_STATIONS: [station_meta(by_id[i]) if i in by_id else known[i] for i in ordered],
                     CONF_HYDRO_AXIS_CEILING: ceilings,
-                    CONF_HYDRO_ORDER: order_text,
                     CONF_HYDRO_TREND_THRESHOLD: user_input[CONF_HYDRO_TREND_THRESHOLD],
                     CONF_HYDRO_STALE_MINUTES: user_input[CONF_HYDRO_STALE_MINUTES],
                     CONF_HYDRO_ARCHIVE: user_input[CONF_HYDRO_ARCHIVE],
@@ -199,7 +187,7 @@ class HydroOptionsFlowHandler(config_entries.OptionsFlow):
         }
         return self.async_show_form(
             step_id="hydro_options",
-            data_schema=_stations_schema(stations, [m["id"] for m in current], saved_order, extra),
+            data_schema=_stations_schema(stations, [m["id"] for m in current], extra),
             errors=errors,
             description_placeholders={"river": river, "stations": _order_hint(stations)},
         )

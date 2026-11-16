@@ -40,10 +40,9 @@
             },
             "hydro_stations": {
                 "title": "Stazioni del {river}",
-                "description": "Seleziona le stazioni. Lascia vuoto l’ordine manuale per usare il profilo del fiume, dove disponibile. Per i fiumi senza profilo vale l’ordine di selezione. Inserisci gli ID delle stazioni separati da virgole per impostare l’ordine di visualizzazione.\n\nStazioni: {stations}",
+                "description": "Seleziona le stazioni. Sono mostrate nell’ordine verificato del fiume, dove un profilo le copre; le altre stazioni seguono nell’ordine in cui le hai selezionate.\n\nStazioni: {stations}",
                 "data": {
-                    "stations": "Stazioni",
-                    "display_order": "Ordine manuale (ID stazioni)"
+                    "stations": "Stazioni"
                 }
             }
         },
@@ -51,7 +50,6 @@
             "cannot_connect": "Impossibile connettersi all'API. Controlla le impostazioni.",
             "invalid_comune": "Il comune selezionato non è valido.",
             "no_stations": "Seleziona almeno una stazione.",
-            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287.",
             "invalid_axis_ceiling": "Usa id_stazione=metri per stazioni selezionate, tra 0 e 100 m, es. 334=10."
         },
         "abort": {
@@ -110,10 +108,9 @@
             },
             "hydro_options": {
                 "title": "Stazioni del {river}",
-                "description": "Seleziona le stazioni. Lascia vuoto l’ordine manuale per usare il profilo del fiume, dove disponibile. Per i fiumi senza profilo vale l’ordine di selezione. Inserisci gli ID delle stazioni separati da virgole per impostare l’ordine di visualizzazione.\n\nStazioni: {stations}",
+                "description": "Seleziona le stazioni. Sono mostrate nell’ordine verificato del fiume, dove un profilo le copre; le altre stazioni seguono nell’ordine in cui le hai selezionate.\n\nStazioni: {stations}",
                 "data": {
                     "stations": "Stazioni",
-                    "display_order": "Ordine manuale (ID stazioni)",
                     "trend_threshold_cm": "Soglia del trend",
                     "stale_minutes": "Obsoleto dopo (0 = automatico)",
                     "archive_history": "Completa ogni giorno le statistiche del livello",
@@ -128,8 +125,7 @@
             }
         },
         "error": {
-            "no_stations": "Seleziona almeno una stazione.",
-            "invalid_order": "Usa gli ID delle stazioni separati da virgole, es. 276, 333, 287."
+            "no_stations": "Seleziona almeno una stazione."
         },
         "abort": {
             "cannot_connect": "Impossibile leggere l'anagrafica stazioni ARPAV. Riprova più tardi."
@@ -249,12 +245,6 @@
             "arpav": {
                 "name": "Situazione a {station_name} - previsioni per {comune_name}"
             }
-        }
-    },
-    "issues": {
-        "hydro_manual_order_deprecated": {
-            "title": "L’ordine manuale delle stazioni è deprecato",
-            "description": "La configurazione idrometrica **{entry_title}** usa un ordine salvato. L’ordine manuale è deprecato in ARPAV Meteo e Idro 0.15.5 e verrà rimosso nella 0.16.0. Apri le opzioni dell’integrazione, svuota il campo **Ordine manuale (ID stazioni)** e salva per usare il profilo verificato dove disponibile. Le stazioni fuori profilo mantengono l’ordine di selezione."
         }
     },
     "exceptions": {

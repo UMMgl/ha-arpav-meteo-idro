@@ -19,7 +19,6 @@ from .const import (
     CONF_ARCHIVE_BRIGHTNESS,
     CONF_ENTRY_TYPE,
     CONF_HYDRO_ARCHIVE,
-    CONF_HYDRO_ORDER,
     CONF_HYDRO_STATIONS,
     DOMAIN,
     ENTRY_TYPE_HYDRO,
@@ -48,7 +47,11 @@ HYDRO_DEVICE_PREFIX = "hydro_"
 # the station files cover the last 2-3 days: once a day is enough
 HYDRO_ARCHIVE_HOUR = 3
 HYDRO_ARCHIVE_MINUTE = 20
-MANUAL_ORDER_REPAIR = "hydro_manual_order_deprecated"
+
+# Removed in 0.16.0: the manual station order saved by older hydrometric entries
+# and the Repairs issue that announced its removal.
+LEGACY_ORDER_OPTION = "display_order"
+LEGACY_ORDER_REPAIR = "hydro_manual_order_deprecated"
 
 
 def _is_hydro(entry: ConfigEntry) -> bool:
@@ -97,23 +100,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_setup_hydro_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the hydrometric stations of a river."""
-
-    issue_id = f"{MANUAL_ORDER_REPAIR}_{entry.entry_id}"
-    order_text = entry.options.get(CONF_HYDRO_ORDER)
-    # Old entries only stored their station sequence. It is preserved as an override.
-    has_override = bool(entry.options.get(CONF_HYDRO_STATIONS)) if order_text is None else bool(order_text.strip())
-    if has_override:
-        ir.async_create_issue(
-            hass,
-            DOMAIN,
-            issue_id,
-            is_fixable=False,
-            severity=ir.IssueSeverity.WARNING,
-            translation_key=MANUAL_ORDER_REPAIR,
-            translation_placeholders={"entry_title": entry.title},
-        )
-    else:
-        ir.async_delete_issue(hass, DOMAIN, issue_id)
 
     coordinator = HydroCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
@@ -217,10 +203,24 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     return await hass.config_entries.async_unload_platforms(entry, _platforms(entry))
 
 
-async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Remove the manual order warning when its hydrometric entry is deleted."""
-    if _is_hydro(entry):
-        ir.async_delete_issue(hass, DOMAIN, f"{MANUAL_ORDER_REPAIR}_{entry.entry_id}")
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Migrate an entry to the current version.
+
+    Version 2 (0.16.0) removes the manual station order: the saved order is
+    dropped, so a hydrometric entry shows its stations in the verified river
+    order, with the stations outside a profile after them in selection order.
+    The Repairs issue of the deprecation is deleted from the registry.
+    """
+    if entry.version > 2:
+        # saved by a newer release: do not touch it
+        return False
+
+    if entry.version == 1:
+        options = {k: v for k, v in entry.options.items() if k != LEGACY_ORDER_OPTION}
+        ir.async_delete_issue(hass, DOMAIN, f"{LEGACY_ORDER_REPAIR}_{entry.entry_id}")
+        hass.config_entries.async_update_entry(entry, options=options, version=2)
+        _LOGGER.debug("Migrated the entry %s to version 2", entry.entry_id)
+    return True
 
 
 async def async_setup(hass, config):
