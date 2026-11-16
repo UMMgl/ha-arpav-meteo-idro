@@ -2,13 +2,17 @@
 # Copyright (c) 2026 Gianluca Nardin (@UMMgl)
 """Fail when a rule of the required quality tier is not done (or exempt with a reason).
 
-Usage: python scripts/check_quality_scale.py [bronze|silver|gold|platinum]
+Usage: python scripts/check_quality_scale.py [bronze|silver|gold|platinum] --coverage-report coverage.json
+
+Silver and higher require pytest coverage evidence for every integration module.
 
 The tiers follow https://developers.home-assistant.io/docs/core/integration-quality-scale/rules
 and each tier includes the previous ones. The report lists the open rules of
 every tier, so the next tier stays visible.
 """
 
+import argparse
+import json
 import pathlib
 import sys
 
@@ -46,22 +50,55 @@ def status(rule_value) -> tuple[str, str | None]:
     return rule_value or "todo", None
 
 
+def coverage_passes(report: pathlib.Path) -> bool:
+    """Require coverage above 95% for every integration module with statements."""
+    try:
+        coverage_files = json.loads(report.read_text(encoding="utf-8"))["files"]
+    except (OSError, ValueError, KeyError) as error:
+        sys.stdout.write(f"Cannot read integration coverage: {error}" + "\n")
+        return False
+
+    root = FILE.parents[2]
+    measured = {pathlib.Path(name).resolve(): stats["summary"] for name, stats in coverage_files.items()}
+    passed = True
+    for source in sorted(FILE.parent.rglob("*.py")):
+        name = source.relative_to(root)
+        summary = measured.get(source)
+        if summary is None:
+            sys.stdout.write(f"Coverage missing: {name}" + "\n")
+            passed = False
+        elif summary["num_statements"] and summary["covered_lines"] * 100 <= summary["num_statements"] * 95:
+            sys.stdout.write(f"Coverage must exceed 95%: {name} ({summary['percent_covered']:.2f}%)" + "\n")
+            passed = False
+    return passed
+
+
 def main() -> int:
     """Check the tier given on the command line."""
-    target = sys.argv[1] if len(sys.argv) > 1 else "bronze"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("tier", nargs="?", default="bronze", choices=tuple(TIERS))
+    parser.add_argument("--coverage-report", type=pathlib.Path)
+    args = parser.parse_args()
+    target = args.tier
     rules = yaml.safe_load(FILE.read_text(encoding="utf-8"))["rules"]
     failed = False
     for tier, names in TIERS.items():
         missing = [n for n in names if n not in rules]
-        open_rules = [n for n in names if n in rules and status(rules[n])[0] == "todo"]
+        open_rules = [n for n in names if n in rules and status(rules[n])[0] not in {"done", "exempt"}]
         unexplained = [n for n in names if n in rules and status(rules[n])[0] == "exempt" and not status(rules[n])[1]]
-        done = len(names) - len(missing) - len(open_rules)
+        done = len(names) - len(missing) - len(open_rules) - len(unexplained)
         sys.stdout.write(f"{tier:9} {done}/{len(names)} done or exempt"
                          + (f" | open: {', '.join(open_rules)}" if open_rules else "")
                          + (f" | missing from the file: {', '.join(missing)}" if missing else "")
                          + (f" | exempt without a reason: {', '.join(unexplained)}" if unexplained else "") + "\n")
         required = list(TIERS).index(tier) <= list(TIERS).index(target)
         if required and (open_rules or missing or unexplained):
+            failed = True
+    if target != "bronze":
+        if args.coverage_report is None:
+            sys.stdout.write("Provide --coverage-report for Silver, Gold or Platinum." + "\n")
+            failed = True
+        elif not coverage_passes(args.coverage_report):
             failed = True
     sys.stdout.write(f"required tier: {target} -> {'FAILED' if failed else 'OK'}\n")
     return 1 if failed else 0
