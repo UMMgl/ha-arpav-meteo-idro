@@ -4,7 +4,9 @@
 
 Only the latest release of ARPAV Meteo e Idro receives fixes. No support
 period is promised: this is a volunteer project and fixes are made on a
-best-effort basis.
+best-effort basis. In practice, fixes are never backported: a user of an older
+release is asked to update to the latest one through HACS (it may include other
+changes, see the [changelog](CHANGELOG.md)).
 
 ## Scope and the Cyber Resilience Act
 
@@ -22,14 +24,30 @@ project for commercial use or integration into a commercial product appears.
 The assessment, its factual basis, the reassessment triggers and the treatment
 of each requirement are in [docs/security/cra-scope.md](docs/security/cra-scope.md);
 the evidence for the security practices is in
-[docs/security/evidence.md](docs/security/evidence.md).
+[docs/security/evidence.md](docs/security/evidence.md), the risk analysis with
+its open gaps in [docs/security/risk-assessment.md](docs/security/risk-assessment.md)
+and the first paper exercise of the process below in
+[docs/security/exercises/](docs/security/exercises/2026-11-vulnerability-report.md).
 
 ## Reporting a vulnerability
 
 Please report vulnerabilities privately through
 [GitHub private vulnerability reporting](https://github.com/UMMgl/ha-arpav-meteo-idro/security/advisories/new),
 not in public issues. Include the version, what you observed and how to
-reproduce it.
+reproduce it. A report that reaches the project in another way (a public
+issue, a comment) is moved to private reporting, and the public text is removed
+or reduced on request.
+
+### What to expect
+
+* The report is read by the maintainer only, and is not shared with anyone else.
+  Unpublished details and proofs of concept are not given to AI tools unless the
+  maintainer decides so for that report.
+* You get an acknowledgement, then the outcome of the triage: whether it is a
+  vulnerability, which versions are affected, how severe it is, and whether and
+  how it will be fixed.
+* No fixing time and no embargo length are promised. You are told the planned
+  date of publication beforehand, and are credited if you wish.
 
 ### Response targets
 
@@ -42,14 +60,20 @@ agreements, and they promise no fixing time:
 * a vulnerability that is confirmed to be actively exploited is handled with
   immediate priority;
 * when a vulnerability is confirmed, the fix is released in the latest release
-  and, where appropriate, announced with a GitHub Security Advisory.
+  and announced with a GitHub Security Advisory, whatever its severity, unless
+  it has no effect on users of a released version. HACS does not show advisories
+  to users: the advisory and the release notes are the channels.
 
 ## What the integration does
 
 * It only reads public ARPAV open data over HTTPS (no credentials, no personal
   data) and the public METAR service, using the Home Assistant web session.
 * XML is parsed with `defusedxml` only (no entity expansion, no external
-  resources); documents larger than 5 MB or HTML pages are rejected.
+  resources); documents larger than 5 MB or HTML pages are rejected. The size
+  check is made after the document has been downloaded: the download itself is
+  bounded only by a 30 second timeout, and the JSON responses of the weather and
+  METAR parts have no size limit (a known gap, see
+  [docs/security/risk-assessment.md](docs/security/risk-assessment.md)).
 * It writes only to the Home Assistant entity states and to the Recorder
   statistics of its own sensors.
 
@@ -83,7 +107,11 @@ them and regenerate the file with `uv` before merging.
 
 pip-audit runs on every `requirements*.txt` file and on the `requirements` of
 `manifest.json` in each CI run and every Monday; a finding fails the check and is
-either fixed by upgrading or listed here with the reason.
+either fixed by upgrading or listed here with the reason. An accepted finding
+states the package and version, whether it is shipped or only used by tests or
+the build, why it cannot be exploited here or what compensates for it, and an
+expiry date (at most one quarter); it is removed or renewed with a new reason at
+the quarterly review.
 
 Accepted findings:
 

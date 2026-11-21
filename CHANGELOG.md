@@ -4,6 +4,7 @@
 
 
 ### :lock: Security
+- **risk assessment**: documented risk assessment (`docs/security/risk-assessment.md`: assets, trust boundaries, 13 risks with controls linked to code, tests and workflows, and open gaps with due dates) and a paper exercise of the vulnerability-handling process (`docs/security/exercises/`); `SECURITY.md` now says what a reporter can expect, when advisories are published, that HACS does not show them, and that the 5 MiB XML limit is checked after the download
 - **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned
 
 ## [0.16.0] - 2026-11-21
