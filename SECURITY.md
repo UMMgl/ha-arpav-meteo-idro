@@ -40,6 +40,9 @@ or reduced on request.
 
 ### What to expect
 
+* The project has a single maintainer and no backup contact: a report waits for
+  the maintainer, and the response targets below may not be met when the
+  maintainer is unavailable.
 * The report is read by the maintainer only, and is not shared with anyone else.
   Unpublished details and proofs of concept are not given to AI tools unless the
   maintainer decides so for that report.
