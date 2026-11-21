@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :wrench: Chores
+- **release**: record 0.16.0 (Silver) in `[tool.arpav_meteo_idro.released]`, so the quality-tier ratchet floor is now Silver; roadmap and release evidence updated for 0.16.0
+
 
 ### :lock: Security
 - **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned

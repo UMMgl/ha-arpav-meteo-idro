@@ -12,31 +12,33 @@ ordering for all multi-station water bodies (see
 option, and the Bronze tier plus the Gold quick wins (diagnostics, stale devices,
 disabled-by-default entities, exception translations).
 
-## 0.16.0 – Silver and release security (stable planned for December 2026)
+## 0.16.0 – Silver and release security (released 2026-11-21)
 
 Minimum release tier: **Silver**.
 
 - [x] **10-minute samples in charts.** The level sensor exposes the last 24 hours
   of samples as an attribute (excluded from the Recorder) and the example
-  dashboards draw them.
+  dashboards draw them ([#57](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/57)).
 - [x] **Map example** of the hydrometric stations
-  ([#20](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/20)).
+  ([#20](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/20), PR [#59](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/59)).
 - [x] **Hash-pinned test requirements** and removal of the unused development
-  container.
-- [ ] **Shared web session in the weather part** (`inject-websession`, first half of
-  [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7)).
-- [ ] **Remove the manual station order**, with migration of existing entries
-  ([#38](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/38)).
-- [ ] **Test coverage above 95% for every module**, coverage report in the Tests
+  container ([#62](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/62)).
+- [x] **Shared web session in the weather part** (`inject-websession`, first half of
+  [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7), PR [#60](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/60)).
+- [x] **Remove the manual station order**, with migration of existing entries
+  ([#38](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/38), PR [#64](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/64)).
+- [x] **Test coverage above 95% for every module**, coverage report in the Tests
   workflow (`test-coverage`,
-  [#5](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/5)).
-- [ ] **Release security gate:** the security workflow must pass on the tagged
+  [#5](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/5), PRs [#60](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/60),
+  [#66](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/66), [#67](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/67)).
+- [x] **Release security gate:** the security workflow must pass on the tagged
   commit before anything is published, beta tags included; the minimum quality
-  tier is read from a versioned `release_tier` setting that cannot be lowered.
-- [ ] **Security evidence register** with the OpenSSF Passing criteria and a draft
+  tier is read from a versioned `release_tier` setting that cannot be lowered
+  ([#65](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/65)).
+- [x] **Security evidence register** with the OpenSSF Passing criteria and a draft
   OWASP SAMM level 1 baseline, and the written CRA scope decision
   ([#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28),
-  [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18)).
+  [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18), PR [#58](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/58)).
 
 ## 0.16.x – Consolidation (December 2026 – January 2027)
 
@@ -81,11 +83,12 @@ Resilience Act) is handled as **due diligence**, not as a claim of conformity: t
 project does not carry the CE marking, does not issue a declaration of
 conformity and does not promise five years of support.
 
-- [ ] Scope decision, evidence register and review triggers
+- [x] Scope decision, evidence register and review triggers
   ([#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28),
-  [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18), 0.16.0).
-- [ ] Security gate on every release: scanning on the tagged commit, SBOM, release
-  checksums and build provenance (0.16.0).
+  [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18), 0.16.0, PR [#58](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/58)).
+- [x] Security gate on every release: scanning on the tagged commit, SBOM, release
+  checksums and build provenance (0.16.0, PR [#65](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/65); evidence in
+  [docs/security/evidence.md](docs/security/evidence.md)).
 - [ ] Vulnerability handling: acknowledgement within 7 days and triage within
   2 weeks, as targets rather than guarantees; exercised in 0.16.x
   ([#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18)).
