@@ -26,11 +26,16 @@ import math
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta, timezone
+from typing import TYPE_CHECKING, TypedDict, cast
 
 # defusedxml only: a malicious or broken XML must not be able to expand entities
 # or reach external resources. There is deliberately no fallback to the
 # standard library parser (defusedxml is a requirement of the manifest).
-from defusedxml import ElementTree as ET  # type: ignore[import-untyped]
+from defusedxml import ElementTree as ET
+
+if TYPE_CHECKING:
+    # typing only: parsing always goes through defusedxml
+    from xml.etree.ElementTree import Element
 
 XML_BASE = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml"
 REGISTRY_URL = f"{XML_BASE}/stazioni_idro.xml"
@@ -177,6 +182,15 @@ class HydroStationData:
         return levels[0] if len(levels) == 1 else None
 
 
+class HourlyStatistic(TypedDict):
+    """One completed hourly bucket, in the shape the statistics importer reads."""
+
+    start: datetime
+    mean: float
+    min: float
+    max: float
+
+
 @dataclass
 class HydroReading:
     """What the integration exposes for a station at a given moment."""
@@ -196,7 +210,7 @@ class HydroReading:
 # parsing
 # --------------------------------------------------------------------------
 
-def _root(document: bytes | str, expected: str):
+def _root(document: bytes | str, expected: str) -> Element:
     # bytes are preferred: the parser then honours the ISO-8859-1 declaration
     if len(document) > MAX_XML_BYTES:
         raise HydroParseError("document too large")
@@ -205,7 +219,7 @@ def _root(document: bytes | str, expected: str):
     if head.startswith(("<!doctype html", "<html")):
         raise HydroParseError("HTML returned instead of XML")
     try:
-        root = ET.fromstring(document)
+        root: Element = ET.fromstring(document)
     except Exception as err:  # defusedxml raises its own subclasses
         raise HydroParseError(f"malformed XML: {err}") from err
     if root.tag != expected:
@@ -368,7 +382,7 @@ def level_change(samples: list[HydroSample], count: int = TREND_SAMPLES) -> floa
         return None
     t0 = valid[0].observed_at
     xs = [(s.observed_at - t0).total_seconds() for s in valid]
-    ys = [float(s.value) for s in valid]  # type: ignore[arg-type]
+    ys = [s.value for s in valid if s.value is not None]
     mean_x = sum(xs) / len(xs)
     mean_y = sum(ys) / len(ys)
     denominator = sum((x - mean_x) ** 2 for x in xs)
@@ -419,6 +433,7 @@ def evaluate(
         return HydroReading(None, None, False if series.samples else None, None, None,
                             BAND_MISSING, QUALITY_MISSING, None, series.thresholds)
 
+    # valid_samples only holds samples with a number: last.value is never None
     last = valid[-1]
     last_sample_valid = series.samples[-1].value is not None
     age = (now - last.observed_at).total_seconds() / 60
@@ -427,7 +442,7 @@ def evaluate(
     if age > stale_minutes:
         band, quality = BAND_STALE, QUALITY_STALE
     else:
-        band = band_of(float(last.value), series.thresholds)  # type: ignore[arg-type]
+        band = band_of(cast(float, last.value), series.thresholds)
         quality = QUALITY_VALID if last_sample_valid else QUALITY_LAST_INVALID
 
     return HydroReading(
@@ -447,7 +462,7 @@ def recent_samples(
     series: HydroSeries | None,
     hours: float = RECENT_SAMPLES_HOURS,
     max_points: int = MAX_RECENT_SAMPLES,
-) -> list[list]:
+) -> list[list[str | float]]:
     """Return the valid samples of the last ``hours`` as ``[[iso_utc, value], ...]``.
 
     The window ends at the newest valid sample (not at "now"), so a stale
@@ -463,8 +478,8 @@ def recent_samples(
         return []
     since = valid[-1].observed_at - timedelta(hours=hours)
     window = [s for s in valid if s.observed_at >= since][-max_points:]
-    return [[s.observed_at.isoformat(), round(float(s.value), 3)]  # type: ignore[arg-type]
-            for s in window]
+    return [[s.observed_at.isoformat(), round(float(s.value), 3)]
+            for s in window if s.value is not None]
 
 
 # normalized charts: the first and the third threshold always at the same height
@@ -533,14 +548,14 @@ def hourly_statistics(
     min_readings: int = 3,
     *,
     complete_hours_only: bool = False,
-) -> list[dict]:
+) -> list[HourlyStatistic]:
     """Aggregate distinct valid observations into completed hourly buckets."""
     if series is None:
         return []
     by_hour: dict[datetime, dict[datetime, float]] = {}
     for sample in series.valid_samples:
         hour = sample.observed_at.replace(minute=0, second=0, microsecond=0)
-        by_hour.setdefault(hour, {})[sample.observed_at] = float(sample.value)  # type: ignore[arg-type]
+        by_hour.setdefault(hour, {})[sample.observed_at] = cast(float, sample.value)
 
     frequency = series.frequency_minutes
     if complete_hours_only and (not frequency or frequency <= 0 or 60 % frequency):
@@ -548,7 +563,7 @@ def hourly_statistics(
     if frequency and frequency >= 30:
         min_readings = min(min_readings, max(1, 60 // frequency))
 
-    statistics = []
+    statistics: list[HourlyStatistic] = []
     for hour, observations in sorted(by_hour.items()):
         if before is not None and hour + timedelta(hours=1) > before:
             continue

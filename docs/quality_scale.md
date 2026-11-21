@@ -90,7 +90,9 @@ To do: reconfiguration-flow, repair-issues (e.g. a station that stops publishing
 ## Platinum
 
 ✅ async-dependency, inject-websession (every request goes through the Home Assistant
-shared session, with a 30 s timeout). To do: strict-typing (mypy strict).
+shared session, with a 30 s timeout). To do: strict-typing (mypy strict): phase A is done (the modules that do not import
+Home Assistant pass `mypy --strict`, configured in `pyproject.toml`); the rule stays
+todo until the whole integration is covered.
 
 ## Testing
 

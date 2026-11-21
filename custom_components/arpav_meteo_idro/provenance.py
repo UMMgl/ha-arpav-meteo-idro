@@ -26,10 +26,10 @@ class Provenance:
     rule: str | None = None
     """For the computed condition only: the criterion that decided it."""
 
-    def as_attributes(self) -> dict:
+    def as_attributes(self) -> dict[str, str]:
         """Return the provenance as extra state attributes, skipping empty fields."""
 
-        attributes = {
+        attributes: dict[str, str | None] = {
             "source": self.source,
             "source_name": self.name,
             "source_observed_at": self.observed_at,

@@ -30,6 +30,29 @@ release_tier = "silver"
 "0.15.5" = "bronze"
 "0.16.0" = "silver"
 
+[tool.mypy]
+# Strict typing, phase A of the Platinum rule strict-typing: only the modules that
+# do not import Home Assistant, so that the Lint job can run mypy without
+# installing it. Phases B and C extend `files` to the rest of the integration.
+python_version = "3.14"
+strict = true
+files = [
+    "custom_components/arpav_meteo_idro/const.py",
+    "custom_components/arpav_meteo_idro/hydro.py",
+    "custom_components/arpav_meteo_idro/hydro_topology.py",
+    "custom_components/arpav_meteo_idro/provenance.py",
+    "custom_components/arpav_meteo_idro/thresholds.py",
+]
+# the package __init__ imports Home Assistant: do not analyse it, and do not
+# report errors in modules reached only through an import
+follow_imports = "silent"
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+# defusedxml ships no type information (and is not installed in the Lint job)
+module = ["defusedxml", "defusedxml.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
