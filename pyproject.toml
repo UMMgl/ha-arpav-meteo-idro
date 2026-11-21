@@ -28,6 +28,7 @@ release_tier = "silver"
 # the first pull request after its tag; that is what the ratchet compares against,
 # so the check needs no network access.
 "0.15.5" = "bronze"
+"0.16.0" = "silver"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

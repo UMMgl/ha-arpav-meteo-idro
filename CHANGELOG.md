@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :wrench: Chores
+- **release**: record 0.16.0 (Silver) in `[tool.arpav_meteo_idro.released]`, so the quality-tier ratchet floor is now Silver; roadmap and release evidence updated for 0.16.0
+
 
 ## [0.16.0] - 2026-11-21
 ### :boom: Breaking Changes
