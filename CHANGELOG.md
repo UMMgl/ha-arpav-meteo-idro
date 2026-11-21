@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### :lock: Security
+- **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned
+
 ## [0.16.0] - 2026-11-21
 ### :boom: Breaking Changes
 - **hydro**: the manual station order is removed (deprecated in 0.15.5, #38). The **Manual order (station IDs)** field is gone from the setup and options forms, and the `legacy` and `manual` values of `display_order_source` no longer exist (it is now `topology` or `selection`). Existing hydrometric entries are migrated (config entry version 1.2: only the minor version changes, so a rollback to 0.15.5 still loads the entries): the saved order is dropped and the stations are shown in the verified river profile order, with the stations the profile does not cover after them in selection order. Dashboards that sorted on the `display_order` attribute keep working; a dashboard that relied on a manual order must be adjusted, or the river's profile reported as an issue. The `hydro_manual_order_deprecated` Repairs issue is deleted by the migration.

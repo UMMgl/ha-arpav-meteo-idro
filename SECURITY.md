@@ -87,13 +87,17 @@ either fixed by upgrading or listed here with the reason.
 
 Accepted findings:
 
-* `requirements_test.txt` (test tooling, never shipped): 42 advisories in
-  Pillow 12.3.0, fixed in Pillow 13.0.0. The file is unpinned; it resolves to
-  `pytest-homeassistant-custom-component` 0.13.375, which pins
-  `homeassistant==2026.10.4`, which pins `Pillow==12.3.0`. The integration does
-  not use Pillow and tests do not process untrusted images. The identifiers are
-  in `.github/pip-audit-ignore-test.txt`, applied to that file only; the list
-  goes away when the pytest plugin moves to Home Assistant 2026.11.
+* `requirements_test.txt` (test tooling, never shipped): 43 advisories in
+  Pillow 12.3.0 (GitHub advisories and PYSEC identifiers, 42 CVEs in pip-audit
+  terms), fixed in Pillow 13.0.0. The file resolves to
+  `pytest-homeassistant-custom-component` 0.13.375, the latest release of the
+  plugin, which pins `homeassistant==2026.10.4`, which pins `Pillow==12.3.0`;
+  overriding that pin would loosen the lock, so it is not done. The integration
+  does not use Pillow (it declares only `defusedxml`) and tests do not process
+  untrusted images. The identifiers are in `.github/pip-audit-ignore-test.txt`
+  (applied to that file only) and in `osv-scanner.toml`, which OpenSSF Scorecard
+  honours; every entry there expires on 2027-02-28 and both lists go away when
+  the pytest plugin moves to Home Assistant 2026.11.
 
 Fixed by upgrading: `requirements_ha.txt` homeassistant 2026.10.2 to 2026.11.1
 (Pillow 13.0.0 and uv 0.13.6; 43 advisories).

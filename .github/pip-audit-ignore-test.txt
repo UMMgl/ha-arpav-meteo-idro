@@ -2,6 +2,7 @@
 # Accepted pip-audit findings, applied to requirements_test.txt only (test tooling, not shipped).
 # All are Pillow 12.3.0, pinned by homeassistant 2026.10.4 <- pytest-homeassistant-custom-component 0.13.375;
 # fixed in Pillow 13.0.0 (homeassistant 2026.11). Remove this file when the pytest plugin moves to 2026.11. See SECURITY.md.
+# Same advisories as osv-scanner.toml (used by OpenSSF Scorecard, expiry 2027-02-28); keep the two in step.
 CVE-2026-112390
 CVE-2026-112391
 CVE-2026-112393
@@ -17,6 +18,7 @@ CVE-2026-112893
 CVE-2026-112894
 CVE-2026-112895
 CVE-2026-112897
+CVE-2026-112898
 CVE-2026-112899
 CVE-2026-112900
 CVE-2026-128066
