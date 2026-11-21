@@ -1,0 +1,226 @@
+# SPDX-License-Identifier: Apache-2.0
+# OSV-Scanner configuration, read by OpenSSF Scorecard (Vulnerabilities check).
+#
+# All 43 entries are advisories on Pillow 12.3.0, pinned in requirements_test.txt
+# (test tooling only, never shipped): homeassistant 2026.10.4 pins Pillow==12.3.0 and is
+# itself pinned by pytest-homeassistant-custom-component 0.13.375, the latest release of
+# the plugin. Pillow 13.0.0 (the fix) arrives with the plugin release for Home Assistant
+# 2026.11. The integration declares only defusedxml, does not use Pillow, and the tests
+# do not process untrusted images. Not exploitable here. Reviewed again before expiry;
+# remove the entries when requirements_test.txt moves to Pillow 13. See SECURITY.md.
+# Keep in step with .github/pip-audit-ignore-test.txt.
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4326"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112392). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4327"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112394). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4328"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112396). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4329"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112397). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4330"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112398). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4331"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112402). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4332"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112403). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4333"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112405). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4334"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112896). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4335"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112901). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4336"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-114501). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4337"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96636). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4338"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96637). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4339"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96639). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4340"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96641). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4341"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96642). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4342"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96643). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4343"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96644). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-4363"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112902). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-22hg-r758-rrw9"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112390). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-24rc-8hj2-v98c"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96638). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-254f-3936-288h"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112391). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-332p-7hrc-92wf"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112393). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-462x-pgg6-55fp"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112395). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-5xm2-6676-qcp9"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112399). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-65qm-jvmh-6pqg"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112400). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-74r2-7ff9-mjj2"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112401). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-78g4-xqwv-q3g8"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; no CVE alias). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-c6hw-5grf-ff96"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112404). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-f2g6-542v-9j58"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112406). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-fc9g-5qg7-mf45"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112891). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-g7cr-3p24-7wf7"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96778). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-gg2r-wvfm-q9rx"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112892). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-j4m9-6w36-pw47"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112893). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-jg86-v3jv-hrpm"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112894). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-mrfp-p49p-3hf2"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-96640). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-p4wg-p73j-c528"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112895). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-q45j-58j2-45rg"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112897). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-rfgq-q3w2-pmv2"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112898). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-vx6w-vv9f-6gvg"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112899). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-w889-685w-c8fh"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-112900). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-wqgw-9xfh-qf2g"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-128066). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
+
+[[IgnoredVulns]]
+id = "GHSA-xcvg-w56q-r89m"
+ignoreUntil = 2027-02-28
+reason = "Pillow 12.3.0 in requirements_test.txt (test tooling, not distributed; CVE-2026-128067). Not exploitable here: the integration does not use Pillow. Fixed in Pillow 13.0.0, blocked by the homeassistant 2026.10.4 pin of pytest-homeassistant-custom-component."
