@@ -169,7 +169,7 @@ _VENETO_PATHS = {
 
 def _station_profile(reaches: tuple[Reach, ...], station_nodes: dict[str, str]) -> dict[str, Reach]:
     """List covered stations in topological order with their evidence."""
-    graph = TopologicalSorter()
+    graph: TopologicalSorter[str] = TopologicalSorter()
     for reach in reaches:
         graph.add(reach.downstream, reach.upstream)
 

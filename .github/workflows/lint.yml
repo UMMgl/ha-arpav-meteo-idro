@@ -39,3 +39,6 @@ jobs:
 
         - name: "Run"
           run: python3 -m ruff check .
+
+        - name: "Type-check with mypy (strict, modules without Home Assistant)"
+          run: python3 -m mypy

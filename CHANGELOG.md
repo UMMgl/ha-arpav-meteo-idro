@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :gem: Quality
+- **typing**: `mypy --strict` passes on the modules that do not import Home Assistant (`const.py`, `hydro.py`, `hydro_topology.py`, `provenance.py`, `thresholds.py`), phase A of the Platinum rule `strict-typing` (#7); no behaviour change
+
 ### :wrench: Chores
 - **release**: record 0.16.0 (Silver) in `[tool.arpav_meteo_idro.released]`, so the quality-tier ratchet floor is now Silver; roadmap and release evidence updated for 0.16.0
 

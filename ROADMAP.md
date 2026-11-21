@@ -42,8 +42,9 @@ Minimum release tier: **Silver**.
 
 ## 0.16.x – Consolidation (December 2026 – January 2027)
 
-- [ ] **Strict typing, phase A:** the modules that do not import Home Assistant,
-  checked by mypy in the Lint job.
+- [x] **Strict typing, phase A:** the modules that do not import Home Assistant
+  (`const`, `hydro`, `hydro_topology`, `provenance`, `thresholds`) pass
+  `mypy --strict`; the Lint job runs it once the workflow change is authorised.
 - [ ] **Risk assessment and vulnerability-handling exercise** (simulated report,
   outcome recorded in the evidence register), completing
   [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18).
