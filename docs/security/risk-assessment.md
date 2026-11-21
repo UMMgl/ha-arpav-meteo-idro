@@ -4,7 +4,9 @@
 Tracking issue: [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18)
 (work package S3). Related: [#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21),
 [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28).
-Register of evidence: [evidence.md](evidence.md). Scope decision:
+Register of evidence: [evidence.md](evidence.md). Security requirements:
+[security-requirements.md](security-requirements.md). Design principles:
+[design-principles.md](design-principles.md). Scope decision:
 [cra-scope.md](cra-scope.md).
 
 **Status: draft prepared by an AI agent from the repository on 2026-11-21, to be
@@ -67,7 +69,10 @@ only part of a URL that comes from remote data is the station file name
 
 ## 4. Security objectives and design principles
 
-Written down here for the first time (they were implicit in the code):
+Written down here for the first time (they were implicit in the code). The
+testable requirements derived from them are in
+[security-requirements.md](security-requirements.md) and the principles, with
+their evidence, in [design-principles.md](design-principles.md):
 
 1. **No credentials and no personal data** are held, requested or logged by the
    integration; diagnostics redact coordinates ([diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py)).
@@ -100,7 +105,7 @@ maintainer, and agents only prepare changes through their own App identity.
 | C3 | Document larger than 5 MiB refused **after it has been downloaded** | [`MAX_XML_BYTES`](../../custom_components/arpav_meteo_idro/hydro.py#L67), [`_root`](../../custom_components/arpav_meteo_idro/hydro.py#L199) | [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py) (`test_oversized_document_is_refused`). See gap G1: this is not a download limit. |
 | C4 | Numbers, instants and station IDs validated with strict patterns and finite/positive checks; invalid values become "no value" | [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py) (`INSTANT`, `STATION_ID`, `parse_number`) | [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py) (`test_parse_number_*`, `test_parse_instant_*`) |
 | C5 | Shared Home Assistant session and a 30 s total timeout on every request, weather part included | `REQUEST_TIMEOUT` in [hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L35), [coordinator.py](../../custom_components/arpav_meteo_idro/coordinator.py#L33), [metar.py](../../custom_components/arpav_meteo_idro/metar.py#L29), [config_flow.py](../../custom_components/arpav_meteo_idro/config_flow.py#L59), [brightness_statistics.py](../../custom_components/arpav_meteo_idro/brightness_statistics.py#L35); `git grep "ClientSession("` finds nothing in the package | [test_weather_flow_http.py](../../tests/test_weather_flow_http.py), [test_silver_ha.py](../../tests/test_silver_ha.py) (timeout paths) |
-| C6 | Hydrometric part: at most 5 stations fetched concurrently (semaphore) | [hydro_coordinator.py:101](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L101) | No dedicated test of the limit (gap G4) |
+| C6 | Hydrometric part: at most 5 stations fetched concurrently (semaphore) | [hydro_coordinator.py:101](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L101) | [test_hydro_ha.py](../../tests/test_hydro_ha.py) (`test_hydro_limits_concurrency_and_keeps_partial_success` asserts that eight stations never run more than five requests at once); gap G4 closed |
 | C7 | Hydrometric part: per-station exponential back-off (2x, 4x, 8x the polling interval, 30 min cap, jitter) after repeated failures; last good observation kept | [`_async_update_station`](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L122) | [test_hydro_ha.py](../../tests/test_hydro_ha.py) (retry time and recovery, about lines 396-417) |
 | C8 | Statistics written only for the integration's own level sensors, resolved through the entity registry, complete past hours only, and only hours the Recorder does not already hold | [hydro_statistics.py](../../custom_components/arpav_meteo_idro/hydro_statistics.py#L54) | [test_hydro_statistics.py](../../tests/test_hydro_statistics.py) |
 | C9 | `samples_24h` is capped at 288 points and excluded from the Recorder | [`MAX_RECENT_SAMPLES`](../../custom_components/arpav_meteo_idro/hydro.py#L78), [`_unrecorded_attributes`](../../custom_components/arpav_meteo_idro/hydro_sensor.py#L113) | [test_hydro.py](../../tests/test_hydro.py) (`test_recent_samples_is_bounded`), [test_hydro_ha.py](../../tests/test_hydro_ha.py) (`test_level_sensor_exposes_unrecorded_samples`) |
@@ -141,7 +146,7 @@ maintainer, and agents only prepare changes through their own App identity.
 | G1 | R3 | Stream the download with a byte limit instead of reading the whole body; bound the JSON responses | 2027-01-31 |
 | G2 | R4 | Back-off and concurrency limit for the weather and METAR coordinators | 2027-02-28 |
 | G3 | R6, R7 | README note on the JavaScript in the examples and on card-mod and apexcharts-card as third-party code | 2026-12-31 |
-| G4 | C6 | A test that no more than five stations are fetched at once | 2027-01-31 |
+| G4 | C6 | A test that no more than five stations are fetched at once | Closed: the test exists (`test_hydro_limits_concurrency_and_keeps_partial_success`, found when the requirements were written on 2026-11-21) |
 | G5 | R8 | Remove or renew the Pillow waivers | 2027-02-28 (fixed by the waivers' expiry; reviewed on 2027-02-16) |
 | G6 | R9 | Demonstrate that a failing security gate blocks publication | 2027-01-31 |
 | G7 | R10 | Document key storage, rotation and revocation of the App keys | Documented 2026-11-21; next action: rotation, 2027-11 (proposed) |

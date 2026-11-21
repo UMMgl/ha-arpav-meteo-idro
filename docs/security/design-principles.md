@@ -1,0 +1,25 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+# Security design principles
+
+The principles that the code and the pipelines of this project already follow,
+written down so that a change can be judged against them. They answer the SAMM
+level-1 activity *Secure Architecture – Architecture Design* in
+[evidence.md](evidence.md). Each principle has one line of reasoning and a link
+to where it shows; the testable requirements derived from them are in
+[security-requirements.md](security-requirements.md), and the risks they
+address in the [risk assessment](risk-assessment.md).
+
+A change that goes against a principle needs a stated reason in its pull
+request. A principle that is not fully met yet says so and points to its gap.
+
+| # | Principle | Why | Where it shows |
+|---|---|---|---|
+| P1 | **No listening ports.** The integration only makes outbound requests. | Nothing can connect to it, so there is no network attack surface of its own. | [manifest.json](../../custom_components/arpav_meteo_idro/manifest.json) (`iot_class: cloud_polling`); no server code in [the package](../../custom_components/arpav_meteo_idro) |
+| P2 | **No credentials, no personal data.** The integration needs no account and keeps nothing that identifies the user; diagnostics redact location data. | What is not held cannot leak. | [config_flow.py](../../custom_components/arpav_meteo_idro/config_flow.py) (no secret fields), `TO_REDACT` in [diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py#L17); SR-10, SR-11 |
+| P3 | **Least privilege in the pipelines.** Workflows start with `permissions: {}` and grant each job only what it needs; actions are pinned to commit SHAs; agents act through a repository-scoped App that cannot merge. | A compromised step or token can do as little damage as possible. | [.github/workflows](../../.github/workflows), [CONTRIBUTING.md](../../CONTRIBUTING.md); SR-17 |
+| P4 | **Bounded, time-limited outbound requests.** Fixed HTTPS hosts, the shared Home Assistant session, a 30-second timeout on every request, a limit on concurrent requests and a back-off after failures. | A slow, hostile or broken server must not hold the user's Home Assistant or overload ARPAV. | `REQUEST_TIMEOUT` and `MAX_CONCURRENT_STATIONS` in [hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L35); SR-6, SR-7. Not yet met: the download size limit (SR-3, G1) and the weather and METAR back-off (SR-8, G2) |
+| P5 | **Everything from outside is untrusted.** Remote XML and JSON, file names taken from the registry and every number and date are validated before use, and XML goes through `defusedxml` only. | The sources are public and unauthenticated, and HTTPS protects the path, not the content. | [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py) (`_root`, `station_file`, `parse_number`, `parse_instant`); fuzzing in [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py); SR-1, SR-2, SR-4, SR-5 |
+| P6 | **Fail closed on unusable data.** A value that cannot be validated becomes "no value", never zero; an old reading is shown as stale, never as normal; a failed fetch keeps the last good value and says so. | A wrong "all clear" is worse than a missing value. | [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py#L406) (`evaluate`), [hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py#L122); [test_hydro.py](../../tests/test_hydro.py) (`test_stale_and_missing`); SR-5, SR-9 |
+| P7 | **An optional source never breaks the core one.** The METAR report only fills gaps of the weather entry, and a failed METAR request returns nothing instead of an error; the hydrometric part is a separate entry with its own coordinator. | The core readings must keep working when a secondary service is down. | [metar.py](../../custom_components/arpav_meteo_idro/metar.py), [coordinator.py](../../custom_components/arpav_meteo_idro/coordinator.py); [test_metar.py](../../tests/test_metar.py) (`test_fetch_observation_failures_return_none`), [test_hydro_ha.py](../../tests/test_hydro_ha.py) (`test_weather_entries_are_untouched`) |
+| P8 | **Minimal runtime dependencies.** The only runtime requirement is `defusedxml`; test and release tools are pinned with hashes and audited. | Every dependency is code the user runs and the project must keep safe. | [manifest.json](../../custom_components/arpav_meteo_idro/manifest.json), [requirements_test.txt](../../requirements_test.txt), [SBOM of the 0.16.0 release](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.16.0/ha-arpav-meteo-idro.cdx.json); SR-16 |
+| P9 | **Releases that can be verified.** One workflow builds a release from a tag, only after the security and quality gates pass, with SBOM, checksums and provenance. | Users and HACS install what the release contains; tampering must be detectable. | [release.yml](../../.github/workflows/release.yml), [SECURITY.md](../../SECURITY.md) ("Verifying a release"); SR-14, SR-15. The gate has not been shown failing yet (G6) |
