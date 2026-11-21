@@ -28,9 +28,10 @@ conformity with the Cyber Resilience Act (see [cra-scope.md](cra-scope.md)).
 
 Reviewed on **2026-11-16** against `main` (merge of
 [#39](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/39)).
-Sections 3 and 4, and the rows that point to the risk assessment, were updated on
-**2026-11-21** against `main` at `18740e3` (release 0.16.0); the other rows keep their
-2026-11-16 review date until the quarterly review.
+Sections 2, 3 and 4, and the rows that point to the risk assessment, were updated on
+**2026-11-21** against `main` at `e545e35` (release 0.16.0 and the risk assessment); the
+rows of section 1 that are not linked to the risk assessment keep their 2026-11-16
+review date until the quarterly review.
 
 ## Reference runs and releases
 
@@ -146,10 +147,12 @@ exists; *N/A* = not applicable with the reason given.
 
 ## 2. OWASP SAMM v2 – level 1 baseline
 
-> **Status: draft – to be validated by the maintainer.** Prepared by an AI
-> agent from repository evidence on 2026-11-16. The ratings are a first
-> proposal for a one-off validation session with the maintainer; they have not
-> been confirmed and must not be quoted as a SAMM assessment result.
+**Status: validated by the maintainer on 2026-11-21.** The baseline was
+prepared by an AI agent from repository evidence (first draft 2026-11-16,
+updated 2026-11-21) and validated activity by activity by the maintainer on
+2026-11-21. First review: **2027-02-16**. The ratings are the project's own
+self-assessment of this repository, its CI and its releases; they are not a
+certification or the result of an external SAMM assessment.
 
 Scale used: **Yes** = the level-1 activity is in place and evidenced;
 **Partial** = in place for part of the scope or not formalised; **No** = not
@@ -161,64 +164,78 @@ and its releases (one maintainer, no organisation).
 
 | Practice – stream (level-1 activity) | Rating | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
-| Strategy & Metrics – Create and Promote (identify organisational drivers related to risk tolerance) | Partial | Drivers recorded in [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18) (scope decision 2026-11-15) and [cra-scope.md](cra-scope.md) | @UMMgl | 2026-11-16 | Risk tolerance drafted in [risk-assessment.md](risk-assessment.md) (section 1, 2026-11-21); maintainer to confirm it at the SAMM validation session |
-| Strategy & Metrics – Measure and Improve (define metrics) | Partial | Indicators proposed in [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) (releases with complete evidence, expired exceptions); Scorecard runs weekly ([run](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005629)) | @UMMgl | 2026-11-16 | Metrics not yet collected; first values at the 2027-02-16 review |
-| Policy & Compliance – Policy and Standards (security baseline of policies and standards) | Yes | [SECURITY.md](../../SECURITY.md), [CONTRIBUTING.md](../../CONTRIBUTING.md) (requirements for contributions), [quality_scale.yaml](../../custom_components/arpav_meteo_idro/quality_scale.yaml) | @UMMgl | 2026-11-16 | |
-| Policy & Compliance – Compliance Management (identify third-party compliance drivers) | Yes | [cra-scope.md](cra-scope.md) (CRA), data licence in [README.md](../../README.md) ("Data provenance", CC BY 4.0), [NOTICE](../../NOTICE) | @UMMgl | 2026-11-16 | |
-| Education & Guidance – Training and Awareness (security awareness training for developers) | No | None; the maintainer applies OWASP practices ([#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21)) | @UMMgl | 2026-11-16 | Record a short self-study (e.g. OWASP CI/CD Top 10) at the 2027-02-16 review |
-| Education & Guidance – Organization and Culture (security champion in each team) | Yes (trivially) | Single-maintainer project: the maintainer is the security contact ([SECURITY.md](../../SECURITY.md)) | @UMMgl | 2026-11-16 | Maintainer to confirm that this counts |
+| Strategy & Metrics – Create and Promote (identify organisational drivers related to risk tolerance) | Yes | Risk tolerance in section 1 of [risk-assessment.md](risk-assessment.md); drivers recorded in [#18](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/18) (scope decision 2026-11-15) and [cra-scope.md](cra-scope.md) | @UMMgl | 2026-11-21 |  |
+| Strategy & Metrics – Measure and Improve (define metrics) | Partial | Indicators defined in [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) (releases with complete evidence, expired exceptions); Scorecard runs weekly ([run](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005629)) | @UMMgl | 2026-11-21 | Metrics are defined but not yet collected; first values at the 2027-02-16 review |
+| Policy & Compliance – Policy and Standards (security baseline of policies and standards) | Yes | [SECURITY.md](../../SECURITY.md), [CONTRIBUTING.md](../../CONTRIBUTING.md) (requirements for contributions), [quality_scale.yaml](../../custom_components/arpav_meteo_idro/quality_scale.yaml) | @UMMgl | 2026-11-21 |  |
+| Policy & Compliance – Compliance Management (identify third-party compliance drivers) | Yes | [cra-scope.md](cra-scope.md) (CRA), data licence in [README.md](../../README.md) ("Data provenance", CC BY 4.0), [NOTICE](../../NOTICE) | @UMMgl | 2026-11-21 |  |
+| Education & Guidance – Training and Awareness (security awareness training for developers) | Yes | The maintainer has security training (maintainer statement, 2026-11-21) | @UMMgl | 2026-11-21 |  |
+| Education & Guidance – Organization and Culture (security champion in each team) | Yes | Single-maintainer project: the maintainer is the security contact ([SECURITY.md](../../SECURITY.md)); confirmed by the maintainer on 2026-11-21 | @UMMgl | 2026-11-21 |  |
 
 ### Design
 
 | Practice – stream (level-1 activity) | Rating | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
-| Threat Assessment – Application Risk Profile (basic assessment of likelihood and impact) | Partial | Summary in [SECURITY.md](../../SECURITY.md) ("What the integration does"); OWASP review in [#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21) | @UMMgl | 2026-11-16 | Documented in [risk-assessment.md](risk-assessment.md) (draft, 2026-11-21); rating to be raised at the maintainer's validation |
-| Threat Assessment – Threat Modeling (best-effort, risk-based modelling) | No | None beyond the points above | @UMMgl | 2026-11-16 | Threat list (boundaries B1-B6, risks R1-R13) in [risk-assessment.md](risk-assessment.md) (draft, 2026-11-21); rating to be raised at the maintainer's validation |
-| Security Requirements – Software Requirements (security objectives mapped to functional requirements) | Partial | Input limits and parsing rules in [hydro.py](../../custom_components/arpav_meteo_idro/hydro.py); tests in [test_hydro.py](../../tests/test_hydro.py) | @UMMgl | 2026-11-16 | Objectives written in [risk-assessment.md](risk-assessment.md) (section 4, draft, 2026-11-21); not yet mapped to individual requirements |
-| Security Requirements – Supplier Security (evaluate the supplier) | Partial | Data source is ARPAV open data (CC BY 4.0, [README.md](../../README.md) "Data provenance"); runtime dependency `defusedxml` ([manifest.json](../../custom_components/arpav_meteo_idro/manifest.json)); upstream fork recorded in [NOTICE](../../NOTICE) | @UMMgl | 2026-11-16 | Suppliers evaluated in [risk-assessment.md](risk-assessment.md) (section 6, draft, 2026-11-21); to be validated by the maintainer |
-| Secure Architecture – Architecture Design (basic security principles during design) | Partial | Least-privilege workflows; bounded requests ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py): timeout, concurrency limit); no listening ports, no credentials | @UMMgl | 2026-11-16 | Principles written in [risk-assessment.md](risk-assessment.md) (section 4, draft, 2026-11-21); the 5 MiB limit is not a download limit (G1) |
-| Secure Architecture – Technology Management (elicit technologies and integrations to identify risk) | Yes | [SBOM of every release](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.15.5/ha-arpav-meteo-idro.cdx.json); hashed tool requirements (`requirements_*.txt`); [diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py) redacts location data | @UMMgl | 2026-11-16 | |
+| Threat Assessment – Application Risk Profile (basic assessment of likelihood and impact) | Yes | Risks R1-R13 with cause, controls and residual risk in [risk-assessment.md](risk-assessment.md) (section 5); summary in [SECURITY.md](../../SECURITY.md) ("What the integration does") | @UMMgl | 2026-11-21 |  |
+| Threat Assessment – Threat Modeling (best-effort, risk-based modelling) | Yes | Assets, trust boundaries B1-B6 and the risks of each input in [risk-assessment.md](risk-assessment.md) (sections 2, 3 and 5): a reasoned list, not a formal model, which is what level 1 asks for | @UMMgl | 2026-11-21 |  |
+| Security Requirements – Software Requirements (security objectives mapped to functional requirements) | Yes | [security-requirements.md](security-requirements.md): 17 numbered requirements, each with its implementation, its test or workflow and its status; open requirements are linked to gaps G1, G2 and G6 | @UMMgl | 2026-11-21 | Three requirements are open (SR-3, SR-8 and the negative proof of SR-14), tracked as G1, G2 and G6 |
+| Security Requirements – Supplier Security (evaluate the supplier) | Yes | Suppliers evaluated in [risk-assessment.md](risk-assessment.md) (section 6): ARPAV, aviationweather.gov, `defusedxml`, Home Assistant and HACS, GitHub, the upstream project; data licence in [README.md](../../README.md) ("Data provenance") | @UMMgl | 2026-11-21 |  |
+| Secure Architecture – Architecture Design (basic security principles during design) | Yes | [design-principles.md](design-principles.md): nine principles, each linked to the code or the workflow where it shows | @UMMgl | 2026-11-21 | Two principles are not fully met yet: the download size limit (G1) and the weather and METAR back-off (G2) |
+| Secure Architecture – Technology Management (elicit technologies and integrations to identify risk) | Yes | [SBOM of every release](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.16.0/ha-arpav-meteo-idro.cdx.json); hashed tool requirements (`requirements_*.txt`); [diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py) redacts location data | @UMMgl | 2026-11-21 |  |
 
 ### Implementation
 
 | Practice – stream (level-1 activity) | Rating | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
-| Secure Build – Build Process (formal, repeatable build) | Yes | [release.yml](../../.github/workflows/release.yml), actions pinned to full commit SHAs, tools installed with `--require-hashes`; [Release run 43774490878](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43774490878) | @UMMgl | 2026-11-16 | `requirements_test.txt` is not hash-pinned yet (Scorecard alerts #2, #3, #8): planned for 0.16.0 |
-| Secure Build – Software Dependencies (BOM of applications, opportunistic analysis) | Yes | [SBOM (CycloneDX)](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.15.5/ha-arpav-meteo-idro.cdx.json) in every release since 0.15.4; pip-audit and Dependabot ([dependabot.yml](../../.github/dependabot.yml)) | @UMMgl | 2026-11-16 | |
-| Secure Deployment – Deployment Process (formalise the deployment, secure tooling) | Yes | Tag-triggered [release.yml](../../.github/workflows/release.yml); Gold quality gate before publishing ([#39](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/39)); [SHA256SUMS](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.15.5/SHA256SUMS) and [attestation](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.15.5/ha-arpav-meteo-idro.intoto.jsonl) | @UMMgl | 2026-11-16 | Security checks are not yet a release gate on the tagged commit: S4, 0.16.0 (workflow change, needs maintainer authorisation) |
-| Secure Deployment – Secret Management (limit access to production secrets) | Partial | The project has no runtime secrets; release uses the workflow `GITHUB_TOKEN` and OIDC with narrow `permissions:`; AI agents act through a dedicated GitHub App ([#27](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/27), [CONTRIBUTING.md](../../CONTRIBUTING.md)) | @UMMgl | 2026-11-16 | Risk R10 and gap G7 in [risk-assessment.md](risk-assessment.md): key handling, rotation and revocation documented on 2026-11-21 (maintainer's statement); first rotation due 2027-11 |
-| Defect Management – Defect Tracking (structured tracking of security defects) | Yes | GitHub issues, code scanning alerts, private vulnerability reports; response targets in [SECURITY.md](../../SECURITY.md) | @UMMgl | 2026-11-16 | |
-| Defect Management – Metrics and Feedback (review recorded defects, derive quick wins) | Yes | Scorecard findings turned into issues #24–#27 ([#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21)), all closed | @UMMgl | 2026-11-16 | Repeat at each quarterly review |
+| Secure Build – Build Process (formal, repeatable build) | Yes | [release.yml](../../.github/workflows/release.yml), actions pinned to full commit SHAs, tools and test requirements installed with `--require-hashes` ([requirements_test.txt](../../requirements_test.txt), [tests.yml](../../.github/workflows/tests.yml)); [Release run 44845687536](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/44845687536) | @UMMgl | 2026-11-21 |  |
+| Secure Build – Software Dependencies (BOM of applications, opportunistic analysis) | Yes | [SBOM (CycloneDX)](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.16.0/ha-arpav-meteo-idro.cdx.json) in every release since 0.15.4; pip-audit and Dependabot ([dependabot.yml](../../.github/dependabot.yml)); dated waivers in [osv-scanner.toml](../../osv-scanner.toml) | @UMMgl | 2026-11-21 |  |
+| Secure Deployment – Deployment Process (formalise the deployment, secure tooling) | Yes | Tag-triggered [release.yml](../../.github/workflows/release.yml) with the security gate on the tagged commit and the quality ratchet before publishing; [Release run 44845687536](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/44845687536); [SHA256SUMS](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.16.0/SHA256SUMS) and [attestation](https://github.com/UMMgl/ha-arpav-meteo-idro/releases/download/0.16.0/ha-arpav-meteo-idro.intoto.jsonl) | @UMMgl | 2026-11-21 | The gate has not been shown blocking a release yet: G6 in [risk-assessment.md](risk-assessment.md), proposed 2027-01-31 (needs the maintainer's authorisation, it touches a tag) |
+| Secure Deployment – Secret Management (limit access to production secrets) | Yes | The project has no runtime secrets; release uses the workflow `GITHUB_TOKEN` and OIDC with narrow `permissions:`. One private key per GitHub App, kept in a single protected private store (multi-factor authentication, single user), never in the repository or in CI secrets; handling, rotation and revocation in [risk-assessment.md](risk-assessment.md) ("App credentials") | @UMMgl | 2026-11-21 | First key rotation due 2027-11 (G7) |
+| Defect Management – Defect Tracking (structured tracking of security defects) | Yes | GitHub issues, code scanning alerts, private vulnerability reports; response targets in [SECURITY.md](../../SECURITY.md) | @UMMgl | 2026-11-21 |  |
+| Defect Management – Metrics and Feedback (review recorded defects, derive quick wins) | Yes | Scorecard findings turned into issues #24–#27 ([#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21)), all closed; gaps G1-G10 with due dates in [risk-assessment.md](risk-assessment.md) | @UMMgl | 2026-11-21 | Repeat at each quarterly review |
 
 ### Verification
 
 | Practice – stream (level-1 activity) | Rating | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
-| Architecture Assessment – Architecture Validation (identify components, review basic security provisioning) | Partial | Component list in [README.md](../../README.md) and [hydro_topology.md](../hydro_topology.md); no security review of it | @UMMgl | 2026-11-16 | Done in [risk-assessment.md](risk-assessment.md) (draft, 2026-11-21); validation by the maintainer pending |
-| Architecture Assessment – Architecture Mitigation (ad-hoc review for unmitigated threats) | Partial | OWASP review in [#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21) produced fixes ([#22](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/22)) | @UMMgl | 2026-11-16 | Repeat at the 2027-02-16 review, after the gaps G1-G10 in [risk-assessment.md](risk-assessment.md) are worked |
-| Requirements-driven Testing – Control Verification (test for software security controls) | Partial | Parser limits and rejection of HTML/oversized documents are tested ([test_hydro.py](../../tests/test_hydro.py)); the weather part's network handling is not covered | @UMMgl | 2026-11-16 | Weather-part session and error-path tests, 0.16.0 (pull request [#60](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/60) open at the time of writing; [#7](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/7), [#5](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/5)) |
-| Requirements-driven Testing – Misuse/Abuse Testing (security fuzz testing) | Yes | [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py), [#34](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/34) | @UMMgl | 2026-11-16 | |
-| Security Testing – Scalable Baseline (automated security testing tools) | Yes | [Security run on `main`](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005671): CodeQL, bandit, pip-audit, gitleaks, zizmor | @UMMgl | 2026-11-16 | |
-| Security Testing – Deep Understanding (manual testing of high-risk components) | No | None | @UMMgl | 2026-11-16 | Paper review of the parser, fetch and limits against the threat list done on 2026-11-21 (found G1, G4); no manual testing of the running integration; next at the 2027-02-16 review |
+| Architecture Assessment – Architecture Validation (identify components, review basic security provisioning) | Yes | Component list in [README.md](../../README.md) and [hydro_topology.md](../hydro_topology.md); components, boundaries and controls reviewed in [risk-assessment.md](risk-assessment.md) | @UMMgl | 2026-11-21 |  |
+| Architecture Assessment – Architecture Mitigation (ad-hoc review for unmitigated threats) | Yes | The risk assessment of 2026-11-21 produced the gaps G1-G10 with due dates ([risk-assessment.md](risk-assessment.md)); the earlier OWASP review in [#21](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/21) produced fixes ([#22](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/22)) | @UMMgl | 2026-11-21 | Repeat at the 2027-02-16 review, after the open gaps are worked |
+| Requirements-driven Testing – Control Verification (test for software security controls) | Yes | Each requirement of [security-requirements.md](security-requirements.md) names its test or workflow: parser limits ([test_hydro.py](../../tests/test_hydro.py), [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py)), concurrency limit and back-off ([test_hydro_ha.py](../../tests/test_hydro_ha.py)), diagnostics ([test_gold_ha.py](../../tests/test_gold_ha.py)), weather and METAR error paths ([test_weather_flow_http.py](../../tests/test_weather_flow_http.py), [test_metar.py](../../tests/test_metar.py)); coverage floor in CI | @UMMgl | 2026-11-21 | No test asserts the timeout argument of each request (SR-6, checked by review); the download size limit (SR-3, G1) and the weather back-off (SR-8, G2) are not implemented yet |
+| Requirements-driven Testing – Misuse/Abuse Testing (security fuzz testing) | Yes | [test_hydro_fuzz.py](../../tests/test_hydro_fuzz.py), [#34](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/34) | @UMMgl | 2026-11-21 |  |
+| Security Testing – Scalable Baseline (automated security testing tools) | Yes | [Security run on `main`](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/43775005671): CodeQL, bandit, pip-audit, gitleaks, zizmor; the same checks gate every release | @UMMgl | 2026-11-21 |  |
+| Security Testing – Deep Understanding (manual testing of high-risk components) | No | None. A review of the parser by an agent is not manual testing by a person, so the paper review of 2026-11-21 does not count | @UMMgl | 2026-11-21 | Guided manual review of the parser (`hydro.py`) by the maintainer, planned for 0.17, or accepted as a No; decision at the 2027-02-16 review |
 
 ### Operations
 
 | Practice – stream (level-1 activity) | Rating | Evidence | Owner | Reviewed | Gap / due |
 |---|---|---|---|---|---|
-| Incident Management – Incident Detection (best-effort detection from log data) | Partial | Code scanning and Dependabot alerts; the integration logs failed requests ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py)); Home Assistant owns the runtime logs | @UMMgl | 2026-11-16 | No detection in users' installations (outside the project's control) |
-| Incident Management – Incident Response (roles and responsibilities) | Partial | Maintainer is the single contact ([SECURITY.md](../../SECURITY.md)); acknowledgement 7 days, triage 2 weeks as internal targets | @UMMgl | 2026-11-16 | No backup contact: decided on 2026-11-21 (G9 closed), residual risk R12 stays in [risk-assessment.md](risk-assessment.md). Tabletop exercise done on 2026-11-21: [exercise](exercises/2026-11-vulnerability-report.md) |
-| Environment Management – Configuration Hardening (best-effort hardening) | Partial | Workflows with least-privilege `permissions:` and zizmor; secret scanning with push protection (confirmed by the maintainer on 2026-11-21) | @UMMgl | 2026-11-16 | Branch protection and required checks are not readable by the App token (HTTP 403): confirmed by the maintainer on 2026-11-16 and 2026-11-21 (a statement, not a screenshot); next check 2027-02-16 |
-| Environment Management – Patching and Updating (best-effort patching) | Yes | [dependabot.yml](../../.github/dependabot.yml), weekly pip-audit, lock refresh procedure in [SECURITY.md](../../SECURITY.md) | @UMMgl | 2026-11-16 | |
-| Operational Management – Data Protection (basic data protection practices) | Yes | No personal data processed; diagnostics redact coordinates ([diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py)); [SECURITY.md](../../SECURITY.md) ("What the integration does") | @UMMgl | 2026-11-16 | |
-| Operational Management – System Decommissioning / Legacy Management (decommission unused services; manage upgrades individually) | Partial | Only the latest release is supported ([SECURITY.md](../../SECURITY.md)); deprecation of the manual station order announced a release ahead ([#38](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/38)) | @UMMgl | 2026-11-16 | Upgrade guidance added to [SECURITY.md](../../SECURITY.md) ("Supported versions") on 2026-11-21 |
+| Incident Management – Incident Detection (best-effort detection from log data) | Partial | Code scanning and Dependabot alerts; the integration logs failed requests ([hydro_coordinator.py](../../custom_components/arpav_meteo_idro/hydro_coordinator.py)); Home Assistant owns the runtime logs | @UMMgl | 2026-11-21 | No detection in the installations of the users (outside the project's control); accepted |
+| Incident Management – Incident Response (roles and responsibilities) | Partial | Maintainer is the single contact ([SECURITY.md](../../SECURITY.md)); acknowledgement 7 days, triage 2 weeks as internal targets; tabletop exercise done on 2026-11-21: [exercise](exercises/2026-11-vulnerability-report.md) | @UMMgl | 2026-11-21 | No backup contact: decided by the maintainer on 2026-11-21 (G9 closed), residual risk R12 stays in [risk-assessment.md](risk-assessment.md); Partial by choice |
+| Environment Management – Configuration Hardening (best-effort hardening) | Yes | Workflows with least-privilege `permissions:` and zizmor ([security.yml](../../.github/workflows/security.yml)); secret scanning with push protection, branch protection and two-factor authentication confirmed by the maintainer on 2026-11-21 (a statement: the settings are not readable by the App token) | @UMMgl | 2026-11-21 | Settings re-confirmed at the 2027-02-16 review (G10) |
+| Environment Management – Patching and Updating (best-effort patching) | Yes | [dependabot.yml](../../.github/dependabot.yml), weekly pip-audit, lock refresh procedure in [SECURITY.md](../../SECURITY.md) | @UMMgl | 2026-11-21 |  |
+| Operational Management – Data Protection (basic data protection practices) | Yes | No personal data processed; diagnostics redact coordinates ([diagnostics.py](../../custom_components/arpav_meteo_idro/diagnostics.py)); [SECURITY.md](../../SECURITY.md) ("What the integration does") | @UMMgl | 2026-11-21 |  |
+| Operational Management – System Decommissioning / Legacy Management (decommission unused services; manage upgrades individually) | Yes | [SECURITY.md](../../SECURITY.md) ("Supported versions"): only the latest release is supported, fixes are not backported, update through HACS; removals are announced a release ahead (the manual station order, [#38](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/38)) | @UMMgl | 2026-11-21 |  |
 
-Summary of the draft ratings (30 level-1 activities): 13 Yes, 14 Partial, 3 No.
+Summary of the validated ratings (30 level-1 activities): **26 Yes, 3 Partial,
+1 No** (draft of 2026-11-16: 13 Yes, 14 Partial, 3 No).
+
+Open points of the baseline:
+
+* *Measure and Improve* (Partial): metrics are defined but not collected; first
+  values at the 2027-02-16 review.
+* *Incident Detection* (Partial): no visibility on the users' installations;
+  outside the project's control, accepted.
+* *Incident Response* (Partial): no backup contact; a deliberate choice of the
+  maintainer (2026-11-21).
+* *Deep Understanding* (No): guided manual review of the parser planned for
+  0.17, or accepted as a No.
+* Requirements still open behind the Yes ratings: SR-3 (G1), SR-8 (G2) and the
+  negative proof of the release gate (SR-14, G6).
 
 ## 3. Risk assessment and exercises
 
 | Item | Evidence | Owner | Reviewed | Next review | Open gaps |
 |---|---|---|---|---|---|
-| Risk assessment (assets, trust boundaries, risks R1-R13, controls C1-C20, suppliers) | [risk-assessment.md](risk-assessment.md), links checked against `main` at `18740e3` | @UMMgl | 2026-11-21 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G1-G6 with proposed due dates; G7 documented (rotation 2027-11); G8, G9, G10 closed by the maintainer's statements of 2026-11-21 |
+| Risk assessment (assets, trust boundaries, risks R1-R13, controls C1-C20, suppliers) | [risk-assessment.md](risk-assessment.md), links checked against `main` at `18740e3` | @UMMgl | 2026-11-21 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G1-G3, G5 and G6 with proposed due dates (G4 closed: the concurrency test exists); G7 documented (rotation 2027-11); G8, G9, G10 closed by the maintainer's statements of 2026-11-21 |
 | Tabletop exercise of vulnerability handling (scenario: oversized response, paper only) | [exercises/2026-11-vulnerability-report.md](exercises/2026-11-vulnerability-report.md) | @UMMgl | 2026-11-21 | Yearly (2027-11), after the first real report, or after a process change | F6 (checks on private forks), F7 (Security section in release notes, gate never seen failing) |
 
 ## 4. Gaps linked to other work
@@ -228,7 +245,9 @@ Summary of the draft ratings (30 level-1 activities): 13 Yes, 14 Partial, 3 No.
 | Security checks as release gate on the tagged SHA | Done: [release.yml](../../.github/workflows/release.yml), [Release run 44845687536](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/44845687536); a negative test is G6 in [risk-assessment.md](risk-assessment.md) | 2027-01-31 (proposed) |
 | Hash-pinned test requirements (Scorecard alerts #2, #3, #8) | Done: `requirements_test.txt` is compiled with hashes and installed with `--require-hashes` ([tests.yml](../../.github/workflows/tests.yml)) | |
 | Weather part on the Home Assistant session | Done in 0.16.0 ([CHANGELOG.md](../../CHANGELOG.md)); back-off and concurrency limit for the weather and METAR parts are G2 | 2027-02-28 (proposed) |
-| Download size limit for XML and JSON responses | G1 in [risk-assessment.md](risk-assessment.md) | 2027-01-31 (proposed) |
-| Risk analysis, threat list, simulated vulnerability report | Done (drafts) on 2026-11-21: sections 3 above | |
+| Download size limit for XML and JSON responses | G1 in [risk-assessment.md](risk-assessment.md); SR-3 in [security-requirements.md](security-requirements.md) | 2027-01-31 (proposed) |
+| Risk analysis, threat list, simulated vulnerability report | Done (drafts) on 2026-11-21: section 3 above | |
+| Security requirements and design principles | Done on 2026-11-21: [security-requirements.md](security-requirements.md), [design-principles.md](design-principles.md); open requirements SR-3 (G1), SR-8 (G2), SR-14 negative proof (G6) | See the gaps |
 | Backup contact | Closed: none, decided by the maintainer on 2026-11-21 (G9); residual risk R12 | Quarterly review |
-| SAMM baseline validation, first dated review | [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) | 2027-02-16 |
+| SAMM baseline validation | Done: validated by the maintainer on 2026-11-21 (section 2 above); tracked in [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) | |
+| First dated review of the register | [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) | 2027-02-16 |

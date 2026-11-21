@@ -25,7 +25,11 @@ The assessment, its factual basis, the reassessment triggers and the treatment
 of each requirement are in [docs/security/cra-scope.md](docs/security/cra-scope.md);
 the evidence for the security practices is in
 [docs/security/evidence.md](docs/security/evidence.md), the risk analysis with
-its open gaps in [docs/security/risk-assessment.md](docs/security/risk-assessment.md)
+its open gaps in [docs/security/risk-assessment.md](docs/security/risk-assessment.md),
+the security objectives as testable requirements in
+[docs/security/security-requirements.md](docs/security/security-requirements.md),
+the design principles in
+[docs/security/design-principles.md](docs/security/design-principles.md)
 and the first paper exercise of the process below in
 [docs/security/exercises/](docs/security/exercises/2026-11-vulnerability-report.md).
 

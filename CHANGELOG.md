@@ -4,6 +4,7 @@
 
 
 ### :lock: Security
+- **security documentation**: the security objectives are now written as numbered, testable requirements (`docs/security/security-requirements.md`, with the code, the test and the status of each; open ones are linked to the risk assessment gaps) and the design principles of the integration are documented (`docs/security/design-principles.md`); the OWASP SAMM level-1 baseline in `docs/security/evidence.md` was validated by the maintainer on 2026-11-21 (26 Yes, 3 Partial, 1 No)
 - **risk assessment**: documented risk assessment (`docs/security/risk-assessment.md`: assets, trust boundaries, 13 risks with controls linked to code, tests and workflows, and open gaps with due dates) and a paper exercise of the vulnerability-handling process (`docs/security/exercises/`); `SECURITY.md` now says what a reporter can expect, when advisories are published, that HACS does not show them, and that the 5 MiB XML limit is checked after the download
 - **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned
 
