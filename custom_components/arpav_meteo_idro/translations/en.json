@@ -219,6 +219,9 @@
             "hydro_observed_at": {
                 "name": "Observed at"
             },
+            "hydro_flow": {
+                "name": "Flow"
+            },
             "hydro_level_change": {
                 "name": "Level change"
             },

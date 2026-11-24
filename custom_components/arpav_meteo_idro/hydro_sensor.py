@@ -15,7 +15,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, UnitOfLength
+from homeassistant.const import EntityCategory, UnitOfLength, UnitOfVolumeFlowRate
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -87,6 +87,27 @@ SENSORS: tuple[HydroSensorDescription, ...] = (
 )
 
 
+def _flow_sample(state: HydroStationState) -> hydro.HydroSample | None:
+    return hydro.last_valid_sample(state.data.flow_series() if state.data else None)
+
+
+# created only for the stations whose file holds a PORTATA series (see below)
+FLOW_SENSOR = HydroSensorDescription(
+    key="flow",
+    translation_key="hydro_flow",
+    device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
+    state_class=SensorStateClass.MEASUREMENT,
+    native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_SECOND,
+    suggested_display_precision=2,
+    value_fn=lambda s: sample.value if (sample := _flow_sample(s)) else None,
+)
+
+
+def _publishes_flow(coordinator: HydroCoordinator, station_id: str) -> bool:
+    state = (coordinator.data or {}).get(station_id)
+    return state is not None and state.data is not None and state.data.flow_series() is not None
+
+
 def level_unique_id(station_id: str) -> str:
     """Return the unique ID of the level sensor of a station (used by the archive)."""
     return f"{DOMAIN}_hydro_{station_id}_level"
@@ -97,11 +118,18 @@ async def async_setup_hydro_entities(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Create the sensors of every selected station."""
-    async_add_entities(
+    entities = [
         HydroSensor(coordinator, meta, description)
         for meta in coordinator.stations
         for description in SENSORS
+    ]
+    # about half of the stations publish a discharge: no permanently empty sensor for the others
+    entities.extend(
+        HydroSensor(coordinator, meta, FLOW_SENSOR)
+        for meta in coordinator.stations
+        if _publishes_flow(coordinator, meta["id"])
     )
+    async_add_entities(entities)
 
 
 class HydroSensor(ArpavHydroEntity, SensorEntity):
@@ -145,12 +173,19 @@ class HydroSensor(ArpavHydroEntity, SensorEntity):
         if state is None:
             return None
         reading = state.reading
+        series = state.series
+        observed_at = reading.observed_at if reading else None
+        if self.entity_description.key == "flow":
+            # the discharge is a series of its own, with its own ID and time
+            series = state.data.flow_series() if state.data else None
+            sample = hydro.last_valid_sample(series)
+            observed_at = sample.observed_at if sample else None
         attributes: dict[str, Any] = {
             "station_id": self._station_id,
-            "sensor_id": state.series.sensor_id if state.series else None,
+            "sensor_id": series.sensor_id if series else None,
             "source": "arpav_hydrometric_station",
             "source_url": hydro.station_url(state.meta.get("link"), self._station_id),
-            "source_observed_at": reading.observed_at.isoformat() if reading and reading.observed_at else None,
+            "source_observed_at": observed_at.isoformat() if observed_at else None,
         }
         if self.entity_description.key == "level":
             # every sample of the last 24 h (10 minutes apart), for ApexCharts

@@ -181,6 +181,12 @@ class HydroStationData:
         # with more than one level series the choice must be explicit
         return levels[0] if len(levels) == 1 else None
 
+    def flow_series(self) -> HydroSeries | None:
+        """Return the discharge series, when the file holds exactly one PORTATA series."""
+        flows = [s for s in self.series if s.type == TYPE_FLOW]
+        # like the level, more than one series is ambiguous: no guess
+        return flows[0] if len(flows) == 1 else None
+
 
 class HourlyStatistic(TypedDict):
     """One completed hourly bucket, in the shape the statistics importer reads."""
@@ -456,6 +462,14 @@ def evaluate(
         age_minutes=round(age, 1),
         thresholds=series.thresholds,
     )
+
+
+def last_valid_sample(series: HydroSeries | None) -> HydroSample | None:
+    """Return the newest sample holding a number, or None (no series, only sentinels)."""
+    if series is None:
+        return None
+    valid = series.valid_samples
+    return valid[-1] if valid else None
 
 
 def recent_samples(
