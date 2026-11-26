@@ -228,15 +228,16 @@ Open points of the baseline:
   maintainer (2026-11-21).
 * *Deep Understanding* (No): guided manual review of the parser planned for
   0.17, or accepted as a No.
-* Requirements still open behind the Yes ratings: SR-3 (G1), SR-8 (G2) and the
-  negative proof of the release gate (SR-14, G6).
+* Requirements still open behind the Yes ratings: SR-8 (G2) and the negative
+  proof of the release gate (SR-14, G6); SR-3 (G1) was closed on 2026-11-26.
 
 ## 3. Risk assessment and exercises
 
 | Item | Evidence | Owner | Reviewed | Next review | Open gaps |
 |---|---|---|---|---|---|
-| Risk assessment (assets, trust boundaries, risks R1-R13, controls C1-C20, suppliers) | [risk-assessment.md](risk-assessment.md), links checked against `main` at `18740e3` | @UMMgl | 2026-11-21 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G1-G3, G5 and G6 with proposed due dates (G4 closed: the concurrency test exists); G7 documented (rotation 2027-11); G8, G9, G10 closed by the maintainer's statements of 2026-11-21 |
+| Risk assessment (assets, trust boundaries, risks R1-R13, controls C1-C20, suppliers) | [risk-assessment.md](risk-assessment.md), links checked against `main` at `18740e3` | @UMMgl | 2026-11-21 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G2, G3, G5 and G6 with proposed due dates (G1 closed on 2026-11-26 by pull request [#83](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/83); G4 closed: the concurrency test exists); G7 documented (rotation 2027-11); G8, G9, G10 closed by the maintainer's statements of 2026-11-21 |
 | Tabletop exercise of vulnerability handling (scenario: oversized response, paper only) | [exercises/2026-11-vulnerability-report.md](exercises/2026-11-vulnerability-report.md) | @UMMgl | 2026-11-21 | Yearly (2027-11), after the first real report, or after a process change | F6 (checks on private forks), F7 (Security section in release notes, gate never seen failing) |
+| OWASP mapping (Top 10 2021, CI/CD Top 10, ASVS 5.0 level 1, required checks on `main`) | [owasp-mapping.md](owasp-mapping.md), written against `main` at `13bd977`; the required-checks list is the maintainer's session's report, not verified by the App | @UMMgl | 2026-11-26 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G2, G6 and pull request #82 (redirects), see its section 5 |
 
 ## 4. Gaps linked to other work
 
@@ -245,9 +246,9 @@ Open points of the baseline:
 | Security checks as release gate on the tagged SHA | Done: [release.yml](../../.github/workflows/release.yml), [Release run 44845687536](https://github.com/UMMgl/ha-arpav-meteo-idro/actions/runs/44845687536); a negative test is G6 in [risk-assessment.md](risk-assessment.md) | 2027-01-31 (proposed) |
 | Hash-pinned test requirements (Scorecard alerts #2, #3, #8) | Done: `requirements_test.txt` is compiled with hashes and installed with `--require-hashes` ([tests.yml](../../.github/workflows/tests.yml)) | |
 | Weather part on the Home Assistant session | Done in 0.16.0 ([CHANGELOG.md](../../CHANGELOG.md)); back-off and concurrency limit for the weather and METAR parts are G2 | 2027-02-28 (proposed) |
-| Download size limit for XML and JSON responses | G1 in [risk-assessment.md](risk-assessment.md); SR-3 in [security-requirements.md](security-requirements.md) | 2027-01-31 (proposed) |
+| Download size limit for XML and JSON responses | Done on 2026-11-26: [http_limits.py](../../custom_components/arpav_meteo_idro/http_limits.py), pull request [#83](https://github.com/UMMgl/ha-arpav-meteo-idro/pull/83) (G1 in [risk-assessment.md](risk-assessment.md), SR-3 in [security-requirements.md](security-requirements.md)) | |
 | Risk analysis, threat list, simulated vulnerability report | Done (drafts) on 2026-11-21: section 3 above | |
-| Security requirements and design principles | Done on 2026-11-21: [security-requirements.md](security-requirements.md), [design-principles.md](design-principles.md); open requirements SR-3 (G1), SR-8 (G2), SR-14 negative proof (G6) | See the gaps |
+| Security requirements and design principles | Done on 2026-11-21: [security-requirements.md](security-requirements.md), [design-principles.md](design-principles.md); open requirements SR-8 (G2), SR-14 negative proof (G6); SR-3 (G1) closed on 2026-11-26 | See the gaps |
 | Backup contact | Closed: none, decided by the maintainer on 2026-11-21 (G9); residual risk R12 | Quarterly review |
 | SAMM baseline validation | Done: validated by the maintainer on 2026-11-21 (section 2 above); tracked in [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) | |
 | First dated review of the register | [#28](https://github.com/UMMgl/ha-arpav-meteo-idro/issues/28) | 2027-02-16 |
