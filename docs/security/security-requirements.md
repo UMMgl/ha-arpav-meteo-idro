@@ -6,7 +6,9 @@ that can be tested. They answer the SAMM level-1 activity *Security
 Requirements – Software Requirements* in [evidence.md](evidence.md) and turn the
 objectives listed in section 4 of the [risk assessment](risk-assessment.md) into
 checkable statements. The principles behind them are in
-[design-principles.md](design-principles.md).
+[design-principles.md](design-principles.md). The OWASP Top 10, CI/CD Top 10
+and ASVS 5.0 level 1 identifiers that correspond to these requirements are in
+[owasp-mapping.md](owasp-mapping.md).
 
 How to read it:
 

@@ -237,6 +237,7 @@ Open points of the baseline:
 |---|---|---|---|---|---|
 | Risk assessment (assets, trust boundaries, risks R1-R13, controls C1-C20, suppliers) | [risk-assessment.md](risk-assessment.md), links checked against `main` at `18740e3` | @UMMgl | 2026-11-21 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G1-G3, G5 and G6 with proposed due dates (G4 closed: the concurrency test exists); G7 documented (rotation 2027-11); G8, G9, G10 closed by the maintainer's statements of 2026-11-21 |
 | Tabletop exercise of vulnerability handling (scenario: oversized response, paper only) | [exercises/2026-11-vulnerability-report.md](exercises/2026-11-vulnerability-report.md) | @UMMgl | 2026-11-21 | Yearly (2027-11), after the first real report, or after a process change | F6 (checks on private forks), F7 (Security section in release notes, gate never seen failing) |
+| OWASP mapping (Top 10 2021, CI/CD Top 10, ASVS 5.0 level 1, required checks on `main`) | [owasp-mapping.md](owasp-mapping.md), written against `main` at `13bd977`; the required-checks list is the maintainer's session's report, not verified by the App | @UMMgl | 2026-11-26 (draft by an AI agent, to be validated by the maintainer) | 2027-02-16 | G2, G6 and pull request #82 (redirects), see its section 5 |
 
 ## 4. Gaps linked to other work
 

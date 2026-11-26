@@ -29,7 +29,10 @@ its open gaps in [docs/security/risk-assessment.md](docs/security/risk-assessmen
 the security objectives as testable requirements in
 [docs/security/security-requirements.md](docs/security/security-requirements.md),
 the design principles in
-[docs/security/design-principles.md](docs/security/design-principles.md)
+[docs/security/design-principles.md](docs/security/design-principles.md),
+the mapping of these controls to the OWASP Top 10, the OWASP Top 10 CI/CD
+Security Risks and ASVS 5.0 level 1 in
+[docs/security/owasp-mapping.md](docs/security/owasp-mapping.md)
 and the first paper exercise of the process below in
 [docs/security/exercises/](docs/security/exercises/2026-11-vulnerability-report.md).
 
