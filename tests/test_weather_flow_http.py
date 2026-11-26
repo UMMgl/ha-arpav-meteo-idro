@@ -21,6 +21,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession  # noqa
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 from yarl import URL  # noqa: E402
 from custom_components.arpav_meteo_idro import config_flow as flow  # noqa: E402
+from custom_components.arpav_meteo_idro import http_limits  # noqa: E402
 from custom_components.arpav_meteo_idro.const import (  # noqa: E402
     API_BASE,
     CONF_AIR_QUALITY,
@@ -128,6 +129,19 @@ async def test_helpers_raise_on_http_errors(hass, aioclient_mock, helper):
         await helper(hass)
 
 
+@pytest.mark.parametrize("helper", [
+    lambda hass: flow.fetch_zone_names(hass),
+    lambda hass: flow.fetch_zones(hass),
+    lambda hass: flow.fetch_stations(hass),
+    lambda hass: flow.fetch_stations_air(hass, "7"),
+])
+async def test_helpers_raise_on_oversized_responses(hass, arpav, monkeypatch, helper):
+    """A body over the limit is an aiohttp error, like any unreachable service."""
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
+    with pytest.raises(aiohttp.ClientError):
+        await helper(hass)
+
+
 async def test_helpers_raise_on_network_errors(hass, aioclient_mock):
     """A network failure propagates as an aiohttp error."""
     aioclient_mock.get(re.compile(re.escape(API_BASE)), exc=aiohttp.ClientError("down"))
@@ -163,6 +177,18 @@ async def test_weather_flow_end_to_end(enable_custom_integrations, hass, arpav):
 async def test_weather_flow_aborts_on_network_errors(enable_custom_integrations, hass, aioclient_mock, failure):
     """No answer from ARPAV: the flow aborts with cannot_connect and creates nothing."""
     aioclient_mock.get(COMUNI_URL, **failure)
+
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "weather"})
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+    assert not hass.config_entries.async_entries(DOMAIN)
+
+
+async def test_weather_flow_aborts_on_oversized_response(enable_custom_integrations, hass, arpav, monkeypatch):
+    """An oversized list is treated like an unreachable service."""
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
 
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "weather"})
