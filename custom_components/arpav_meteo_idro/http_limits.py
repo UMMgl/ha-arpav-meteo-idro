@@ -44,9 +44,10 @@ async def read_limited(response: aiohttp.ClientResponse, max_bytes: int) -> byte
 
     body = bytearray()
     async for chunk in response.content.iter_chunked(_CHUNK_BYTES):
-        body.extend(chunk)
-        if len(body) > max_bytes:
+        # checked before appending: an over-limit chunk is never retained
+        if len(body) + len(chunk) > max_bytes:
             raise ResponseTooLargeError("response too large")
+        body.extend(chunk)
     return bytes(body)
 
 
