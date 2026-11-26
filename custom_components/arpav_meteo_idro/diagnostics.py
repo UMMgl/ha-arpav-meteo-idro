@@ -24,6 +24,17 @@ TO_REDACT = {
     "comune_id",
     "comune_name",
     "title",
+    # the monitoring area: the zone of the weather entry, the river and the
+    # stations (identifiers, names, places and links) of the hydro entry
+    "zone_id",
+    "zone_name",
+    "river",
+    "id",
+    "name",
+    "place",
+    "link",
+    # keyed by the IDs of the selected hydrometric stations
+    "axis_ceiling",
 }
 
 
