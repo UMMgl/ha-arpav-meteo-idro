@@ -4,18 +4,22 @@
 
 import json
 
-import aiohttp
 import pytest
 
-from custom_components.arpav_meteo_idro import http_limits
-from custom_components.arpav_meteo_idro.http_limits import (
+pytest.importorskip("fcntl")  # the package needs Home Assistant, which runs on POSIX only
+pytest.importorskip("homeassistant")
+
+import aiohttp  # noqa: E402
+
+from custom_components.arpav_meteo_idro import http_limits  # noqa: E402
+from custom_components.arpav_meteo_idro.http_limits import (  # noqa: E402
     MAX_JSON_RESPONSE_BYTES,
     ResponseTooLargeError,
     read_json_limited,
     read_limited,
 )
 
-from .helpers import FIXTURES, FakeResponse
+from .helpers import FIXTURES, FakeResponse  # noqa: E402
 
 
 class CountingResponse(FakeResponse):

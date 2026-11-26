@@ -191,5 +191,5 @@ async def test_oversized_metar_responses_are_unusable_answers(monkeypatch):
 
     # the list of aerodromes is needed by the config flow: the error reaches it
     _, patcher = _patch_session(routes)
-    with patcher, pytest.raises(aiohttp.ClientError):
+    with patcher, pytest.raises(http_limits.ResponseTooLargeError):
         await metar.async_fetch_stations(None, 45.4, 11.9, _distance)

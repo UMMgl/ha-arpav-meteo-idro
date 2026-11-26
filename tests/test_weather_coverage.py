@@ -68,9 +68,9 @@ async def test_weather_helpers_raise_on_oversized_responses(monkeypatch):
     """A body over the limit is an aiohttp error, not a half-read answer."""
     monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
     rows = load_json("arpav_meteogrammi_tabella.json")["data"]
-    with pytest.raises(aiohttp.ClientError):
+    with pytest.raises(http_limits.ResponseTooLargeError):
         await weather.async_get_forecast(FakeSession({"bollettini_meteo_giornate": rows}))
-    with pytest.raises(aiohttp.ClientError):
+    with pytest.raises(http_limits.ResponseTooLargeError):
         await weather.async_get_current_conditions(FakeSession({"meteo_meteogrammi_tabella": rows}), "902")
 
 

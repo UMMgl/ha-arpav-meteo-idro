@@ -11,8 +11,6 @@ import pytest
 pytest.importorskip("fcntl")  # the package needs Home Assistant, which runs on POSIX only
 pytest.importorskip("homeassistant")
 
-import aiohttp  # noqa: E402
-
 from custom_components.arpav_meteo_idro import brightness_statistics as bs  # noqa: E402
 from custom_components.arpav_meteo_idro import http_limits  # noqa: E402
 
@@ -78,7 +76,7 @@ async def test_archive_oversized_response_is_a_client_error(monkeypatch):
     with (
         patch.object(bs, "async_get_clientsession", lambda hass: session),
         patch.object(bs, "async_add_external_statistics", add),
-        pytest.raises(aiohttp.ClientError),
+        pytest.raises(http_limits.ResponseTooLargeError),
     ):
         await bs.async_archive_brightness(hass, 45.4, 11.9)
     add.assert_not_called()

@@ -59,6 +59,9 @@ AIR = {"data": [
     {"CODSEQST": "a1", "NOME_STAZIONE": "Arcella", "RETE": "Urbana"},
 ]}
 
+# the mock adds no Content-Type: the integration refuses a body not declared as JSON, like aiohttp
+JSON = {"Content-Type": "application/json"}
+
 
 def _serve(mock, skip=()):
     """Serve the lists the weather flow reads, but the ones in ``skip`` (the first mock wins)."""
@@ -72,7 +75,7 @@ def _serve(mock, skip=()):
     }
     for url, payload in routes.items():
         if url not in skip:
-            mock.get(url, json=payload)
+            mock.get(url, json=payload, headers=JSON)
     return mock
 
 
@@ -138,7 +141,7 @@ async def test_helpers_raise_on_http_errors(hass, aioclient_mock, helper):
 async def test_helpers_raise_on_oversized_responses(hass, arpav, monkeypatch, helper):
     """A body over the limit is an aiohttp error, like any unreachable service."""
     monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
-    with pytest.raises(aiohttp.ClientError):
+    with pytest.raises(http_limits.ResponseTooLargeError):
         await helper(hass)
 
 
@@ -200,7 +203,7 @@ async def test_weather_flow_aborts_on_oversized_response(enable_custom_integrati
 
 async def test_weather_flow_aborts_on_unexpected_payload(enable_custom_integrations, hass, aioclient_mock):
     """A list without the expected keys is treated like an unreachable service."""
-    aioclient_mock.get(COMUNI_URL, json={"data": [{"unexpected": True}]})
+    aioclient_mock.get(COMUNI_URL, json={"data": [{"unexpected": True}]}, headers=JSON)
 
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "weather"})
@@ -277,7 +280,8 @@ async def test_options_without_usable_coordinates_skip_metar(enable_custom_integ
     """No coordinates, or unreadable ones, mean no aerodrome lookup at all."""
     arpav = _serve(aioclient_mock, skip=(STATIONS_URL,))
     entry = _entry(hass, coordinates=False)
-    arpav.get(STATIONS_URL, json={"data": [{"codseqst": "s1", "nome_stazione": "Legnaro", "provincia": "PD"}]})
+    arpav.get(STATIONS_URL, json={"data": [{"codseqst": "s1", "nome_stazione": "Legnaro", "provincia": "PD"}]},
+             headers=JSON)
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] is FlowResultType.FORM
