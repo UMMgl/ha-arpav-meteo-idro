@@ -10,6 +10,7 @@ from .const import (
 )
 
 from . import metar
+from .http_limits import read_json_limited
 from .provenance import Provenance
 from .thresholds import DayThresholds, NightThresholds
 
@@ -195,7 +196,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
                     translation_placeholders={"status": str(response.status)})
-            data = await response.json()
+            data = await read_json_limited(response)
 
         # Dictionary to store the max-time item per type
         latest_by_type = {}
@@ -317,7 +318,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
                     translation_placeholders={"status": str(response.status)})
-            data = await response.json()
+            data = await read_json_limited(response)
 
         latest = {}
         for item in data.get("data", []):
@@ -609,7 +610,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
                     translation_placeholders={"status": str(response.status)})
-            data = await response.json()
+            data = await read_json_limited(response)
 
         # the closest station may have no readings at all
         stations = sort_locations_by_distance(data.get("data", []), lat, lon)
@@ -636,7 +637,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(
                     translation_domain=DOMAIN, translation_key="fetch_failed",
                     translation_placeholders={"status": str(response.status)})
-            data = await response.json()
+            data = await read_json_limited(response)
 
         latest = {}
         for item in data.get("data", []):
@@ -924,7 +925,7 @@ async def _fetch_forecast_data(hass, zone_id):
             raise UpdateFailed(
                 translation_domain=DOMAIN, translation_key="fetch_failed",
                 translation_placeholders={"status": str(response.status)})
-        data = await response.json()
+        data = await read_json_limited(response)
 
     forecasts = [
         _assemble_forecast_dict(entry)

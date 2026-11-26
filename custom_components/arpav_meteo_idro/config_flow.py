@@ -53,6 +53,7 @@ from .const import (
 from . import metar
 from .hydro_config_flow import HydroConfigFlowMixin, HydroOptionsFlowHandler
 from .coordinator import haversine
+from .http_limits import read_json_limited
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ async def fetch_zone_names(hass):
     session = async_get_clientsession(hass)
     async with session.get(f"{API_BASE}/bollettini_meteo_simboli_en", timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
-        json_data = await response.json()
+        json_data = await read_json_limited(response)
         data = json_data.get("data", [])
 
         # Map each zonaid to the first matching zona (zone name)
@@ -80,7 +81,7 @@ async def fetch_zones(hass):
     session = async_get_clientsession(hass)
     async with session.get(f"{API_BASE}/meteo_comuni", timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
-        json_data = await response.json()
+        json_data = await read_json_limited(response)
         data = json_data.get("data", [])
 
         # Map comune names to their IDs and zonaid
@@ -101,7 +102,7 @@ async def fetch_stations(hass):
         f"{API_BASE}/meteo_meteogrammi?rete=MGRAMMI&coordcd=18&orario=0", timeout=REQUEST_TIMEOUT
     ) as response:
         response.raise_for_status()
-        json_data = await response.json()
+        json_data = await read_json_limited(response)
         # Access the "data" key which contains the list of stations
         data = json_data.get("data", [])
         sorted_stations = sorted(data, key=lambda x: x["nome_stazione"])
@@ -119,7 +120,7 @@ async def fetch_stations_air(hass, cod_parametro):
         f"{API_BASE}/aria_elenco_stazioni?cod_parametro={cod_parametro}", timeout=REQUEST_TIMEOUT
     ) as response:
         response.raise_for_status()
-        json_data = await response.json()
+        json_data = await read_json_limited(response)
         # Access the "data" key which contains the list of stations
         data = json_data.get("data", [])
         sorted_stations = sorted(data, key=lambda x: x["RETE"] + x["NOME_STAZIONE"])
