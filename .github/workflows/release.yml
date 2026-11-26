@@ -147,7 +147,9 @@ jobs:
           import json
           print("\n".join(json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"]))
           PY
-          "$RUNNER_TEMP/runtime/bin/pip" install --quiet -r "$RUNNER_TEMP/requirements_runtime.txt"
+          # wheels only: a source distribution would run its PEP 517 build backend on
+          # the release runner, with access to the release archive in $RUNNER_TEMP
+          "$RUNNER_TEMP/runtime/bin/pip" install --quiet --only-binary=:all: -r "$RUNNER_TEMP/requirements_runtime.txt"
           python3 -m pip install --quiet --require-hashes -r requirements_release.txt
           python3 -m cyclonedx_py environment "$RUNNER_TEMP/runtime/bin/python" \
             --pyproject pyproject.toml --of JSON -o "$RUNNER_TEMP/ha-arpav-meteo-idro.cdx.json"
