@@ -26,7 +26,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa
 
 from custom_components.arpav_meteo_idro import brightness_statistics as bs  # noqa: E402
 from custom_components.arpav_meteo_idro import coordinator as coord  # noqa: E402
-from custom_components.arpav_meteo_idro import const, metar  # noqa: E402
+from custom_components.arpav_meteo_idro import const, http_limits, metar  # noqa: E402
 from custom_components.arpav_meteo_idro.const import DOMAIN  # noqa: E402
 from custom_components.arpav_meteo_idro.provenance import Provenance  # noqa: E402
 from custom_components.arpav_meteo_idro.thresholds import DayThresholds, NightThresholds  # noqa: E402
@@ -286,6 +286,36 @@ async def test_failed_station_fetch_is_an_update_failure(enable_custom_integrati
             await call()
         api.routes[key] = original
 
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_oversized_response_is_an_update_failure(enable_custom_integrations, hass, api, monkeypatch):
+    """A body over the limit is an unusable answer on every endpoint, and the last data is kept."""
+    entry = await _setup(hass, api)
+    coordinator = entry.runtime_data.coordinator
+    last_data = coordinator.data
+    assert last_data is not None
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
+
+    for call in (
+        lambda: coordinator.fetch_station_data(STATION),
+        lambda: coordinator.fetch_air_quality_data("1", "PM10"),
+        lambda: coord._fetch_forecast_data(hass, 13),
+        lambda: coordinator.get_night_sky_brightness(45.3, 11.9),
+        lambda: coordinator._fetch_station_brightness("902"),
+    ):
+        with pytest.raises(http_limits.ResponseTooLargeError):
+            await call()
+
+    # through the coordinator: the refresh fails, the previous data stays available
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success is False
+    assert coordinator.data is last_data
+
+    monkeypatch.undo()
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success is True
+    assert coordinator.data is not last_data
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 

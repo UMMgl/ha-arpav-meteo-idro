@@ -116,6 +116,24 @@ async def test_hydro_options_flow_aborts_when_the_registry_is_unreachable(
     assert result["reason"] == "cannot_connect"
 
 
+async def test_hydro_flows_abort_when_the_registry_is_oversized(
+    enable_custom_integrations, hass, arpav, monkeypatch,  # noqa: F811
+):
+    """A registry over the limit is handled like an unreachable one, by both flows."""
+    monkeypatch.setattr(hydro, "MAX_XML_BYTES", 1000)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "hydro"})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+
+
 async def test_hydro_options_flow_requires_a_station(
     enable_custom_integrations, hass, arpav,  # noqa: F811
 ):

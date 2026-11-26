@@ -29,6 +29,7 @@ from homeassistant.util import slugify
 
 from .const import API_BASE, DOMAIN
 from .coordinator import sort_locations_by_distance
+from .http_limits import read_json_limited
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ async def _fetch(session, url):
 
     async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
-        return await response.json()
+        return await read_json_limited(response)
 
 
 def _hourly_statistics(readings):
