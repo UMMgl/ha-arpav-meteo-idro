@@ -18,12 +18,14 @@ from homeassistant import config_entries  # noqa: E402
 from homeassistant.components.recorder.statistics import async_import_statistics, statistics_during_period  # noqa: E402
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er, issue_registry as ir  # noqa: E402
+from homeassistant.helpers.aiohttp_client import async_get_clientsession  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
 from custom_components.arpav_meteo_idro import (  # noqa: E402
     LEGACY_ORDER_OPTION,
     LEGACY_ORDER_REPAIR,
     async_migrate_entry,
+    http_limits,
     hydro,
     hydro_coordinator,
     hydro_statistics,
@@ -351,6 +353,36 @@ async def test_backfill_fills_only_missing_complete_hours(
     assert report[entity_id]["hours"] > 0
     repeat = await hydro_statistics.async_import_hydro_history(hass, coordinator)
     assert all(item["hours"] == 0 for item in repeat.values())
+
+
+async def test_hydro_oversized_document_is_an_unusable_response(
+    enable_custom_integrations, hass, arpav, freezer, monkeypatch,
+):
+    """A station file over the limit is a fetch error: the last valid reading is kept."""
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.coordinator
+    before = dict(coordinator.data)
+
+    session = async_get_clientsession(hass)
+    monkeypatch.setattr(hydro, "MAX_XML_BYTES", 1000)
+    with pytest.raises(http_limits.ResponseTooLargeError):
+        await hydro_coordinator.async_fetch_document(session, hydro.REGISTRY_URL)
+    with pytest.raises(http_limits.ResponseTooLargeError):
+        await hydro_coordinator.async_fetch_registry(hass)
+
+    freezer.move_to(NOW + timedelta(minutes=5))
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success
+    for key, state in coordinator.data.items():
+        assert state.acquisition_status == "fetch_error"
+        assert state.error == "response too large"
+        assert state.reading.level == before[key].reading.level
+        assert state.data == before[key].data
+        assert state.fetched_at == before[key].fetched_at
 
 
 async def test_hydro_keeps_last_valid_on_unusable_response(

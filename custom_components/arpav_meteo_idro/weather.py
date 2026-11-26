@@ -17,6 +17,7 @@ from .const import (
     CONF_OBSERVATIONS,
 )
 from .entity import ArpavWeatherEntity
+from .http_limits import read_json_limited
 
 
 async def async_get_forecast(session):
@@ -24,7 +25,7 @@ async def async_get_forecast(session):
     url = f"{API_BASE}/bollettini_meteo_giornate"
     async with session.get(url) as response:
         response.raise_for_status()
-        data = await response.json()
+        data = await read_json_limited(response)
         return [entry for entry in data if entry["zonaid"] == 13]
 
 
@@ -33,7 +34,7 @@ async def async_get_current_conditions(session, station_id):
     url = f"{API_BASE}/meteo_meteogrammi_tabella?codseqst={station_id}"
     async with session.get(url) as response:
         response.raise_for_status()
-        data = await response.json()
+        data = await read_json_limited(response)
         return data[0] if data else {}
 
 

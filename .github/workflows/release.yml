@@ -130,7 +130,18 @@ jobs:
           RELEASE_VERSION: ${{ github.ref_name }}
         run: |
           # the SBOM describes this release: version from the tag
-          sed -i "s/^version = .*/version = \"$RELEASE_VERSION\"/" pyproject.toml
+          # the tag is read as data by Python: it is never parsed as a sed program
+          python3 - <<'PY'
+          import os
+          import re
+
+          with open("pyproject.toml", encoding="utf-8") as handle:
+              content = handle.read()
+          version_line = 'version = "' + os.environ["RELEASE_VERSION"] + '"'
+          content = re.sub(r"^version = .*", lambda _match: version_line, content, flags=re.MULTILINE)
+          with open("pyproject.toml", "w", encoding="utf-8") as handle:
+              handle.write(content)
+          PY
           python3 -m venv "$RUNNER_TEMP/runtime"
           python3 - > "$RUNNER_TEMP/requirements_runtime.txt" <<'PY'
           import json

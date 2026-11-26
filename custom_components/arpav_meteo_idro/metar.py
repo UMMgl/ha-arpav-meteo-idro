@@ -23,6 +23,7 @@ import aiohttp
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CARDINAL_DIRECTIONS
+from .http_limits import read_json_limited
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -138,7 +139,7 @@ async def async_fetch_stations(hass, latitude, longitude, distance_of):
     session = async_get_clientsession(hass)
     async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
-        data = await response.json()
+        data = await read_json_limited(response)
 
     stations = []
     for entry in data:
@@ -179,7 +180,7 @@ async def _async_reporting_icaos(hass, icaos):
         session = async_get_clientsession(hass)
         async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             response.raise_for_status()
-            data = await response.json()
+            data = await read_json_limited(response)
     except (aiohttp.ClientError, TimeoutError) as err:
         # without this detail the list is still usable, just less informative
         _LOGGER.debug("Unable to tell which aerodromes are reporting: %s", err)
@@ -197,7 +198,7 @@ async def async_fetch_observation(hass, icao):
         session = async_get_clientsession(hass)
         async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
             response.raise_for_status()
-            data = await response.json()
+            data = await read_json_limited(response)
     except (aiohttp.ClientError, TimeoutError) as err:
         # an optional data source must never take the whole update down
         _LOGGER.warning("Unable to fetch the METAR report of %s: %s", icao, err)

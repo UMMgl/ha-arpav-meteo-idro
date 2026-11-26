@@ -17,7 +17,7 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 
 import aiohttp  # noqa: E402
 
-from custom_components.arpav_meteo_idro import weather  # noqa: E402
+from custom_components.arpav_meteo_idro import http_limits, weather  # noqa: E402
 
 from .helpers import FakeSession, load_json  # noqa: E402
 
@@ -62,6 +62,16 @@ async def test_get_current_conditions_http_error_is_raised():
     session = FakeSession({"meteo_meteogrammi_tabella": ([], 503)})
     with pytest.raises(aiohttp.ClientResponseError):
         await weather.async_get_current_conditions(session, "902")
+
+
+async def test_weather_helpers_raise_on_oversized_responses(monkeypatch):
+    """A body over the limit is an aiohttp error, not a half-read answer."""
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
+    rows = load_json("arpav_meteogrammi_tabella.json")["data"]
+    with pytest.raises(http_limits.ResponseTooLargeError):
+        await weather.async_get_forecast(FakeSession({"bollettini_meteo_giornate": rows}))
+    with pytest.raises(http_limits.ResponseTooLargeError):
+        await weather.async_get_current_conditions(FakeSession({"meteo_meteogrammi_tabella": rows}), "902")
 
 
 def test_datetime_encoder():
