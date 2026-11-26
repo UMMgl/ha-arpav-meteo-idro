@@ -28,6 +28,7 @@ from .const import (
     CONF_HYDRO_UPDATE_MINUTES,
     DOMAIN,
 )
+from .http_limits import read_limited
 from .hydro_topology import ordered_selection, station_key
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ async def async_fetch_document(session: aiohttp.ClientSession, url: str) -> byte
     """Download an ARPAV XML document."""
     async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
         response.raise_for_status()
-        return await response.read()
+        return await read_limited(response, hydro.MAX_XML_BYTES)
 
 
 async def async_fetch_registry(hass: HomeAssistant) -> list[hydro.HydroStation]:

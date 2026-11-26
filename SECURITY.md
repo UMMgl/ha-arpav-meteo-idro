@@ -76,10 +76,12 @@ agreements, and they promise no fixing time:
 * It only reads public ARPAV open data over HTTPS (no credentials, no personal
   data) and the public METAR service, using the Home Assistant web session.
 * XML is parsed with `defusedxml` only (no entity expansion, no external
-  resources); documents larger than 5 MB or HTML pages are rejected. The size
-  check is made after the document has been downloaded: the download itself is
-  bounded only by a 30 second timeout, and the JSON responses of the weather and
-  METAR parts have no size limit (a known gap, see
+  resources); documents larger than 5 MB or HTML pages are rejected. Every
+  response is read in chunks and the download is aborted as soon as it passes
+  the limit (5 MiB for XML, 10 MiB for the JSON of the weather and METAR parts),
+  so an oversized or endless body is never held in memory whole; an oversized
+  response is handled like any failed request, and the 30 second timeout still
+  bounds the time (see
   [docs/security/risk-assessment.md](docs/security/risk-assessment.md)).
 * It writes only to the Home Assistant entity states and to the Recorder
   statistics of its own sensors.

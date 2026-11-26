@@ -12,7 +12,7 @@ pytest.importorskip("homeassistant")
 
 import aiohttp  # noqa: E402
 
-from custom_components.arpav_meteo_idro import metar  # noqa: E402
+from custom_components.arpav_meteo_idro import http_limits, metar  # noqa: E402
 
 from .helpers import FakeSession, load_json  # noqa: E402
 
@@ -172,3 +172,24 @@ def test_observed_at_fallbacks():
     assert metar._observed_at({"reportTime": "bad", "obsTime": 1787050800}).startswith("2026-08-1")
     assert metar._observed_at({"obsTime": "bad"}) is None
     assert metar._observed_at({}) is None
+
+
+async def test_oversized_metar_responses_are_unusable_answers(monkeypatch):
+    """A body over the limit is handled like a failed request, never a crash."""
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
+    routes = {"stationinfo": load_json("metar_stationinfo.json"), "/metar": load_json("metar_reports.json")}
+
+    # the report of an aerodrome is optional: no observation, no exception
+    _, patcher = _patch_session(routes)
+    with patcher:
+        assert await metar.async_fetch_observation(None, "LIPZ") is None
+
+    # the "which aerodromes are reporting" lookup falls back to "all of them"
+    _, patcher = _patch_session(routes)
+    with patcher:
+        assert await metar._async_reporting_icaos(None, ["LIPZ", "LIPU"]) == {"LIPZ", "LIPU"}
+
+    # the list of aerodromes is needed by the config flow: the error reaches it
+    _, patcher = _patch_session(routes)
+    with patcher, pytest.raises(http_limits.ResponseTooLargeError):
+        await metar.async_fetch_stations(None, 45.4, 11.9, _distance)

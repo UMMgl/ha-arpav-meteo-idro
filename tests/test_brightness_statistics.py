@@ -12,6 +12,7 @@ pytest.importorskip("fcntl")  # the package needs Home Assistant, which runs on 
 pytest.importorskip("homeassistant")
 
 from custom_components.arpav_meteo_idro import brightness_statistics as bs  # noqa: E402
+from custom_components.arpav_meteo_idro import http_limits  # noqa: E402
 
 from .helpers import FakeSession, load_json  # noqa: E402
 
@@ -64,3 +65,18 @@ async def test_archive_imports_nearest_usable_stations():
     assert add.call_count == 2
     assert add.call_args_list[0].args[2][0]["mean"] == 20.3
     assert not any("codseqst=None" in url for url in session.requests)
+
+
+async def test_archive_oversized_response_is_a_client_error(monkeypatch):
+    """A body over the limit reaches the callers as an aiohttp error, which they already handle."""
+    monkeypatch.setattr(http_limits, "MAX_JSON_RESPONSE_BYTES", 10)
+    hass = SimpleNamespace(config=SimpleNamespace(components={"recorder"}))
+    session = FakeSession({"meteo_meteogrammi?": load_json("arpav_brightness_network.json")})
+    add = MagicMock()
+    with (
+        patch.object(bs, "async_get_clientsession", lambda hass: session),
+        patch.object(bs, "async_add_external_statistics", add),
+        pytest.raises(http_limits.ResponseTooLargeError),
+    ):
+        await bs.async_archive_brightness(hass, 45.4, 11.9)
+    add.assert_not_called()
