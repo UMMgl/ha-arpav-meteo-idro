@@ -9,6 +9,7 @@ import logging
 import random
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from urllib.parse import urljoin, urlsplit
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
@@ -54,11 +55,38 @@ class HydroStationState:
     next_retry_at: datetime | None = None
 
 
+ALLOWED_HOSTS = {urlsplit(hydro.XML_BASE).hostname}
+MAX_REDIRECTS = 5
+REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
+
+
+def _is_allowed_url(raw):
+    try:
+        parts = urlsplit(raw)
+        host, port = parts.hostname, parts.port
+    except ValueError:
+        return False
+    if parts.scheme not in ("http", "https") or not host or parts.username is not None or parts.password is not None:
+        return False
+    if port is None or (parts.scheme == "http" and port == 80) or (parts.scheme == "https" and port == 443):
+        return host in ALLOWED_HOSTS
+    if ":" in host:
+        host = f"[{host}]"
+    return f"{host}:{port}" in ALLOWED_HOSTS
+
+
 async def async_fetch_document(session: aiohttp.ClientSession, url: str) -> bytes:
-    """Download an ARPAV XML document."""
-    async with session.get(url, timeout=REQUEST_TIMEOUT) as response:
-        response.raise_for_status()
-        return await response.read()
+    """Download an ARPAV XML document, re-checking the destination of every redirect."""
+    for _ in range(MAX_REDIRECTS + 1):
+        if not _is_allowed_url(url):
+            raise aiohttp.InvalidURL(url)
+        async with session.get(url, timeout=REQUEST_TIMEOUT, allow_redirects=False) as response:
+            if response.status in REDIRECT_STATUSES and response.headers.get("Location"):
+                url = urljoin(url, response.headers["Location"])
+                continue
+            response.raise_for_status()
+            return await response.read()
+    raise aiohttp.ClientError("too many redirects")
 
 
 async def async_fetch_registry(hass: HomeAssistant) -> list[hydro.HydroStation]:
