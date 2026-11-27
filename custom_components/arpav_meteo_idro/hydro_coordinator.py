@@ -47,6 +47,7 @@ class HydroStationState:
     order: int
     data: hydro.HydroStationData | None = None
     series: hydro.HydroSeries | None = None
+    flow: hydro.HydroSeries | None = None
     reading: hydro.HydroReading | None = None
     fetched_at: datetime | None = None
     error: str | None = None
@@ -128,6 +129,7 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
         if previous is not None:
             state.data = previous.data
             state.series = previous.series
+            state.flow = previous.flow
             state.fetched_at = previous.fetched_at
             state.consecutive_failures = previous.consecutive_failures
             state.next_retry_at = previous.next_retry_at
@@ -150,6 +152,11 @@ class HydroCoordinator(DataUpdateCoordinator[dict[str, HydroStationState]]):
                     state.fetched_at = dt_util.utcnow()
                 elif state.series is None:
                     state.data, state.series = data, series
+                # the discharge is accepted on its own: only an older copy of the file is ignored
+                flow = data.flow_series()
+                latest, kept = hydro.last_valid_sample(flow), hydro.last_valid_sample(state.flow)
+                if not (latest and kept and latest.observed_at < kept.observed_at):
+                    state.flow = flow
 
             if state.acquisition_status == "ok":
                 state.consecutive_failures = 0

@@ -308,6 +308,116 @@ async def test_level_sensor_exposes_unrecorded_samples(enable_custom_integration
     assert "samples_24h" in HydroSensor._unrecorded_attributes  # noqa: SLF001
 
 
+async def test_flow_sensor_only_for_stations_publishing_discharge(enable_custom_integrations, hass, arpav, freezer):
+    """A flow sensor exists where the file has a PORTATA series; sentinels only leave it unavailable."""
+    freezer.move_to(NOW)
+    san_nicolo = _meta("595", "Bacchiglione a Ponte San Nicolo'", "Ponte San Nicolo'", 45.37, 11.94)
+    entry = _entry(stations=[*STATIONS, san_nicolo])
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    flow_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_flow")
+    assert flow_id
+    flow = hass.states.get(flow_id)
+    assert float(flow.state) == pytest.approx(24.12)
+    assert flow.attributes["unit_of_measurement"] == "m³/s"
+    assert flow.attributes["device_class"] == "volume_flow_rate"
+    assert flow.attributes["state_class"] == "measurement"
+    assert flow.attributes["sensor_id"] == "300012208"
+    assert datetime.fromisoformat(flow.attributes["source_observed_at"]) == datetime(2026, 11, 15, 7, 0, tzinfo=UTC)
+    assert "samples_24h" not in flow.attributes
+
+    # Vicenza publishes only '>>' for the flow: the sensor exists but has no value
+    vicenza = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_333_flow")
+    assert vicenza and hass.states.get(vicenza).state == "unavailable"
+    # Bovolenta publishes no flow at all: no sensor
+    assert registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_flow") is None
+    # the level sensor keeps the ID of its own series
+    level_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_level")
+    assert hass.states.get(level_id).attributes["sensor_id"] == "300011408"
+
+
+SAN_NICOLO = _meta("595", "Bacchiglione a Ponte San Nicolo'", "Ponte San Nicolo'", 45.37, 11.94)
+
+
+@pytest.mark.parametrize("level", ["missing", "sentinels", "older"])
+async def test_flow_is_accepted_when_the_level_is_unusable(
+    enable_custom_integrations, hass, arpav, freezer, level,
+):
+    """A newer discharge is shown even when the level of the same file is rejected."""
+    freezer.move_to(NOW)
+    entry = _entry(stations=[*STATIONS, SAN_NICOLO])
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.coordinator
+    initial = coordinator.data["595"]
+    healthy = {key: state.data for key, state in coordinator.data.items()}
+    level_series = initial.data.level_series()
+    flow_series = initial.data.flow_series()
+    newer_at = flow_series.samples[-1].observed_at + timedelta(minutes=10)
+    newer_flow = replace(flow_series, samples=[
+        *flow_series.samples, replace(flow_series.samples[-1], observed_at=newer_at, value=30.5)])
+    unusable_level = {
+        "missing": [],
+        "sentinels": [replace(level_series, samples=[replace(level_series.samples[-1], value=None, raw=">>")])],
+        "older": [replace(level_series, samples=level_series.samples[:-1])],
+    }[level]
+    older_flow = replace(flow_series, samples=flow_series.samples[:-1])
+    responses = iter([
+        replace(initial.data, series=[*unusable_level, newer_flow]),
+        # an older copy of the file must not take the discharge back
+        replace(initial.data, series=[*unusable_level, older_flow]),
+    ])
+
+    async def fetch(meta):
+        return next(responses) if meta["id"] == "595" else healthy[meta["id"]]
+
+    flow_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_flow")
+    with patch.object(coordinator, "_async_fetch_station", side_effect=fetch):
+        for minutes in (10, 20):
+            freezer.move_to(NOW + timedelta(minutes=minutes))
+            await coordinator.async_refresh()
+            await hass.async_block_till_done()
+            assert coordinator.data["595"].acquisition_status != "ok"
+            flow = hass.states.get(flow_id)
+            assert float(flow.state) == pytest.approx(30.5)
+            assert datetime.fromisoformat(flow.attributes["source_observed_at"]) == newer_at
+
+
+async def test_flow_sensor_appears_when_a_later_refresh_brings_discharge(
+    enable_custom_integrations, hass, aioclient_mock, freezer,
+):
+    """A station unreadable at setup gets its flow sensor once its file arrives."""
+    freezer.move_to(NOW)
+    aioclient_mock.get(hydro.REGISTRY_URL, content=REGISTRY)
+    for name in ("0287.xml", "0333.xml", "0334.xml"):
+        aioclient_mock.get(f"{hydro.XML_BASE}/{name}", content=(FIXTURES / name).read_bytes())
+    aioclient_mock.get(f"{hydro.XML_BASE}/0595.xml", status=503)
+    entry = _entry(stations=[*STATIONS, SAN_NICOLO])
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    registry = er.async_get(hass)
+    assert registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_flow") is None
+
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(hydro.REGISTRY_URL, content=REGISTRY)
+    for name in ("0287.xml", "0333.xml", "0334.xml", "0595.xml"):
+        aioclient_mock.get(f"{hydro.XML_BASE}/{name}", content=(FIXTURES / name).read_bytes())
+    freezer.move_to(NOW + timedelta(minutes=10))
+    await entry.runtime_data.coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    flow_id = registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_595_flow")
+    assert flow_id
+    assert float(hass.states.get(flow_id).state) == pytest.approx(24.12)
+    # still no sensor where the file holds no discharge
+    assert registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_flow") is None
+
+
 async def test_old_reading_is_stale(enable_custom_integrations, hass, arpav, freezer):
     """A reading older than the limit is reported as stale, without a trend."""
     freezer.move_to(NOW + timedelta(hours=5))

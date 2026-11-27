@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :sparkles: New Features
+- **hydro**: a **Flow** sensor (m³/s, `volume_flow_rate`) for the stations whose file holds a `PORTATA` series, which was parsed but not exposed; stations without one get no sensor, and a series made only of sentinels leaves the sensor unavailable, never 0. The discharge is updated even when the level of the same file is rejected, and the sensor is added on a later refresh when the station was unreadable at setup or starts publishing a discharge
+
 ### :gem: Quality
 - **typing**: `mypy --strict` passes on the modules that do not import Home Assistant (`const.py`, `hydro.py`, `hydro_topology.py`, `provenance.py`, `thresholds.py`), phase A of the Platinum rule `strict-typing` (#7); no behaviour change
 

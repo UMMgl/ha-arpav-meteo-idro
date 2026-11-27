@@ -402,3 +402,31 @@ def test_recent_samples_empty_cases():
     assert hydro.recent_samples(None) == []
     assert hydro.recent_samples(series_of([">>", "-"])) == []
     assert hydro.recent_samples(series_of(["1.0"]), max_points=0) == []
+
+
+def test_flow_series_of_a_station_with_discharge():
+    """Ponte San Nicolò publishes a PORTATA series next to the level."""
+    data = hydro.parse_station(fixture("0595.xml"))
+    flow = data.flow_series()
+    assert flow is not None and flow.sensor_id == "300012208"
+    last = hydro.last_valid_sample(flow)
+    assert last is not None and last.value == pytest.approx(24.12)
+    assert last.observed_at == datetime(2026, 11, 15, 7, 0, tzinfo=UTC)
+
+
+def test_flow_series_absent_or_only_sentinels():
+    """Bovolenta has no PORTATA series; Vicenza has one made only of sentinels."""
+    assert hydro.parse_station(fixture("0287.xml")).flow_series() is None
+    vicenza = hydro.parse_station(fixture("0333.xml")).flow_series()
+    assert vicenza is not None
+    assert hydro.last_valid_sample(vicenza) is None
+    assert hydro.last_valid_sample(None) is None
+
+
+def test_flow_series_must_be_unambiguous():
+    """Two PORTATA series in one file: no guess, like the level."""
+    data = hydro.parse_station(fixture("0595.xml"))
+    flow = data.flow_series()
+    assert flow is not None
+    data.series.append(flow)
+    assert data.flow_series() is None

@@ -217,6 +217,9 @@
             "hydro_observed_at": {
                 "name": "Ora della misura"
             },
+            "hydro_flow": {
+                "name": "Portata"
+            },
             "hydro_level_change": {
                 "name": "Variazione del livello"
             },
