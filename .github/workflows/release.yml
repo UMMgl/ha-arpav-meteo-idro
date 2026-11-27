@@ -62,14 +62,44 @@ jobs:
     with:
       quality_tier: ${{ needs.tier.outputs.quality_tier }}
 
+  changelog:
+    name: "Release changelog"
+    needs: [security, tier, quality]
+    # same gating as the release job; the third-party changelog action only needs
+    # read access, so it runs in its own job without write permissions
+    if: >-
+      ${{ always() && github.ref_type == 'tag' &&
+      needs.security.result == 'success' && needs.tier.result == 'success' &&
+      needs.tier.outputs.quality_tier != '' &&
+      (needs.quality.result == 'success' ||
+      (needs.quality.result == 'skipped' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc')))) }}
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
+    outputs:
+      changes: ${{ steps.changelog.outputs.changes }}
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generate the changelog
+        id: changelog
+        uses: requarks/changelog-action@7ce6be4c4d2233ae2a943694ca34f23aeafa1054  # v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
+
   release:
     name: "Release"
-    needs: [security, tier, quality]
+    needs: [security, tier, quality, changelog]
     # publish only for a tag, when the security gate and the tier check passed and the
     # quality gate passed (or was skipped for a pre-release tag)
     if: >-
       ${{ always() && github.ref_type == 'tag' &&
       needs.security.result == 'success' && needs.tier.result == 'success' &&
+      needs.changelog.result == 'success' &&
       needs.tier.outputs.quality_tier != '' &&
       (needs.quality.result == 'success' ||
       (needs.quality.result == 'skipped' && (contains(github.ref_name, 'b') || contains(github.ref_name, 'rc')))) }}
@@ -84,13 +114,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@7ce6be4c4d2233ae2a943694ca34f23aeafa1054  # v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
 
       - name: "Adjust version number"
         shell: "bash"
@@ -147,7 +170,9 @@ jobs:
           import json
           print("\n".join(json.load(open("custom_components/arpav_meteo_idro/manifest.json"))["requirements"]))
           PY
-          "$RUNNER_TEMP/runtime/bin/pip" install --quiet -r "$RUNNER_TEMP/requirements_runtime.txt"
+          # wheels only: a source distribution would run its PEP 517 build backend on
+          # the release runner, with access to the release archive in $RUNNER_TEMP
+          "$RUNNER_TEMP/runtime/bin/pip" install --quiet --only-binary=:all: -r "$RUNNER_TEMP/requirements_runtime.txt"
           python3 -m pip install --quiet --require-hashes -r requirements_release.txt
           python3 -m cyclonedx_py environment "$RUNNER_TEMP/runtime/bin/python" \
             --pyproject pyproject.toml --of JSON -o "$RUNNER_TEMP/ha-arpav-meteo-idro.cdx.json"
@@ -174,7 +199,7 @@ jobs:
       - name: "Upload the release assets"
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3  # v3
         with:
-          body: ${{ steps.changelog.outputs.changes }}
+          body: ${{ needs.changelog.outputs.changes }}
           # beta and release candidate tags (e.g. 0.15.5b1, 0.15.5rc1) are GitHub
           # pre-releases: HACS offers them only to users who enable beta versions
           prerelease: ${{ contains(github.ref_name, 'b') || contains(github.ref_name, 'rc') }}
