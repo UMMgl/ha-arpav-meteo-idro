@@ -34,7 +34,10 @@ jobs:
           cache: "pip"
 
       - name: "Install requirements"
-        run: python3 -m pip install --require-hashes -r requirements_test.txt
+        # the lock is complete and hash-pinned; --no-deps installs exactly it, so the
+        # overrides in requirements_test.overrides (e.g. Pillow 13.0.0 over the
+        # homeassistant pin) are not rejected as conflicts
+        run: python3 -m pip install --require-hashes --no-deps -r requirements_test.txt
 
       - name: "Run"
         run: |

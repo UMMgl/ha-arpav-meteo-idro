@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Overrides for the test lock (uv pip compile --override). Remove an entry when
+# pytest-homeassistant-custom-component pins a Home Assistant release that ships it.
+#
+# homeassistant 2026.10.4 (pinned by pytest-homeassistant-custom-component 0.13.375)
+# requires Pillow==12.3.0, which has 43 known advisories fixed in 13.0.0. The tests
+# do not use Pillow; Home Assistant 2026.11 already ships 13.0.0.
+pillow==13.0.0
