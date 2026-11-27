@@ -239,7 +239,7 @@ Each station is a device with these sensors:
 | Status | `below_g1`, `g1_g2`, `g2_g3`, `above_g3` against the alert thresholds (GUARDIA1/2/3) published for the series; `no_thresholds` when ARPAV publishes none; `stale` when the reading is older than the staleness limit; `missing` when there is no valid reading |
 | Trend | `rising`, `steady`, `falling`: least squares change over the last 4 valid readings, rising or falling from the threshold (default 5 cm) |
 | Level change | That change, in m. Disabled by default on new installations (also available as `level_change_m` on the Status sensor) |
-| Flow | Last valid discharge, in m³/s, from the `PORTATA` series of the station file. Created only for the stations that publish one (49 of the 115 in the 25 November 2026 registry, 12 of them only with `>>`); unavailable while the series holds no valid reading. Its `sensor_id` and `source_observed_at` are those of the discharge series |
+| Flow | Last valid discharge, in m³/s, from the `PORTATA` series of the station file. Created only for the stations that publish one, also after setup when a series appears (49 of the 115 in the 25 November 2026 registry, 12 of them only with `>>`); unavailable while the series holds no valid reading. Its `sensor_id` and `source_observed_at` are those of the discharge series |
 
 The Status sensor also exposes `guardia1_m`/`guardia2_m`/`guardia3_m` (null when
 not published, never 0), `quality`, `age_minutes`, `last_sample_valid`,
