@@ -1,18 +1,23 @@
 ## [Unreleased]
+
+## [0.16.1] - 2026-11-28
 ### :gem: Quality
-- **typing**: `mypy --strict` passes on the modules that do not import Home Assistant (`const.py`, `hydro.py`, `hydro_topology.py`, `provenance.py`, `thresholds.py`), phase A of the Platinum rule `strict-typing` (#7); no behaviour change
+- **typing**: `mypy --strict` passes on the modules that do not import Home Assistant (`const.py`, `hydro.py`, `hydro_topology.py`, `provenance.py`, `thresholds.py`), phase A of the Platinum rule `strict-typing` (#7); no behaviour change (#73)
 
 ### :wrench: Chores
 - **ci**: hassfest is pinned to the `2026.11.0` tag of `home-assistant/actions` instead of the moving `master` branch comment; the pinned commit is unchanged, and the Workflows (zizmor) check passes again (#84)
-- **release**: record 0.16.0 (Silver) in `[tool.arpav_meteo_idro.released]`, so the quality-tier ratchet floor is now Silver; roadmap and release evidence updated for 0.16.0
-
+- **release**: record 0.16.0 (Silver) in `[tool.arpav_meteo_idro.released]`, so the quality-tier ratchet floor is now Silver; roadmap and release evidence updated for 0.16.0 (#71)
 
 ### :lock: Security
+- **release**: the version line of `pyproject.toml` is written by Python instead of `sed`, so the tag name is never parsed as a program (#77)
+- **release**: the release runner installs the runtime requirements as wheels only (`--only-binary=:all:`) (#78)
+- **release**: the third-party changelog action runs in its own job with read-only permissions (#79)
+- **ci**: the Scorecard workflow has no top-level permissions and its job only `contents: read` (#80)
 - **owasp mapping**: `docs/security/owasp-mapping.md` maps the existing controls to the OWASP Top 10 (2021), the OWASP Top 10 CI/CD Security Risks and ASVS 5.0 level 1 (with the requirement, file, trigger and required check of each), lists the required checks on `main` as reported by the maintainer's session, and links the open gaps (G2, G6, #82); documentation only
 - **http**: every HTTP response of the integration is now read in chunks and the download is aborted as soon as it passes a size limit (5 MiB for the XML documents, 10 MiB for the JSON of the weather and METAR parts), instead of buffering the whole body first; a declared `Content-Length` over the limit is refused without reading. An oversized response is handled like any other failed request (the last valid reading is kept; the setup and options flows report the service as unreachable). Closes gap G1 of the risk assessment and requirement SR-3 (#83)
-- **security documentation**: the security objectives are now written as numbered, testable requirements (`docs/security/security-requirements.md`, with the code, the test and the status of each; open ones are linked to the risk assessment gaps) and the design principles of the integration are documented (`docs/security/design-principles.md`); the OWASP SAMM level-1 baseline in `docs/security/evidence.md` was validated by the maintainer on 2026-11-21 (26 Yes, 3 Partial, 1 No)
-- **risk assessment**: documented risk assessment (`docs/security/risk-assessment.md`: assets, trust boundaries, 13 risks with controls linked to code, tests and workflows, and open gaps with due dates) and a paper exercise of the vulnerability-handling process (`docs/security/exercises/`); `SECURITY.md` now says what a reporter can expect, when advisories are published, that HACS does not show them, and that the 5 MiB XML limit is checked after the download
-- **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned
+- **security documentation**: the security objectives are now written as numbered, testable requirements (`docs/security/security-requirements.md`, with the code, the test and the status of each; open ones are linked to the risk assessment gaps) and the design principles of the integration are documented (`docs/security/design-principles.md`); the OWASP SAMM level-1 baseline in `docs/security/evidence.md` was validated by the maintainer on 2026-11-21 (26 Yes, 3 Partial, 1 No) (#75)
+- **risk assessment**: documented risk assessment (`docs/security/risk-assessment.md`: assets, trust boundaries, 13 risks with controls linked to code, tests and workflows, and open gaps with due dates) and a paper exercise of the vulnerability-handling process (`docs/security/exercises/`); `SECURITY.md` now says what a reporter can expect, when advisories are published, that HACS does not show them, and that the 5 MiB XML limit is checked after the download (#74)
+- **supply chain**: `osv-scanner.toml` documents the 43 Pillow 12.3.0 advisories (test tooling pinned by `pytest-homeassistant-custom-component`, not shipped) that OpenSSF Scorecard reported, each with a reason and an expiry of 2027-02-28; `.github/pip-audit-ignore-test.txt` and `SECURITY.md` are aligned (#70)
 
 ## [0.16.0] - 2026-11-21
 ### :boom: Breaking Changes
