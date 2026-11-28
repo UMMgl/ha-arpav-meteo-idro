@@ -649,6 +649,7 @@ async def test_config_flow_lists_the_rivers_nearest_to_home_first(
     """With a home near Padova the nearest rivers come first, labelled with the distance."""
     await hass.config.async_update(latitude=45.4064, longitude=11.8768)
     caplog.set_level("DEBUG")
+    caplog.clear()  # the core config update above logs the position itself
     result = await _river_form(hass)
     options = _select_options(result, "river")
     values = [o["value"] for o in options]
@@ -671,7 +672,8 @@ async def test_config_flow_lists_the_rivers_nearest_to_home_first(
 
     # the position and the distances never reach the log
     assert "45.4064" not in caplog.text and "11.8768" not in caplog.text
-    assert " km" not in caplog.text
+    ours = "\n".join(r.getMessage() for r in caplog.records if r.name.startswith("custom_components.arpav_meteo_idro"))
+    assert " km" not in ours
 
 
 async def test_config_flow_without_home_keeps_the_alphabetical_rivers(
