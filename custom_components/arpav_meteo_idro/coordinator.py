@@ -213,7 +213,12 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
             if t.startswith("TARIA"):
                 temperature_data.append(item)
             # Keep only the latest item per type
-            if t not in latest_by_type or item["dataora"] > latest_by_type[t]["dataora"]:
+            # (on a tie, a row that gives a value beats one that does not)
+            if (t not in latest_by_type
+                    or item["dataora"] > latest_by_type[t]["dataora"]
+                    or (item["dataora"] == latest_by_type[t]["dataora"]
+                        and not _values_from_observation(latest_by_type[t])
+                        and _values_from_observation(item))):
                 latest_by_type[t] = item
                 dataora = item["dataora"]
 

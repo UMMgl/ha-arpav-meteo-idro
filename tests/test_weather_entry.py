@@ -339,6 +339,15 @@ async def test_silent_station_is_a_translated_update_failure(enable_custom_integ
     assert data["pressure"] == 1013.2
     assert set(sources) == {"pressure"}
 
+    # an unusable row that ties a usable one (same type and time) does not hide it
+    tied = {"data": [
+        {"tipo": "TARIA", "valore": None, "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+        {"tipo": "TARIA", "valore": "12.5", "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+    ]}
+    api.routes["meteo_meteogrammi_tabella"] = tied
+    data, _raw, _sources = await coordinator.fetch_station_data(STATION)
+    assert data["temperature"] == 12.5
+
     # through the coordinator: no UnboundLocalError, the entities become unavailable
     api.routes["meteo_meteogrammi_tabella"] = {"data": []}
     await coordinator.async_refresh()
