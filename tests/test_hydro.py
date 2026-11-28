@@ -493,6 +493,20 @@ def test_rivers_by_distance_treats_out_of_range_coordinates_as_missing():
     assert hydro.rivers_by_distance(stations, *PADOVA)[1] == ("Adige", None)
 
 
+@pytest.mark.parametrize(("lat", "lon"), [(95.0, 11.9), (-95.0, 11.9), (45.4, 200.0), (45.4, -200.0)])
+def test_out_of_range_station_gets_no_distance_and_does_not_change_the_order(lat, lon):
+    """Latitude 95 or longitude 200 is rejected: no distance, and the river order is unaffected."""
+    bad = _station("9", "Adige", lat, lon)
+    assert hydro.station_distance(bad, *PADOVA) is None
+    good = [_station("1", "Piave", 46.1, 12.2), _station("2", "Brenta", 45.45, 11.90)]
+    assert hydro.rivers_by_distance([bad, *good], *PADOVA) == [
+        *hydro.rivers_by_distance(good, *PADOVA), ("Adige", None)]
+    # a valid station of the same river still gives the river its distance
+    mixed = [bad, _station("3", "Adige", 46.5, 12.5), *good]
+    assert dict(hydro.rivers_by_distance(mixed, *PADOVA))["Adige"] == pytest.approx(
+        hydro.haversine(*PADOVA, 46.5, 12.5))
+
+
 def test_rivers_by_distance_skips_stations_without_a_river():
     """Stations without a river name are ignored."""
     stations = [_station("1", "Adige", 45.4, 11.9),
