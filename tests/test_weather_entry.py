@@ -9,6 +9,7 @@ the integration compares them with the clock.
 
 import copy
 import json
+import logging
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
@@ -264,6 +265,23 @@ async def test_services(enable_custom_integrations, hass, api):
     await hass.services.async_call(
         "homeassistant", "update_entity",
         {"entity_id": _entity_id(hass, "sensor", f"arpav_humidity_{STATION}")}, blocking=True)
+
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_update_does_not_log_a_warning(enable_custom_integrations, hass, api, caplog):
+    """A routine update logs "Fetching data" at DEBUG only, never at WARNING."""
+    caplog.set_level(logging.WARNING)
+    entry = await _setup(hass, api)
+    await entry.runtime_data.coordinator.async_refresh()
+    assert not [r for r in caplog.records if r.name.startswith("custom_components.arpav_meteo_idro.coordinator")]
+
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="custom_components.arpav_meteo_idro.coordinator")
+    await entry.runtime_data.coordinator.async_refresh()
+    fetching = [r for r in caplog.records if r.getMessage() == "Fetching data"]
+    assert fetching
+    assert {r.levelno for r in fetching} == {logging.DEBUG}
 
     assert await hass.config_entries.async_unload(entry.entry_id)
 

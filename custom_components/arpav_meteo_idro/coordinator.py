@@ -86,7 +86,7 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Fetch the latest data from the API."""
-        _LOGGER.warning("Fetching data")
+        _LOGGER.debug("Fetching data")
         sensor_response = self.fetch_station_data(self.station_id)
         forecast_response = _fetch_forecast_data(self.hass, self.zone_id)
         ozone_response = self.fetch_air_quality_data(
