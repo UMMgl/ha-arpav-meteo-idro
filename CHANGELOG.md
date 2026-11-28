@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :bug: Bug Fixes
+- **weather**: the weather update no longer logs a warning ("Fetching data") on every update, i.e. every 5 minutes for each location; the message is now logged at debug level, so the warnings that matter stand out in the log
+
 ### :memo: Documentation
 - **README**: the threshold-notification example now confirms the band for a number of minutes, ignores `stale`/`missing` data and readings older than 90 minutes (age computed from `source_observed_at`), and sends a "back below" message; new note on showing the moon phase next to the river levels; the Data updates section no longer claims that polling costs no database space: the Status sensor is written at every poll (288 states a day per station), the Water level sensor only on a new sample, with a test that counts the events
 

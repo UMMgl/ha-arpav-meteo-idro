@@ -536,14 +536,14 @@ rejected with an error.
       mode: queued
       max: 5
       trigger_variables:
+        e: sensor.bacchiglione_a_vicenza_status
         confirm_minutes: 20
       triggers:
         - trigger: template
           id: above
           value_template: >-
-            {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
             {% set observed = state_attr(e, 'source_observed_at') %}
-            {{ is_state(e, ['g1_g2', 'g2_g3', 'above_g3'])
+            {{ states(e) in ['g1_g2', 'g2_g3', 'above_g3']
                and state_attr(e, 'quality') == 'valid'
                and observed is not none
                and (now() - as_datetime(observed)).total_seconds() <= 90 * 60 }}
@@ -552,7 +552,6 @@ rejected with an error.
         - trigger: template
           id: below
           value_template: >-
-            {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
             {% set observed = state_attr(e, 'source_observed_at') %}
             {{ is_state(e, 'below_g1')
                and state_attr(e, 'quality') == 'valid'
@@ -562,7 +561,6 @@ rejected with an error.
             minutes: "{{ confirm_minutes }}"
       actions:
         - variables:
-            e: sensor.bacchiglione_a_vicenza_status
             name: "{{ state_attr(e, 'station_name') }}"
             level: "{{ state_attr(e, 'level_m') }}"
             trend: "{{ state_attr(e, 'trend') }}"
@@ -629,7 +627,8 @@ rejected with an error.
     are short, so the queue never grows. `restart` is not suitable because it
     would cut a notification that is being sent.
 
-  The entity ID depends on the station name; the `confirm_minutes` and 90-minute
+  The Status entity is set once, as `e` in `trigger_variables`, and used by the
+  triggers and the actions. Its ID depends on the station name; the `confirm_minutes` and 90-minute
   values can be changed. This is not an official warning service: refer to ARPAV
   and Civil Protection.
 * **Moon phase next to the river levels.** Add Home Assistant's built-in
