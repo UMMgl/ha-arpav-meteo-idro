@@ -269,6 +269,10 @@ async def test_services(enable_custom_integrations, hass, api):
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
+def _weather_entity_id(hass):
+    return _entity_id(hass, "weather", UNIQUE_WEATHER)
+
+
 async def test_update_does_not_log_a_warning(enable_custom_integrations, hass, api, caplog):
     """A routine update logs "Fetching data" at DEBUG only, never at WARNING."""
     caplog.set_level(logging.WARNING)
@@ -304,6 +308,38 @@ async def test_failed_station_fetch_is_an_update_failure(enable_custom_integrati
             await call()
         api.routes[key] = original
 
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_silent_station_is_a_translated_update_failure(enable_custom_integrations, hass, api):
+    """A station answering with no rows fails the update with a clear key, then recovers."""
+    entry = await _setup(hass, api)
+    coordinator = entry.runtime_data.coordinator
+    assert hass.states.get(_weather_entity_id(hass)).state != "unavailable"
+    original = api.routes["meteo_meteogrammi_tabella"]
+
+    for silent in ({"data": []}, {}):
+        api.routes["meteo_meteogrammi_tabella"] = silent
+        with pytest.raises(UpdateFailed) as err:
+            await coordinator.fetch_station_data(STATION)
+        assert err.value.translation_domain == DOMAIN
+        assert err.value.translation_key == "no_station_data"
+        assert err.value.translation_placeholders == {"station": STATION}
+
+    # through the coordinator: no UnboundLocalError, the entities become unavailable
+    api.routes["meteo_meteogrammi_tabella"] = {"data": []}
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.last_update_success is False
+    assert isinstance(coordinator.last_exception, UpdateFailed)
+    assert coordinator.last_exception.translation_key == "no_station_data"
+    assert hass.states.get(_weather_entity_id(hass)).state == "unavailable"
+
+    api.routes["meteo_meteogrammi_tabella"] = original
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.last_update_success is True
+    assert hass.states.get(_weather_entity_id(hass)).state != "unavailable"
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 

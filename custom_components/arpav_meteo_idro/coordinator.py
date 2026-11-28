@@ -216,6 +216,13 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                 latest_by_type[t] = item
                 dataora = item["dataora"]
 
+        if not latest_by_type:
+            # the station answered, but with no observation: without this
+            # check "dataora" below would be unbound
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="no_station_data",
+                translation_placeholders={"station": str(station_id)})
+
         # Convert back to list
         filtered_data = list(latest_by_type.values())
 
