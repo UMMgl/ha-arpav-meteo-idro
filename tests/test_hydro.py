@@ -402,3 +402,133 @@ def test_recent_samples_empty_cases():
     assert hydro.recent_samples(None) == []
     assert hydro.recent_samples(series_of([">>", "-"])) == []
     assert hydro.recent_samples(series_of(["1.0"]), max_points=0) == []
+
+
+def _station(station_id, river, lat, lon, place="Somewhere"):
+    return hydro.HydroStation(
+        station_id=station_id, name=f"{river} a {place}", river=river, place=place,
+        latitude=lat, longitude=lon, link=f"{int(station_id):04d}.xml")
+
+
+PADOVA = (45.4064, 11.8768)
+
+
+def test_haversine():
+    """Distances are in kilometres."""
+    assert hydro.haversine(45.0, 11.0, 45.0, 11.0) == 0
+    assert hydro.haversine(45.0, 11.0, 46.0, 11.0) == pytest.approx(111.2, abs=0.5)
+
+
+@pytest.mark.parametrize(("lat", "lon", "usable"), [
+    (45.4, 11.9, True),
+    (0.0, 12.0, True),
+    (45.4, 0.0, True),
+    (None, 11.9, False),
+    (45.4, None, False),
+    (0.0, 0.0, False),
+    (float("nan"), 11.9, False),
+    (45.4, float("inf"), False),
+    (91.0, 11.9, False),
+    (45.4, 181.0, False),
+])
+def test_has_home_position(lat, lon, usable):
+    """None, NaN, out-of-range and (0, 0) are not a home position."""
+    assert hydro.has_home_position(lat, lon) is usable
+
+
+def test_station_distance():
+    """A station without coordinates or a missing home has no distance."""
+    near = _station("1", "A", 45.4064, 11.8868)
+    assert hydro.station_distance(near, *PADOVA) == pytest.approx(0.78, abs=0.05)
+    assert hydro.station_distance(_station("2", "A", None, 11.9), *PADOVA) is None
+    assert hydro.station_distance(_station("3", "A", 45.4, None), *PADOVA) is None
+    for bad in ((91.0, 11.9), (45.4, 181.0), (float("nan"), 11.9), (0.0, 0.0)):
+        assert hydro.station_distance(_station("4", "A", *bad), *PADOVA) is None
+    assert hydro.station_distance(near, None, None) is None
+    assert hydro.station_distance(near, 0.0, 0.0) is None
+
+
+def test_rivers_by_distance_orders_by_nearest_station():
+    """A river is as far as its nearest station."""
+    stations = [
+        _station("1", "Piave", 46.1, 12.2),
+        _station("2", "Brenta", 45.45, 11.90),
+        _station("3", "Brenta", 45.40, 12.01),
+        _station("4", "Bacchiglione", 45.39, 11.91),
+        _station("5", "Bacchiglione", 45.20, 11.90),
+    ]
+    result = hydro.rivers_by_distance(stations, *PADOVA)
+    assert [name for name, _ in result] == ["Bacchiglione", "Brenta", "Piave"]
+    nearest = dict(result)
+    # a river is as far as its nearest station, not its first or last one
+    assert nearest["Bacchiglione"] == pytest.approx(hydro.haversine(*PADOVA, 45.39, 11.91))
+    assert nearest["Brenta"] == pytest.approx(hydro.haversine(*PADOVA, 45.45, 11.90))
+    assert nearest["Bacchiglione"] < nearest["Brenta"] < nearest["Piave"]
+
+
+def test_rivers_by_distance_tie_keeps_alphabetical_order():
+    """Equal distances keep the alphabetical order."""
+    stations = [_station("1", "Zeta", 45.5, 11.9), _station("2", "alfa", 45.5, 11.9)]
+    assert [n for n, _ in hydro.rivers_by_distance(stations, *PADOVA)] == ["alfa", "Zeta"]
+
+
+def test_rivers_by_distance_rivers_without_coordinates_come_last():
+    """Rivers with no coordinates follow, alphabetically."""
+    stations = [
+        _station("1", "Adige", None, None),
+        _station("2", "Brenta", None, 11.9),
+        _station("3", "Piave", 46.1, 12.2),
+        _station("4", "Po", 44.9, 12.4),
+        _station("5", "Adige", 45.4, None),
+    ]
+    result = hydro.rivers_by_distance(stations, *PADOVA)
+    assert [n for n, _ in result][:2] == ["Po", "Piave"]
+    assert [km is None for _, km in result] == [False, False, True, True]
+    assert [n for n, _ in result][2:] == ["Adige", "Brenta"]
+
+
+def test_rivers_by_distance_treats_out_of_range_coordinates_as_missing():
+    """A malformed station position must not give its river a nonsensical distance."""
+    stations = [_station("1", "Adige", 450.0, 11.9), _station("2", "Brenta", 46.0, 12.0)]
+    assert hydro.rivers_by_distance(stations, *PADOVA)[1] == ("Adige", None)
+
+
+@pytest.mark.parametrize(("lat", "lon"), [(95.0, 11.9), (-95.0, 11.9), (45.4, 200.0), (45.4, -200.0)])
+def test_out_of_range_station_gets_no_distance_and_does_not_change_the_order(lat, lon):
+    """Latitude 95 or longitude 200 is rejected: no distance, and the river order is unaffected."""
+    bad = _station("9", "Adige", lat, lon)
+    assert hydro.station_distance(bad, *PADOVA) is None
+    good = [_station("1", "Piave", 46.1, 12.2), _station("2", "Brenta", 45.45, 11.90)]
+    assert hydro.rivers_by_distance([bad, *good], *PADOVA) == [
+        *hydro.rivers_by_distance(good, *PADOVA), ("Adige", None)]
+    # a valid station of the same river still gives the river its distance
+    mixed = [bad, _station("3", "Adige", 46.5, 12.5), *good]
+    assert dict(hydro.rivers_by_distance(mixed, *PADOVA))["Adige"] == pytest.approx(
+        hydro.haversine(*PADOVA, 46.5, 12.5))
+
+
+def test_rivers_by_distance_skips_stations_without_a_river():
+    """Stations without a river name are ignored."""
+    stations = [_station("1", "Adige", 45.4, 11.9),
+                hydro.HydroStation("2", "Orphan", None, None, 45.4, 11.9, "0002.xml")]
+    assert hydro.rivers_by_distance(stations, *PADOVA) == [("Adige", pytest.approx(
+        hydro.haversine(*PADOVA, 45.4, 11.9)))]
+
+
+@pytest.mark.parametrize("home", [(None, None), (0.0, 0.0), (None, 11.9), (45.4, None)])
+def test_rivers_by_distance_without_home_is_alphabetical(home):
+    """No usable home: today's alphabetical list, no distances."""
+    stations = [_station("1", "Piave", 46.1, 12.2), _station("2", "adige", 45.4, 11.0),
+                _station("3", "Brenta", 45.45, 11.9)]
+    assert hydro.rivers_by_distance(stations, *home) == [("adige", None), ("Brenta", None), ("Piave", None)]
+    assert [n for n, _ in hydro.rivers_by_distance(stations, *home)] == hydro.rivers(stations)
+
+
+def test_rivers_by_distance_on_the_registry_fixture():
+    """Real registry: Bacchiglione and Brenta are the nearest to Padova."""
+    stations = hydro.parse_registry(fixture("stazioni_idro.xml"))
+    result = hydro.rivers_by_distance(stations, *PADOVA)
+    assert [n for n, _ in result][:2] == ["Bacchiglione", "Brenta"]
+    assert sorted(n for n, _ in result) == sorted(hydro.rivers(stations))
+    assert [km for _, km in result] == sorted(km for _, km in result if km is not None) + \
+        [None] * sum(km is None for _, km in result)

@@ -207,6 +207,8 @@ the 15 November 2026 registry. See the [profile coverage and sources](docs/hydro
 Other selected stations follow in their selected order. Rivers without a profile
 use the selected order throughout.
 
+In the setup the rivers nearest to the Home Assistant home location come first, each with the distance of its nearest station (for example "Bacchiglione – 3 km"), and the stations of the river show their distance too; nothing is preselected. Without a home location the rivers are listed alphabetically. The location is only used to sort the list: it is not logged or stored.
+
 Since 0.16.0 the display order cannot be set by hand: the manual order field
 of 0.15.x was removed and entries that had one are migrated to the verified
 profile (see the changelog). Stations not covered by a profile follow the

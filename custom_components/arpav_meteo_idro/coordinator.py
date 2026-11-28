@@ -11,6 +11,7 @@ from .const import (
 
 from . import metar
 from .http_limits import read_json_limited
+from .hydro import haversine  # also re-exported: config_flow and the tests import it from here
 from .provenance import Provenance
 from .thresholds import DayThresholds, NightThresholds
 
@@ -19,7 +20,7 @@ from astral.sun import sun, elevation
 from astral.moon import phase
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone, timedelta, UTC
-from math import radians, cos, sin, asin, sqrt
+from math import radians, cos, sin
 
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -787,20 +788,6 @@ def sort_locations_by_distance(locations, target_lat, target_lon):
         locations,
         key=lambda x: haversine(x['latitudine'], x['longitudine'], target_lat, target_lon)
     )
-
-def haversine(lat1, lon1, lat2, lon2):
-    """Calculate the distance in kilometers between two points."""
-    # Convert coordinates to radians
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-
-    # Haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 6371  # Radius of Earth in kilometers
-
-    return c * r
 
 def mj_to_wm2(mj_per_m2, seconds=3600):
     """Convert MJ/m² per interval to W/m² (mean irradiance).

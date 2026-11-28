@@ -318,6 +318,81 @@ def rivers(stations: list[HydroStation]) -> list[str]:
     return sorted({s.river for s in stations if s.river}, key=str.casefold)
 
 
+EARTH_RADIUS_KM = 6371
+
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Return the distance in kilometres between two points given in degrees."""
+    lat1, lon1, lat2, lon2 = map(math.radians, (lat1, lon1, lat2, lon2))
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 2 * math.asin(math.sqrt(a)) * EARTH_RADIUS_KM
+
+
+def has_home_position(latitude: float | None, longitude: float | None) -> bool:
+    """Return whether a home position is usable for ordering by distance.
+
+    ``None``, non-finite values, values outside the valid range and the
+    "Null Island" pair (0, 0) all count as "not set".
+    """
+    if latitude is None or longitude is None:
+        return False
+    if not (math.isfinite(latitude) and math.isfinite(longitude)):
+        return False
+    if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+        return False
+    return not (latitude == 0 and longitude == 0)
+
+
+def station_distance(
+    station: HydroStation, home_latitude: float | None, home_longitude: float | None
+) -> float | None:
+    """Return the distance in km from home to a station, or None when unknown.
+
+    A station whose coordinates are missing, not finite or out of range (the
+    (0, 0) placeholder included) is treated as having none.
+    """
+    if (
+        home_latitude is None
+        or home_longitude is None
+        or not has_home_position(home_latitude, home_longitude)
+        or station.latitude is None
+        or station.longitude is None
+        or not has_home_position(station.latitude, station.longitude)
+    ):
+        return None
+    return haversine(home_latitude, home_longitude, station.latitude, station.longitude)
+
+
+def rivers_by_distance(
+    stations: list[HydroStation], home_latitude: float | None, home_longitude: float | None
+) -> list[tuple[str, float | None]]:
+    """Return the rivers of the registry nearest to home first, with their distance.
+
+    The distance of a river (km) is that of its nearest station with coordinates.
+    Rivers without any station coordinates come last in alphabetical order, with
+    a distance of None. Ties keep the alphabetical order. Without a usable home
+    position the result is the plain alphabetical list of :func:`rivers`, all
+    with a distance of None.
+    """
+    names = rivers(stations)
+    if not has_home_position(home_latitude, home_longitude):
+        return [(name, None) for name in names]
+    nearest: dict[str, float] = {}
+    for station in stations:
+        if not station.river:
+            continue
+        distance = station_distance(station, home_latitude, home_longitude)
+        if distance is not None and distance < nearest.get(station.river, math.inf):
+            nearest[station.river] = distance
+    with_distance = sorted(
+        (name for name in names if name in nearest), key=lambda name: (nearest[name], name.casefold())
+    )
+    without = [name for name in names if name not in nearest]
+    return [(name, nearest[name]) for name in with_distance] + [(name, None) for name in without]
+
+
 def parse_station(document: bytes | str) -> HydroStationData:
     """Parse a station file into its series."""
     root = _root(document, "CONTENITORE")
