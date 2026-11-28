@@ -50,15 +50,40 @@ def parse_ceilings(text: str | None, station_ids: list[str]) -> dict[str, float]
     return {by_key[station_key(station_id)]: value for station_id, value in ceilings.items()}
 
 
-def _station_options(stations: list[hydro.HydroStation]) -> list[selector.SelectOptionDict]:
-    return [selector.SelectOptionDict(value=s.station_id, label=f"{s.place or s.name} ({s.station_id})")
-            for s in stations]
+def river_options(
+    registry: list[hydro.HydroStation], home_latitude: float | None, home_longitude: float | None
+) -> list[selector.SelectOptionDict]:
+    """Return the river choices, nearest to home first, each labelled with its distance.
+
+    The value is always the plain river name (it builds the unique ID of the entry).
+    Without a usable home position the list is alphabetical and has no distances.
+    The position and the distances are only used here: never logged, never stored.
+    """
+    return [
+        selector.SelectOptionDict(
+            value=river, label=river if km is None else f"{river} – {km:.0f} km")
+        for river, km in hydro.rivers_by_distance(registry, home_latitude, home_longitude)
+    ]
 
 
-def _stations_schema(stations, selected, extra=None) -> vol.Schema:
+def _station_options(
+    stations: list[hydro.HydroStation],
+    home: tuple[float | None, float | None] | None = None,
+) -> list[selector.SelectOptionDict]:
+    options = []
+    for s in stations:
+        label = f"{s.place or s.name} ({s.station_id})"
+        km = hydro.station_distance(s, *home) if home else None
+        if km is not None:
+            label = f"{label} – {km:.0f} km"
+        options.append(selector.SelectOptionDict(value=s.station_id, label=label))
+    return options
+
+
+def _stations_schema(stations, selected, extra=None, home=None) -> vol.Schema:
     schema = {
         vol.Required(STEP_STATIONS, default=selected): selector.SelectSelector(
-            selector.SelectSelectorConfig(options=_station_options(stations), multiple=True,
+            selector.SelectSelectorConfig(options=_station_options(stations, home), multiple=True,
                                           mode=selector.SelectSelectorMode.LIST)
         ),
     }
@@ -95,7 +120,10 @@ class HydroConfigFlowMixin:
             step_id="hydro",
             data_schema=vol.Schema({
                 vol.Required(CONF_HYDRO_RIVER): selector.SelectSelector(
-                    selector.SelectSelectorConfig(options=hydro.rivers(self._hydro_registry),
+                    selector.SelectSelectorConfig(options=river_options(
+                                                      self._hydro_registry,
+                                                      self.hass.config.latitude,
+                                                      self.hass.config.longitude),
                                                   mode=selector.SelectSelectorMode.DROPDOWN)
                 ),
             }),
@@ -125,7 +153,8 @@ class HydroConfigFlowMixin:
 
         return self.async_show_form(
             step_id="hydro_stations",
-            data_schema=_stations_schema(stations, []),
+            data_schema=_stations_schema(
+                stations, [], home=(self.hass.config.latitude, self.hass.config.longitude)),
             errors=errors,
             description_placeholders={"river": self._hydro_river, "stations": _order_hint(stations)},
         )

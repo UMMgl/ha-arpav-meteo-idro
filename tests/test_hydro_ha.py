@@ -630,3 +630,59 @@ async def test_options_flow_rejects_invalid_ceiling(enable_custom_integrations, 
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {CONF_HYDRO_AXIS_CEILING: "invalid_axis_ceiling"}
     assert CONF_HYDRO_AXIS_CEILING not in entry.options
+
+
+async def _river_form(hass):
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "hydro"})
+    assert result["step_id"] == "hydro"
+    return result
+
+
+def _select_options(result, field):
+    schema = next(f for f in result["data_schema"].schema if f.schema == field)
+    return result["data_schema"].schema[schema].config["options"]
+
+
+async def test_config_flow_lists_the_rivers_nearest_to_home_first(
+        enable_custom_integrations, hass, arpav, caplog):
+    """With a home near Padova the nearest rivers come first, labelled with the distance."""
+    await hass.config.async_update(latitude=45.4064, longitude=11.8768)
+    caplog.set_level("DEBUG")
+    result = await _river_form(hass)
+    options = _select_options(result, "river")
+    values = [o["value"] for o in options]
+    assert values[:2] == ["Bacchiglione", "Brenta"]
+    assert sorted(values) == hydro.rivers(hydro.parse_registry(REGISTRY))
+    assert options[0]["label"].startswith("Bacchiglione – ") and options[0]["label"].endswith(" km")
+
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Bacchiglione"})
+    assert result["step_id"] == "hydro_stations"
+    station_options = _select_options(result, "stations")
+    assert all(o["label"].endswith(" km") for o in station_options)
+    assert any(o["value"] == "334" for o in station_options)
+
+    with patch("custom_components.arpav_meteo_idro.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {"stations": ["334"]})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["result"].unique_id == "hydro_bacchiglione"
+    assert result["data"] == {CONF_ENTRY_TYPE: ENTRY_TYPE_HYDRO, CONF_HYDRO_RIVER: "Bacchiglione"}
+    assert "45.4064" not in str(result["options"]) and "11.8768" not in str(result["options"])
+
+    # the position and the distances never reach the log
+    assert "45.4064" not in caplog.text and "11.8768" not in caplog.text
+    assert " km" not in caplog.text
+
+
+async def test_config_flow_without_home_keeps_the_alphabetical_rivers(
+        enable_custom_integrations, hass, arpav):
+    """No home position: the options are today's alphabetical list, without distances."""
+    await hass.config.async_update(latitude=0.0, longitude=0.0)
+    result = await _river_form(hass)
+    options = _select_options(result, "river")
+    expected = hydro.rivers(hydro.parse_registry(REGISTRY))
+    assert [o["value"] for o in options] == expected
+    assert [o["label"] for o in options] == expected
+
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"river": "Bacchiglione"})
+    assert all(" km" not in o["label"] for o in _select_options(result, "stations"))

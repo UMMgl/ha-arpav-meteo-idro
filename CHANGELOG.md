@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :rocket: Features and enhancements
+- **hydro**: in the hydrometric setup the rivers nearest to your Home Assistant home location are listed first, each with the distance of its nearest station, and the stations of the river show their distance as well; nothing is preselected and the order inside a river is unchanged. Without a home location the list stays alphabetical. The location is used only to sort the list, never logged or stored (#89)
+
 ### :gem: Quality
 - **typing**: `mypy --strict` passes on the modules that do not import Home Assistant (`const.py`, `hydro.py`, `hydro_topology.py`, `provenance.py`, `thresholds.py`), phase A of the Platinum rule `strict-typing` (#7); no behaviour change
 

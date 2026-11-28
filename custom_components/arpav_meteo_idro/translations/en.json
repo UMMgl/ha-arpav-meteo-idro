@@ -35,7 +35,7 @@
             },
             "hydro": {
                 "title": "Hydrometric stations",
-                "description": "Choose the river or water body. Source: ARPAV open data (CC BY 4.0), automatic data not previously validated.",
+                "description": "Choose the river or water body. The rivers nearest to your home location come first, each with the distance of its nearest station. Source: ARPAV open data (CC BY 4.0), automatic data not previously validated.",
                 "data": {
                     "river": "River"
                 }

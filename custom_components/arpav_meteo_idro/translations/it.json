@@ -33,7 +33,7 @@
             },
             "hydro": {
                 "title": "Stazioni idrometriche",
-                "description": "Scegli il fiume o corpo idrico. Fonte: open data ARPAV (CC BY 4.0), dati automatici non validati preventivamente.",
+                "description": "Scegli il fiume o corpo idrico. I fiumi più vicini alla posizione di casa vengono per primi, ciascuno con la distanza della sua stazione più vicina. Fonte: open data ARPAV (CC BY 4.0), dati automatici non validati preventivamente.",
                 "data": {
                     "river": "Fiume"
                 }
