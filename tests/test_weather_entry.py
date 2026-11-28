@@ -332,12 +332,12 @@ async def test_silent_station_is_a_translated_update_failure(enable_custom_integ
 
     # a station with at least one usable value is not affected by the unusable rows
     usable = copy.deepcopy(unusable)
-    usable["data"].append({"tipo": "TARIA", "valore": "12.5", "dataora": "2026-11-28T10:00:00",
+    usable["data"].append({"tipo": "PRESS", "valore": "1013.2", "dataora": "2026-11-28T10:00:00",
                            "nome_stazione": "x"})
     api.routes["meteo_meteogrammi_tabella"] = usable
     data, _raw, sources = await coordinator.fetch_station_data(STATION)
-    assert data["temperature"] == 12.5
-    assert set(sources) == {"temperature"}
+    assert data["pressure"] == 1013.2
+    assert set(sources) == {"pressure"}
 
     # through the coordinator: no UnboundLocalError, the entities become unavailable
     api.routes["meteo_meteogrammi_tabella"] = {"data": []}
