@@ -19,7 +19,7 @@ from homeassistant.components.recorder.statistics import async_import_statistics
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er, issue_registry as ir  # noqa: E402
 from homeassistant.helpers.aiohttp_client import async_get_clientsession  # noqa: E402
-from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events  # noqa: E402
 
 from custom_components.arpav_meteo_idro import (  # noqa: E402
     LEGACY_ORDER_OPTION,
@@ -306,6 +306,38 @@ async def test_level_sensor_exposes_unrecorded_samples(enable_custom_integration
 
     from custom_components.arpav_meteo_idro.hydro_sensor import HydroSensor  # noqa: PLC0415
     assert "samples_24h" in HydroSensor._unrecorded_attributes  # noqa: SLF001
+
+
+async def test_an_unchanged_poll_writes_only_the_status_sensor(enable_custom_integrations, hass, arpav, freezer):
+    """Document what each poll costs the Recorder when ARPAV has published nothing new.
+
+    The README ("Data updates") states these numbers: the Status sensor changes
+    at every poll (``age_minutes``, ``last_successful_acquisition``), the others
+    only when a new sample arrives.
+    """
+    freezer.move_to(NOW)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.coordinator
+    registry = er.async_get(hass)
+    entity_ids = {
+        key: registry.async_get_entity_id("sensor", DOMAIN, f"{DOMAIN}_hydro_287_{key}")
+        for key in ("level", "status", "trend")
+    }
+    assert all(entity_ids.values())
+    events = async_capture_events(hass, "state_changed")
+
+    for minutes in (5, 10):
+        events.clear()
+        freezer.move_to(NOW + timedelta(minutes=minutes))
+        await coordinator.async_refresh()
+        await hass.async_block_till_done()
+        changed = [event.data["entity_id"] for event in events]
+        assert changed.count(entity_ids["status"]) == 1
+        assert changed.count(entity_ids["level"]) == 0
+        assert changed.count(entity_ids["trend"]) == 0
 
 
 async def test_old_reading_is_stale(enable_custom_integrations, hass, arpav, freezer):
