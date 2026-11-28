@@ -538,6 +538,9 @@ rejected with an error.
       trigger_variables:
         e: sensor.bacchiglione_a_vicenza_status
         confirm_minutes: 20
+      variables:
+        # same entity as above: trigger_variables are not visible to the actions
+        e: sensor.bacchiglione_a_vicenza_status
       triggers:
         - trigger: template
           id: above
@@ -627,8 +630,9 @@ rejected with an error.
     are short, so the queue never grows. `restart` is not suitable because it
     would cut a notification that is being sent.
 
-  The Status entity is set once, as `e` in `trigger_variables`, and used by the
-  triggers and the actions. Its ID depends on the station name; the `confirm_minutes` and 90-minute
+  The Status entity is written twice, as `e` in `trigger_variables` (used by the
+  triggers) and in `variables` (used by the actions): Home Assistant does not pass
+  trigger variables on to the actions. Its ID depends on the station name; the `confirm_minutes` and 90-minute
   values can be changed. This is not an official warning service: refer to ARPAV
   and Civil Protection.
 * **Moon phase next to the river levels.** Add Home Assistant's built-in
