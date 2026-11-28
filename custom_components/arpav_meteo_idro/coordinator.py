@@ -203,7 +203,8 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
         precipitation_data = []
         temperature_data = []
 
-        for item in data.get("data", []):
+        rows = data.get("data") if isinstance(data, dict) else None
+        for item in rows or []:
             t = item["tipo"]
             # Collect all precipitation data points
             if t == "PREC":
@@ -212,7 +213,12 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
             if t.startswith("TARIA"):
                 temperature_data.append(item)
             # Keep only the latest item per type
-            if t not in latest_by_type or item["dataora"] > latest_by_type[t]["dataora"]:
+            # (on a tie, a row that gives a value beats one that does not)
+            if (t not in latest_by_type
+                    or item["dataora"] > latest_by_type[t]["dataora"]
+                    or (item["dataora"] == latest_by_type[t]["dataora"]
+                        and not _values_from_observation(latest_by_type[t])
+                        and _values_from_observation(item))):
                 latest_by_type[t] = item
                 dataora = item["dataora"]
 
@@ -236,6 +242,14 @@ class ArpaVenetoDataUpdateCoordinator(DataUpdateCoordinator):
                     name=entry.get("nome_stazione"),
                     observed_at=observed_at,
                 )
+
+        if not sources:
+            # the station answered (an empty body, no rows, or only rows that
+            # give no usable value): there is nothing to show, and "dataora"
+            # may be unbound
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="no_station_data",
+                translation_placeholders={"station": str(station_id)})
 
         # prepare additional precipitation metrics
         # given that

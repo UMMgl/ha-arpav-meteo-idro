@@ -1,5 +1,6 @@
 ## [Unreleased]
 ### :bug: Bug Fixes
+- **weather**: a weather station that answers without any usable observation (empty answer, no rows, or only rows with no supported value) now fails the update with a clear, translated message (`no_station_data`: "The ARPAV station {station} returned no observations.") and its entities become unavailable until data return, instead of an internal `UnboundLocalError` at every update; the forecast is unavailable too while the station is silent, as before
 - **weather**: the weather update no longer logs a warning ("Fetching data") on every update, i.e. every 5 minutes for each location; the message is now logged at debug level, so the warnings that matter stand out in the log
 
 ## [0.16.1] - 2026-11-28

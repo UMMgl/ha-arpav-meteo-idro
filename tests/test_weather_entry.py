@@ -32,7 +32,7 @@ from custom_components.arpav_meteo_idro.const import DOMAIN  # noqa: E402
 from custom_components.arpav_meteo_idro.provenance import Provenance  # noqa: E402
 from custom_components.arpav_meteo_idro.thresholds import DayThresholds, NightThresholds  # noqa: E402
 
-from .helpers import FakeSession, load_json  # noqa: E402
+from .helpers import FakeResponse, FakeSession, load_json  # noqa: E402
 
 FMT = "%Y-%m-%dT%H:%M:%S"
 STATION = "s1"
@@ -269,6 +269,10 @@ async def test_services(enable_custom_integrations, hass, api):
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
+def _weather_entity_id(hass):
+    return _entity_id(hass, "weather", UNIQUE_WEATHER)
+
+
 async def test_update_does_not_log_a_warning(enable_custom_integrations, hass, api, caplog):
     """A routine update logs "Fetching data" at DEBUG only, never at WARNING."""
     caplog.set_level(logging.WARNING)
@@ -304,6 +308,60 @@ async def test_failed_station_fetch_is_an_update_failure(enable_custom_integrati
             await call()
         api.routes[key] = original
 
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_silent_station_is_a_translated_update_failure(enable_custom_integrations, hass, api):
+    """A station answering with no rows fails the update with a clear key, then recovers."""
+    entry = await _setup(hass, api)
+    coordinator = entry.runtime_data.coordinator
+    assert hass.states.get(_weather_entity_id(hass)).state != "unavailable"
+    original = api.routes["meteo_meteogrammi_tabella"]
+
+    unusable = {"data": [  # rows that exist but give no value the integration uses
+        {"tipo": "UNKNOWN", "valore": "1", "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+        {"tipo": "TARIA", "valore": None, "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+    ]}
+    for silent in ({"data": []}, {}, FakeResponse(body=b""), [], {"data": None}, unusable):
+        api.routes["meteo_meteogrammi_tabella"] = silent
+        with pytest.raises(UpdateFailed) as err:
+            await coordinator.fetch_station_data(STATION)
+        assert err.value.translation_domain == DOMAIN
+        assert err.value.translation_key == "no_station_data"
+        assert err.value.translation_placeholders == {"station": STATION}
+
+    # a station with at least one usable value is not affected by the unusable rows
+    usable = copy.deepcopy(unusable)
+    usable["data"].append({"tipo": "PRESS", "valore": "1013.2", "dataora": "2026-11-28T10:00:00",
+                           "nome_stazione": "x"})
+    api.routes["meteo_meteogrammi_tabella"] = usable
+    data, _raw, sources = await coordinator.fetch_station_data(STATION)
+    assert data["pressure"] == 1013.2
+    assert set(sources) == {"pressure"}
+
+    # an unusable row that ties a usable one (same type and time) does not hide it
+    tied = {"data": [
+        {"tipo": "TARIA", "valore": None, "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+        {"tipo": "TARIA", "valore": "12.5", "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+    ]}
+    api.routes["meteo_meteogrammi_tabella"] = tied
+    data, _raw, _sources = await coordinator.fetch_station_data(STATION)
+    assert data["temperature"] == 12.5
+
+    # through the coordinator: no UnboundLocalError, the entities become unavailable
+    api.routes["meteo_meteogrammi_tabella"] = {"data": []}
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.last_update_success is False
+    assert isinstance(coordinator.last_exception, UpdateFailed)
+    assert coordinator.last_exception.translation_key == "no_station_data"
+    assert hass.states.get(_weather_entity_id(hass)).state == "unavailable"
+
+    api.routes["meteo_meteogrammi_tabella"] = original
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.last_update_success is True
+    assert hass.states.get(_weather_entity_id(hass)).state != "unavailable"
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 

@@ -251,6 +251,9 @@
         "fetch_failed": {
             "message": "Impossibile scaricare i dati ARPAV (stato HTTP {status})."
         },
+        "no_station_data": {
+            "message": "La stazione ARPAV {station} non ha restituito osservazioni."
+        },
         "no_station_readable": {
             "message": "Nessuna stazione idrometrica ARPAV è leggibile."
         },

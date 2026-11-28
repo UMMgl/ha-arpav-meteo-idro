@@ -253,6 +253,9 @@
         "fetch_failed": {
             "message": "Unable to fetch the ARPAV data (HTTP status {status})."
         },
+        "no_station_data": {
+            "message": "The ARPAV station {station} returned no observations."
+        },
         "no_station_readable": {
             "message": "No ARPAV hydrometric station could be read."
         },
