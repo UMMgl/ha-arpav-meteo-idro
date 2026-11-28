@@ -1,4 +1,7 @@
 ## [Unreleased]
+### :lock: Security
+- **hydro**: the hydrometric documents are no longer fetched through blind redirects: `allow_redirects=False`, at most 5 hops followed by hand, and every hop must keep scheme https, no userinfo and the same host and port as the ARPAV base URL; a redirect anywhere else is handled like any other failed request (the last valid reading is kept; the setup and options flows report the service as unreachable). The size limit of #83 still applies to the final response. Closes the Aikido finding CodeAudit#1225290233 (#82)
+
 ### :bug: Bug Fixes
 - **weather**: the weather update no longer logs a warning ("Fetching data") on every update, i.e. every 5 minutes for each location; the message is now logged at debug level, so the warnings that matter stand out in the log
 
