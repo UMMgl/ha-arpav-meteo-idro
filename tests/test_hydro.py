@@ -442,6 +442,8 @@ def test_station_distance():
     assert hydro.station_distance(near, *PADOVA) == pytest.approx(0.78, abs=0.05)
     assert hydro.station_distance(_station("2", "A", None, 11.9), *PADOVA) is None
     assert hydro.station_distance(_station("3", "A", 45.4, None), *PADOVA) is None
+    for bad in ((91.0, 11.9), (45.4, 181.0), (float("nan"), 11.9), (0.0, 0.0)):
+        assert hydro.station_distance(_station("4", "A", *bad), *PADOVA) is None
     assert hydro.station_distance(near, None, None) is None
     assert hydro.station_distance(near, 0.0, 0.0) is None
 
@@ -483,6 +485,12 @@ def test_rivers_by_distance_rivers_without_coordinates_come_last():
     assert [n for n, _ in result][:2] == ["Po", "Piave"]
     assert [km is None for _, km in result] == [False, False, True, True]
     assert [n for n, _ in result][2:] == ["Adige", "Brenta"]
+
+
+def test_rivers_by_distance_treats_out_of_range_coordinates_as_missing():
+    """A malformed station position must not give its river a nonsensical distance."""
+    stations = [_station("1", "Adige", 450.0, 11.9), _station("2", "Brenta", 46.0, 12.0)]
+    assert hydro.rivers_by_distance(stations, *PADOVA)[1] == ("Adige", None)
 
 
 def test_rivers_by_distance_skips_stations_without_a_river():

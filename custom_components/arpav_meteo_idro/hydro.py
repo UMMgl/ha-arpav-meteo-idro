@@ -348,13 +348,16 @@ def has_home_position(latitude: float | None, longitude: float | None) -> bool:
 def station_distance(
     station: HydroStation, home_latitude: float | None, home_longitude: float | None
 ) -> float | None:
-    """Return the distance in km from home to a station, or None when unknown."""
+    """Return the distance in km from home to a station, or None when unknown.
+
+    A station whose coordinates are missing, not finite or out of range (the
+    (0, 0) placeholder included) is treated as having none.
+    """
     if (
         home_latitude is None
         or home_longitude is None
         or not has_home_position(home_latitude, home_longitude)
-        or station.latitude is None
-        or station.longitude is None
+        or not has_home_position(station.latitude, station.longitude)
     ):
         return None
     return haversine(home_latitude, home_longitude, station.latitude, station.longitude)
