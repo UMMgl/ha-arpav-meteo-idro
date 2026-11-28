@@ -1,4 +1,6 @@
 ## [Unreleased]
+### :bug: Bug Fixes
+- **weather**: the weather update no longer logs a warning ("Fetching data") on every update, i.e. every 5 minutes for each location; the message is now logged at debug level, so the warnings that matter stand out in the log
 
 ## [0.16.1] - 2026-11-28
 ### :gem: Quality
