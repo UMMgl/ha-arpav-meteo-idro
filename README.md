@@ -544,6 +544,7 @@ rejected with an error.
             {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
             {% set observed = state_attr(e, 'source_observed_at') %}
             {{ is_state(e, ['g1_g2', 'g2_g3', 'above_g3'])
+               and state_attr(e, 'quality') == 'valid'
                and observed is not none
                and (now() - as_datetime(observed)).total_seconds() <= 90 * 60 }}
           for:
@@ -554,6 +555,7 @@ rejected with an error.
             {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
             {% set observed = state_attr(e, 'source_observed_at') %}
             {{ is_state(e, 'below_g1')
+               and state_attr(e, 'quality') == 'valid'
                and observed is not none
                and (now() - as_datetime(observed)).total_seconds() <= 90 * 60 }}
           for:
@@ -609,7 +611,10 @@ rejected with an error.
     `source_observed_at`, not read from `age_minutes`, so the example does not
     depend on that attribute. `stale`, `missing`, `no_thresholds` and
     `unavailable` are never in the list, and a reading older than 90 minutes makes
-    the template false.
+    the template false. The `quality` attribute must also be `valid`: when the
+    latest sample of the source file is invalid (`quality` is
+    `last_sample_invalid`, the level then being the previous valid reading) the
+    template is false and nothing is sent.
   * `for` starts when the template turns true and is cancelled when it turns
     false, so a brief excursion over a threshold, a station that stops publishing
     or a switch to `stale` sends nothing. Because the whole condition is in one
@@ -635,7 +640,7 @@ rejected with an error.
 
   ```yaml
   type: tile
-  entity: sensor.moon
+  entity: sensor.moon_phase
   name: Moon phase
   ```
 
