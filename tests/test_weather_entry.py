@@ -32,7 +32,7 @@ from custom_components.arpav_meteo_idro.const import DOMAIN  # noqa: E402
 from custom_components.arpav_meteo_idro.provenance import Provenance  # noqa: E402
 from custom_components.arpav_meteo_idro.thresholds import DayThresholds, NightThresholds  # noqa: E402
 
-from .helpers import FakeSession, load_json  # noqa: E402
+from .helpers import FakeResponse, FakeSession, load_json  # noqa: E402
 
 FMT = "%Y-%m-%dT%H:%M:%S"
 STATION = "s1"
@@ -318,13 +318,26 @@ async def test_silent_station_is_a_translated_update_failure(enable_custom_integ
     assert hass.states.get(_weather_entity_id(hass)).state != "unavailable"
     original = api.routes["meteo_meteogrammi_tabella"]
 
-    for silent in ({"data": []}, {}):
+    unusable = {"data": [  # rows that exist but give no value the integration uses
+        {"tipo": "UNKNOWN", "valore": "1", "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+        {"tipo": "TARIA", "valore": None, "dataora": "2026-11-28T10:00:00", "nome_stazione": "x"},
+    ]}
+    for silent in ({"data": []}, {}, FakeResponse(body=b""), [], {"data": None}, unusable):
         api.routes["meteo_meteogrammi_tabella"] = silent
         with pytest.raises(UpdateFailed) as err:
             await coordinator.fetch_station_data(STATION)
         assert err.value.translation_domain == DOMAIN
         assert err.value.translation_key == "no_station_data"
         assert err.value.translation_placeholders == {"station": STATION}
+
+    # a station with at least one usable value is not affected by the unusable rows
+    usable = copy.deepcopy(unusable)
+    usable["data"].append({"tipo": "TARIA", "valore": "12.5", "dataora": "2026-11-28T10:00:00",
+                           "nome_stazione": "x"})
+    api.routes["meteo_meteogrammi_tabella"] = usable
+    data, _raw, sources = await coordinator.fetch_station_data(STATION)
+    assert data["temperature"] == 12.5
+    assert set(sources) == {"temperature"}
 
     # through the coordinator: no UnboundLocalError, the entities become unavailable
     api.routes["meteo_meteogrammi_tabella"] = {"data": []}
