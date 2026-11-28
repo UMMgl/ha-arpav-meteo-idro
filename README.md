@@ -520,31 +520,128 @@ rejected with an error.
   [`examples/`](examples) (see *Example dashboards*): a table of the stations of
   the river with level, status, age and trend, plus 24-hour and 72-hour charts
   against the alert thresholds.
-* **Threshold notifications.** Trigger an automation on the Status sensor of a
-  station, for example to be told when the Bacchiglione at Vicenza passes the
-  second alert threshold:
+* **Threshold notifications.** A notification that is sent only when the river
+  has stayed above an alert threshold for a while and the data is recent, and
+  that says when it is back below. The first trigger fires when the Status
+  sensor of a station has been `g1_g2`, `g2_g3` or `above_g3` for
+  `confirm_minutes` (default 20) **and** the measurement is not older than 90
+  minutes; the second when it has been `below_g1` for as long, under the same
+  age condition. A helper (`input_boolean.vicenza_river_alert_sent`, create it in
+  *Settings → Devices & services → Helpers*) remembers that an alert was sent, so
+  the "back below" message is sent only after one:
 
   ```yaml
   automation:
-    - alias: River above G2
+    - alias: River level alert with confirmation
+      mode: queued
+      max: 5
+      trigger_variables:
+        confirm_minutes: 20
       triggers:
-        - trigger: state
-          entity_id: sensor.bacchiglione_a_vicenza_status
-          to:
-            - g2_g3
-            - above_g3
+        - trigger: template
+          id: above
+          value_template: >-
+            {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
+            {% set observed = state_attr(e, 'source_observed_at') %}
+            {{ is_state(e, ['g1_g2', 'g2_g3', 'above_g3'])
+               and observed is not none
+               and (now() - as_datetime(observed)).total_seconds() <= 90 * 60 }}
+          for:
+            minutes: "{{ confirm_minutes }}"
+        - trigger: template
+          id: below
+          value_template: >-
+            {% set e = 'sensor.bacchiglione_a_vicenza_status' %}
+            {% set observed = state_attr(e, 'source_observed_at') %}
+            {{ is_state(e, 'below_g1')
+               and observed is not none
+               and (now() - as_datetime(observed)).total_seconds() <= 90 * 60 }}
+          for:
+            minutes: "{{ confirm_minutes }}"
       actions:
-        - action: notify.mobile_app_phone
-          data:
-            title: "{{ trigger.to_state.attributes.station_name }}"
-            message: >-
-              Level {{ trigger.to_state.attributes.level_m }} m
-              ({{ trigger.to_state.attributes.trend }}),
-              observed {{ trigger.to_state.attributes.age_minutes | round(0) }} minutes ago.
+        - variables:
+            e: sensor.bacchiglione_a_vicenza_status
+            name: "{{ state_attr(e, 'station_name') }}"
+            level: "{{ state_attr(e, 'level_m') }}"
+            trend: "{{ state_attr(e, 'trend') }}"
+            observed_at: >-
+              {{ as_datetime(state_attr(e, 'source_observed_at'))
+                 | as_local | string | truncate(16, True, '') }}
+        - choose:
+            - conditions: "{{ trigger.id == 'above' }}"
+              sequence:
+                - action: input_boolean.turn_on
+                  target:
+                    entity_id: input_boolean.vicenza_river_alert_sent
+                - action: notify.mobile_app_phone
+                  data:
+                    title: "{{ name }}"
+                    message: >-
+                      {% set band = states(e) %}
+                      {% set limit = {'g1_g2': 'guardia1_m', 'g2_g3': 'guardia2_m',
+                                      'above_g3': 'guardia3_m'}[band] %}
+                      {% set label = {'g1_g2': 'G1', 'g2_g3': 'G2',
+                                      'above_g3': 'G3'}[band] %}
+                      Level {{ level }} m, above alert threshold {{ label }}
+                      ({{ state_attr(e, limit) }} m), trend {{ trend }}.
+                      Observed at {{ observed_at }}.
+            - conditions:
+                - "{{ trigger.id == 'below' }}"
+                - condition: state
+                  entity_id: input_boolean.vicenza_river_alert_sent
+                  state: "on"
+              sequence:
+                - action: input_boolean.turn_off
+                  target:
+                    entity_id: input_boolean.vicenza_river_alert_sent
+                - action: notify.mobile_app_phone
+                  data:
+                    title: "{{ name }}"
+                    message: >-
+                      Level back below the first alert threshold:
+                      {{ level }} m, trend {{ trend }}. Observed at {{ observed_at }}.
   ```
 
-  The entity ID depends on the station name. This is not an official warning
-  service: refer to ARPAV and Civil Protection.
+  How it avoids false alarms and stale data:
+
+  * Each trigger is a template that is true only while the band is right *and*
+    the age of the measurement is acceptable. The age is computed from
+    `source_observed_at`, not read from `age_minutes`, so the example does not
+    depend on that attribute. `stale`, `missing`, `no_thresholds` and
+    `unavailable` are never in the list, and a reading older than 90 minutes makes
+    the template false.
+  * `for` starts when the template turns true and is cancelled when it turns
+    false, so a brief excursion over a threshold, a station that stops publishing
+    or a switch to `stale` sends nothing. Because the whole condition is in one
+    template, the example does not rely on whether a change of attributes only
+    (the Status sensor updates its attributes at every poll) restarts a `for`
+    timer on a state trigger.
+  * Changing band while above (for example `g1_g2` to `g2_g3`) does not send a
+    second message: the message gives the band reached when the confirmation
+    time ended. To be told about escalations as well, add a trigger per band.
+  * `mode: queued` keeps both messages if the "above" and "below" triggers fire
+    close together, which `single` would drop (with a log warning); the actions
+    are short, so the queue never grows. `restart` is not suitable because it
+    would cut a notification that is being sent.
+
+  The entity ID depends on the station name; the `confirm_minutes` and 90-minute
+  values can be changed. This is not an official warning service: refer to ARPAV
+  and Civil Protection.
+* **Moon phase next to the river levels.** Add Home Assistant's built-in
+  [Moon integration](https://www.home-assistant.io/integrations/moon/)
+  (*Settings → Devices & services → Add integration → Moon*) and put its sensor
+  in the same view as the river tables, for example with a card in the view next
+  to them:
+
+  ```yaml
+  type: tile
+  entity: sensor.moon
+  name: Moon phase
+  ```
+
+  The entity ID may differ on your installation. This only shows the phase of
+  the moon: the **astronomical tide** is a different source and this integration
+  does not provide it.
 * **History import.** Recover the hourly statistics of the days the installation
   was offline, or fill the history right after installing, with the
   `arpav_meteo_idro.archive_hydro_history` action (see *Completing the level
@@ -560,8 +657,15 @@ rejected with an error.
   18 minutes after their last sample); polling more often than 5 minutes
   cannot show newer data and a longer interval would only add delay to the
   next batch, while each poll is one small file per station
-  (at most 5 requests at once). Nothing is stored when a poll brings no new
-  sample, so the 5-minute interval costs no database space; a station without a reading newer than
+  (at most 5 requests at once). The Water level sensor is written to the
+  database only when a poll brings a new sample. The Status sensor is written at
+  every poll, even when ARPAV has published nothing new, because its
+  `age_minutes` and `last_successful_acquisition` attributes change each time:
+  one state per poll, so 288 a day per station at the 5-minute interval (the
+  other sensors of the station, Trend among them, are not written when nothing
+  changed). To store fewer rows, exclude the Status sensors from the Recorder
+  (`recorder:` → `exclude:` → `entities:`, listing their entity IDs) or shorten
+  `purge_keep_days`. A station without a reading newer than
   the staleness limit is reported as `stale`. An unusable response retains the last valid reading and its timestamp, so
   it still becomes `stale` as it ages. Polling limits concurrent requests and
   backs off stations with repeated acquisition failures while continuing to

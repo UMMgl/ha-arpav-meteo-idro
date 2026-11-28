@@ -1,4 +1,6 @@
 ## [Unreleased]
+### :memo: Documentation
+- **README**: the threshold-notification example now confirms the band for a number of minutes, ignores `stale`/`missing` data and readings older than 90 minutes (age computed from `source_observed_at`), and sends a "back below" message; new note on showing the moon phase next to the river levels; the Data updates section no longer claims that polling costs no database space: the Status sensor is written at every poll (288 states a day per station), the Water level sensor only on a new sample, with a test that counts the events
 
 ## [0.16.1] - 2026-11-28
 ### :gem: Quality
