@@ -357,6 +357,8 @@ def station_distance(
         home_latitude is None
         or home_longitude is None
         or not has_home_position(home_latitude, home_longitude)
+        or station.latitude is None
+        or station.longitude is None
         or not has_home_position(station.latitude, station.longitude)
     ):
         return None
